@@ -1,5 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, Activity, Calendar, Settings, Clock, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, Clock, CheckCircle } from 'lucide-react';
+
+// TypeScript interfaces for workouts
+interface BaseWorkout {
+  type: string;
+}
+
+interface StrengthWorkout extends BaseWorkout {
+  type: 'strength';
+  exercises: string[];
+  sets: string;
+  intensity: number;
+}
+
+interface HypertrophyWorkout extends BaseWorkout {
+  type: 'hypertrophy';
+  exercises: string[];
+  sets?: string;
+  intensity?: number;
+}
+
+interface CardioWorkout extends BaseWorkout {
+  type: 'liss' | 'hiit';
+  activity: string;
+  duration: number | string;
+}
+
+interface RestWorkout extends BaseWorkout {
+  type: 'rest' | 'deload';
+}
+
+type Workout = StrengthWorkout | HypertrophyWorkout | CardioWorkout | RestWorkout;
+
+interface CustomPlanBlock {
+  name: string;
+  weeks: number;
+  type: string;
+}
+
+interface CompletedWorkout {
+  date: string;
+  block: number;
+  blockName: string;
+  week: number;
+  day: number;
+  details: Workout;
+}
+
+interface AppState {
+  activeTab: string;
+  currentWeek: number;
+  currentDay: number;
+  completedWorkouts: CompletedWorkout[];
+  customPlan: CustomPlanBlock[];
+  maxes: Record<string, number>;
+  tenRMs: Record<string, number>;
+  weightUnit: string;
+  completedSets: Record<string, boolean>;
+  draggedIndex: number | null;
+  dragOverIndex: number | null;
+  showResetConfirm: boolean;
+}
 
 const App = () => {
   // Block Templates
@@ -364,10 +425,10 @@ const App = () => {
   const HISTORY_CONFIGS = {
     rest: { color: 'bg-slate-400', label: 'Rest', summary: 'Recovery day' },
     deload: { color: 'bg-slate-400', label: 'Deload', summary: 'Light activity' },
-    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w) => w.exercises?.join(', ') || 'Strength training' },
-    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
+    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w: StrengthWorkout) => w.exercises?.join(', ') || 'Strength training' },
+    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w: HypertrophyWorkout) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
   };
 
   const AVAILABLE_BLOCKS = {
@@ -381,7 +442,7 @@ const App = () => {
   };
 
   // Helper function to generate exercise key from name
-  const getExerciseKey = (exerciseName) => {
+  const getExerciseKey = (exerciseName: string) => {
     return exerciseName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
   };
 
@@ -390,19 +451,20 @@ const App = () => {
     const currentBlock = state.customPlan[0];
     if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] };
     
-    const blockTemplate = blockTemplates[currentBlock.type];
+    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates];
     if (!blockTemplate) return { strengthExercises: [], hypertrophyExercises: [] };
     
     const strengthExercises = new Set();
     const hypertrophyExercises = new Set();
     
-    blockTemplate.weeks.forEach(week => {
-      week.days.forEach(day => {
-        if (day.exercises) {
-          day.exercises.forEach(exercise => {
-            if (day.type === 'strength') {
+    blockTemplate.weeks.forEach((week: { days: unknown[] }) => {
+      week.days.forEach((day: unknown) => {
+        const dayObj = day as Record<string, unknown>;
+        if ('exercises' in dayObj && Array.isArray(dayObj.exercises)) {
+          (dayObj.exercises as string[]).forEach((exercise: string) => {
+            if (dayObj.type === 'strength') {
               strengthExercises.add(exercise);
-            } else if (day.type === 'hypertrophy') {
+            } else if (dayObj.type === 'hypertrophy') {
               hypertrophyExercises.add(exercise);
             }
           });
@@ -417,11 +479,11 @@ const App = () => {
   };
 
   // Consolidated state
-  const [state, setState] = useState({
+  const [state, setState] = useState<AppState>({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
-    completedWorkouts: [],
+    completedWorkouts: [] as CompletedWorkout[],
     customPlan: [
       { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
       { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
@@ -434,20 +496,20 @@ const App = () => {
       { name: "Strength Block", weeks: 6, type: "strength" },
       { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
     ],
-    maxes: { benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, romaniandeadlift: 120 },
-    tenRMs: {},
+    maxes: { benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, romaniandeadlift: 120 } as Record<string, number>,
+    tenRMs: {} as Record<string, number>,
     weightUnit: 'kg',
-    completedSets: {},
+    completedSets: {} as Record<string, boolean>,
     draggedIndex: null,
     dragOverIndex: null,
     showResetConfirm: false
   });
 
   // Unified state update function
-  const updateState = (updates) => setState(prev => ({ ...prev, ...updates }));
+  const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
 
   // Consolidated utility functions
-  const calculateWeight = (exercise, percentage) => {
+  const calculateWeight = (exercise: string, percentage: number) => {
     const exerciseKey = getExerciseKey(exercise);
     if (!exerciseKey || !state.maxes[exerciseKey]) return 0;
     
@@ -461,7 +523,7 @@ const App = () => {
     return Math.round(calculatedWeight);
   };
 
-  const calculateHypertrophyWeight = (exercise, percentage) => {
+  const calculateHypertrophyWeight = (exercise: string, percentage: number) => {
     const exerciseKey = getExerciseKey(exercise);
     
     // Convert 10RM input to estimated 1RM, then apply percentage
@@ -481,12 +543,12 @@ const App = () => {
     return Math.round(calculatedWeight);
   };
 
-  const calculateWarmupSets = (exercise, workingWeight) => {
+  const calculateWarmupSets = (_exercise: string, workingWeight: number) => {
     if (!workingWeight || workingWeight <= 0) return [];
     
     const barbellWeight = state.weightUnit === 'kg' ? 20 : 45;
     const plateIncrement = state.weightUnit === 'kg' ? 2.5 : 5;
-    const roundToPlate = (weight) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
+    const roundToPlate = (weight: number) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
     
     const warmupSets = [
       { weight: roundToPlate(workingWeight * 0.5), reps: 5, type: 'warmup' },
@@ -500,7 +562,7 @@ const App = () => {
 
   const getCurrentWorkout = () => {
     const block = state.customPlan[0];
-    const blockTemplate = blockTemplates[block.type];
+    const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates];
     if (!blockTemplate) return null;
     
     const weekIndex = Math.min(state.currentWeek - 1, blockTemplate.weeks.length - 1);
@@ -509,33 +571,35 @@ const App = () => {
   };
 
   // Consolidated event handlers
-  const handleDrag = (action, data) => {
+  const handleDrag = (action: string, data: { index?: number; e?: React.DragEvent }) => {
     switch(action) {
       case 'start':
-        if (data.index === 0) { data.e.preventDefault(); return; }
+        if (!data.index || data.index === 0) { data.e?.preventDefault(); return; }
         updateState({ draggedIndex: data.index, dragOverIndex: null });
-        data.e.dataTransfer.effectAllowed = 'move';
-        data.e.dataTransfer.setData('text/plain', data.index.toString());
+        if (data.e) {
+          data.e.dataTransfer.effectAllowed = 'move';
+          data.e.dataTransfer.setData('text/plain', data.index.toString());
+        }
         break;
       case 'over':
-        data.e.preventDefault();
-        data.e.dataTransfer.dropEffect = 'move';
+        data.e?.preventDefault();
+        if (data.e) data.e.dataTransfer.dropEffect = 'move';
         break;
       case 'enter':
-        data.e.preventDefault();
-        if (data.index > 0 && state.draggedIndex !== null && data.index !== state.draggedIndex) {
+        data.e?.preventDefault();
+        if (data.index && data.index > 0 && state.draggedIndex !== null && data.index !== state.draggedIndex) {
           updateState({ dragOverIndex: data.index });
         }
         break;
       case 'leave':
-        if (!data.e.currentTarget.contains(data.e.relatedTarget)) {
+        if (data.e && !data.e.currentTarget.contains(data.e.relatedTarget as Node)) {
           updateState({ dragOverIndex: null });
         }
         break;
-      case 'drop':
-        data.e.preventDefault();
-        data.e.stopPropagation();
-        if (state.draggedIndex === null || data.index === 0) {
+      case 'drop': {
+        data.e?.preventDefault();
+        data.e?.stopPropagation();
+        if (state.draggedIndex === null || !data.index || data.index === 0) {
           updateState({ draggedIndex: null, dragOverIndex: null });
           return;
         }
@@ -547,6 +611,7 @@ const App = () => {
         newPlan.splice(insertIndex, 0, draggedBlock);
         updateState({ customPlan: newPlan, draggedIndex: null, dragOverIndex: null });
         break;
+      }
       case 'end':
         updateState({ draggedIndex: null, dragOverIndex: null });
         break;
@@ -555,16 +620,16 @@ const App = () => {
 
   const completeWorkout = () => {
     const workoutDetails = getCurrentWorkout();
+    if (!workoutDetails) return; // Guard against null workout
     const block = state.customPlan[0];
     
-    const workout = {
+    const workout: CompletedWorkout = {
       date: new Date().toISOString(),
       block: 0,
       blockName: block.name,
       week: state.currentWeek,
       day: state.currentDay,
-      completed: true,
-      details: workoutDetails
+      details: workoutDetails as Workout
     };
     
     let newDay = state.currentDay + 1;
@@ -591,17 +656,19 @@ const App = () => {
     });
   };
 
-  const toggleSet = (exerciseIndex, setIndex) => {
+  const toggleSet = (exerciseIndex: number | string, setIndex: number) => {
     const key = `${exerciseIndex}-${setIndex}`;
     updateState({
       completedSets: { ...state.completedSets, [key]: !state.completedSets[key] }
     });
   };
 
-  const manageBlocks = (action, data) => {
+  const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
     switch(action) {
-      case 'add':
-        const blockConfig = AVAILABLE_BLOCKS[data.blockType];
+      case 'add': {
+        if (!data.blockType) return;
+        const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS];
+        if (!blockConfig) return;
         updateState({
           customPlan: [...state.customPlan, { 
             name: blockConfig.name, 
@@ -610,6 +677,7 @@ const App = () => {
           }]
         });
         break;
+      }
       case 'remove':
         if (state.customPlan.length <= 1) {
           alert('You must have at least one block in your plan.');
@@ -647,14 +715,18 @@ const App = () => {
   };
 
   // Render functions using lookup tables
-  const renderSimpleWorkout = (type, workout) => {
-    const config = WORKOUT_CONFIGS[type];
+  const renderSimpleWorkout = (type: string, workout: Workout) => {
+    const config = WORKOUT_CONFIGS[type as keyof typeof WORKOUT_CONFIGS];
     return (
       <div>
         <div className={`bg-gradient-to-r ${config.bg} text-white p-6 rounded-lg text-center`}>
-          <h3 className="text-2xl font-bold mb-2">{config.title || workout.activity}</h3>
-          {config.desc && <p className="opacity-90">{config.desc}</p>}
-          {workout.duration && (
+          <h3 className="text-2xl font-bold mb-2">
+            {'title' in config ? config.title : 
+             'activity' in workout ? workout.activity : 
+             'Workout'}
+          </h3>
+          {'desc' in config && <p className="opacity-90">{config.desc}</p>}
+          {'duration' in workout && workout.duration && (
             <>
               <div className="text-4xl font-bold">{workout.duration}</div>
               {typeof workout.duration === 'number' && <div className="text-sm opacity-90 mt-1">minutes</div>}
@@ -668,7 +740,7 @@ const App = () => {
     );
   };
 
-  const renderExerciseSet = (exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, workout) => {
+  const renderExerciseSet = (exercise: string, exerciseIndex: number, setScheme: string, schemeIndex: number, intensity: number, weight: number, workout: StrengthWorkout | HypertrophyWorkout) => {
     const [sets, reps] = setScheme.split('x');
     const warmupSets = workout.type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight) : [];
     
@@ -748,26 +820,27 @@ const App = () => {
     if (!workout) return <div className="text-center text-gray-500 py-8"><p>Workout template not yet implemented</p></div>;
 
     if (['rest', 'deload', 'liss', 'hiit'].includes(workout.type)) {
-      return renderSimpleWorkout(workout.type, workout);
+      return renderSimpleWorkout(workout.type, workout as Workout);
     }
 
     if (workout.type === 'strength' || workout.type === 'hypertrophy') {
+      const strengthWorkout = workout as StrengthWorkout | HypertrophyWorkout;
       return (
         <div className="space-y-4">
-          {workout.exercises.map((exercise, exerciseIndex) => {
-            const setSchemes = workout.sets.split(',');
-            const intensities = String(workout.intensity).split(',');
-            const shouldMapByIndex = setSchemes.length === workout.exercises.length;
+          {(strengthWorkout.exercises || []).map((exercise: string, exerciseIndex: number) => {
+            const setSchemes = (strengthWorkout.sets || '').split(',');
+            const intensities = String(strengthWorkout.intensity || 0).split(',');
+            const shouldMapByIndex = setSchemes.length === (strengthWorkout.exercises || []).length;
             const exerciseSetSchemes = shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes;
             
             return exerciseSetSchemes.map((setScheme, schemeIndex) => {
               const intensityIndex = shouldMapByIndex ? exerciseIndex : schemeIndex;
               const intensity = parseInt(intensities[intensityIndex] || intensities[0]);
-              const weight = workout.type === 'strength' ? 
+              const weight = strengthWorkout.type === 'strength' ? 
                 calculateWeight(exercise, intensity) : 
                 calculateHypertrophyWeight(exercise, intensity);
               
-              return renderExerciseSet(exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, workout);
+              return renderExerciseSet(exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, strengthWorkout);
             });
           })}
           <button onClick={completeWorkout} className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors">
@@ -856,11 +929,26 @@ const App = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {state.completedWorkouts.slice(-10).reverse().map((workout, index) => {
+                  {state.completedWorkouts.slice(-10).reverse().map((workout: CompletedWorkout, index: number) => {
                     const date = new Date(workout.date);
                     const workoutType = workout.details?.type || 'unknown';
-                    const config = HISTORY_CONFIGS[workoutType] || HISTORY_CONFIGS.rest;
-                    const workoutSummary = config.getSummary ? config.getSummary(workout.details) : config.summary;
+                    const config = HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest;
+                    const workoutSummary = (() => {
+                      switch (workoutType) {
+                        case 'liss':
+                          return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`;
+                        case 'hiit':
+                          return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`;
+                        case 'strength':
+                          return (workout.details as StrengthWorkout).exercises?.join(', ') || 'Strength training';
+                        case 'hypertrophy': {
+                          const hyp = workout.details as HypertrophyWorkout;
+                          return hyp.exercises?.slice(0, 3).join(', ') + (hyp.exercises?.length > 3 ? '...' : '') || 'Accessory work';
+                        }
+                        default:
+                          return 'summary' in config ? config.summary : 'Workout completed';
+                      }
+                    })();
                     
                     return (
                       <div key={index} className="border-l-4 border-blue-500 pl-4 pb-3">
@@ -875,9 +963,10 @@ const App = () => {
                         <div className="font-semibold text-gray-900">{workout.blockName || 'Unknown Block'}</div>
                         <div className="text-sm text-gray-600">Week {workout.week}, Day {workout.day}</div>
                         {workoutSummary && <div className="text-sm text-gray-700 mt-1 font-medium">{workoutSummary}</div>}
-                        {workout.details?.sets && (
+                        {'sets' in workout.details && (
                           <div className="text-xs text-gray-500 mt-1">
-                            Sets: {workout.details.sets}{workout.details.intensity && ` @ ${workout.details.intensity}%`}
+                            Sets: {(workout.details as StrengthWorkout | HypertrophyWorkout).sets}
+                            {'intensity' in workout.details && workout.details.intensity && ` @ ${workout.details.intensity}%`}
                           </div>
                         )}
                       </div>
@@ -981,12 +1070,12 @@ const App = () => {
                       Strength Exercises (1RM - {state.weightUnit})
                     </h4>
                     <div className="space-y-3">
-                      {strengthExercises.map((exercise) => {
-                        const exerciseKey = getExerciseKey(exercise);
+                      {(strengthExercises as string[]).map((exercise: string) => {
+                        const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
                           <div key={exerciseKey} className="flex items-center gap-3">
-                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
                               value={state.maxes[exerciseKey] || ''}
@@ -1011,12 +1100,12 @@ const App = () => {
                       Hypertrophy Exercises (10RM - {state.weightUnit})
                     </h4>
                     <div className="space-y-3">
-                      {hypertrophyExercises.map((exercise) => {
-                        const exerciseKey = getExerciseKey(exercise);
+                      {(hypertrophyExercises as string[]).map((exercise: string) => {
+                        const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
                           <div key={exerciseKey} className="flex items-center gap-3">
-                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
                               value={state.tenRMs[exerciseKey] || ''}
