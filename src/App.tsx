@@ -1,6 +1,67 @@
 import { useState } from 'react';
 import { Activity, Clock, CheckCircle } from 'lucide-react';
 
+// TypeScript interfaces for workouts
+interface BaseWorkout {
+  type: string;
+}
+
+interface StrengthWorkout extends BaseWorkout {
+  type: 'strength';
+  exercises: string[];
+  sets: string;
+  intensity: number;
+}
+
+interface HypertrophyWorkout extends BaseWorkout {
+  type: 'hypertrophy';
+  exercises: string[];
+  sets?: string;
+  intensity?: number;
+}
+
+interface CardioWorkout extends BaseWorkout {
+  type: 'liss' | 'hiit';
+  activity: string;
+  duration: number | string;
+}
+
+interface RestWorkout extends BaseWorkout {
+  type: 'rest' | 'deload';
+}
+
+type Workout = StrengthWorkout | HypertrophyWorkout | CardioWorkout | RestWorkout;
+
+interface CustomPlanBlock {
+  name: string;
+  weeks: number;
+  type: string;
+}
+
+interface CompletedWorkout {
+  date: string;
+  block: number;
+  blockName: string;
+  week: number;
+  day: number;
+  details: Workout;
+}
+
+interface AppState {
+  activeTab: string;
+  currentWeek: number;
+  currentDay: number;
+  completedWorkouts: CompletedWorkout[];
+  customPlan: CustomPlanBlock[];
+  maxes: Record<string, number>;
+  tenRMs: Record<string, number>;
+  weightUnit: string;
+  completedSets: Record<string, boolean>;
+  draggedIndex: number | null;
+  dragOverIndex: number | null;
+  showResetConfirm: boolean;
+}
+
 const App = () => {
   // Block Templates
   const blockTemplates = {
@@ -364,10 +425,10 @@ const App = () => {
   const HISTORY_CONFIGS = {
     rest: { color: 'bg-slate-400', label: 'Rest', summary: 'Recovery day' },
     deload: { color: 'bg-slate-400', label: 'Deload', summary: 'Light activity' },
-    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w: any) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w: any) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w: any) => w.exercises?.join(', ') || 'Strength training' },
-    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w: any) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
+    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w: StrengthWorkout) => w.exercises?.join(', ') || 'Strength training' },
+    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w: HypertrophyWorkout) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
   };
 
   const AVAILABLE_BLOCKS = {
@@ -396,13 +457,14 @@ const App = () => {
     const strengthExercises = new Set();
     const hypertrophyExercises = new Set();
     
-    blockTemplate.weeks.forEach((week: any) => {
-      week.days.forEach((day: any) => {
-        if (day.exercises) {
-          day.exercises.forEach((exercise: string) => {
-            if (day.type === 'strength') {
+    blockTemplate.weeks.forEach((week: { days: unknown[] }) => {
+      week.days.forEach((day: unknown) => {
+        const dayObj = day as Record<string, unknown>;
+        if ('exercises' in dayObj && Array.isArray(dayObj.exercises)) {
+          (dayObj.exercises as string[]).forEach((exercise: string) => {
+            if (dayObj.type === 'strength') {
               strengthExercises.add(exercise);
-            } else if (day.type === 'hypertrophy') {
+            } else if (dayObj.type === 'hypertrophy') {
               hypertrophyExercises.add(exercise);
             }
           });
@@ -417,11 +479,11 @@ const App = () => {
   };
 
   // Consolidated state
-  const [state, setState] = useState({
+  const [state, setState] = useState<AppState>({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
-    completedWorkouts: [],
+    completedWorkouts: [] as CompletedWorkout[],
     customPlan: [
       { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
       { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
@@ -434,24 +496,24 @@ const App = () => {
       { name: "Strength Block", weeks: 6, type: "strength" },
       { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
     ],
-    maxes: { benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, romaniandeadlift: 120 },
-    tenRMs: {},
+    maxes: { benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, romaniandeadlift: 120 } as Record<string, number>,
+    tenRMs: {} as Record<string, number>,
     weightUnit: 'kg',
-    completedSets: {},
+    completedSets: {} as Record<string, boolean>,
     draggedIndex: null,
     dragOverIndex: null,
     showResetConfirm: false
   });
 
   // Unified state update function
-  const updateState = (updates: any) => setState((prev: any) => ({ ...prev, ...updates }));
+  const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
 
   // Consolidated utility functions
   const calculateWeight = (exercise: string, percentage: number) => {
     const exerciseKey = getExerciseKey(exercise);
-    if (!exerciseKey || !(state.maxes as any)[exerciseKey]) return 0;
+    if (!exerciseKey || !state.maxes[exerciseKey]) return 0;
     
-    const calculatedWeight = (state.maxes as any)[exerciseKey] * (percentage / 100);
+    const calculatedWeight = state.maxes[exerciseKey] * (percentage / 100);
     const barbellExercises = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Front Squat', 'Trap Bar Deadlift', 'Power Clean', 'Romanian Deadlift'];
     
     if (barbellExercises.includes(exercise)) {
@@ -466,12 +528,12 @@ const App = () => {
     
     // Convert 10RM input to estimated 1RM, then apply percentage
     let estimatedOneRM;
-    if ((state.tenRMs as any)[exerciseKey]) {
+    if (state.tenRMs[exerciseKey]) {
       // Convert 10RM to 1RM: 10RM / 0.75 = 1RM
-      estimatedOneRM = (state.tenRMs as any)[exerciseKey] / 0.75;
-    } else if ((state.maxes as any)[exerciseKey]) {
+      estimatedOneRM = state.tenRMs[exerciseKey] / 0.75;
+    } else if (state.maxes[exerciseKey]) {
       // Fallback to actual 1RM if available
-      estimatedOneRM = (state.maxes as any)[exerciseKey];
+      estimatedOneRM = state.maxes[exerciseKey];
     } else {
       return 0;
     }
@@ -509,33 +571,35 @@ const App = () => {
   };
 
   // Consolidated event handlers
-  const handleDrag = (action: string, data: any) => {
+  const handleDrag = (action: string, data: { index?: number; e?: React.DragEvent }) => {
     switch(action) {
       case 'start':
-        if (data.index === 0) { data.e.preventDefault(); return; }
+        if (!data.index || data.index === 0) { data.e?.preventDefault(); return; }
         updateState({ draggedIndex: data.index, dragOverIndex: null });
-        data.e.dataTransfer.effectAllowed = 'move';
-        data.e.dataTransfer.setData('text/plain', data.index.toString());
+        if (data.e) {
+          data.e.dataTransfer.effectAllowed = 'move';
+          data.e.dataTransfer.setData('text/plain', data.index.toString());
+        }
         break;
       case 'over':
-        data.e.preventDefault();
-        data.e.dataTransfer.dropEffect = 'move';
+        data.e?.preventDefault();
+        if (data.e) data.e.dataTransfer.dropEffect = 'move';
         break;
       case 'enter':
-        data.e.preventDefault();
-        if (data.index > 0 && state.draggedIndex !== null && data.index !== state.draggedIndex) {
+        data.e?.preventDefault();
+        if (data.index && data.index > 0 && state.draggedIndex !== null && data.index !== state.draggedIndex) {
           updateState({ dragOverIndex: data.index });
         }
         break;
       case 'leave':
-        if (!data.e.currentTarget.contains(data.e.relatedTarget)) {
+        if (data.e && !data.e.currentTarget.contains(data.e.relatedTarget as Node)) {
           updateState({ dragOverIndex: null });
         }
         break;
       case 'drop': {
-        data.e.preventDefault();
-        data.e.stopPropagation();
-        if (state.draggedIndex === null || data.index === 0) {
+        data.e?.preventDefault();
+        data.e?.stopPropagation();
+        if (state.draggedIndex === null || !data.index || data.index === 0) {
           updateState({ draggedIndex: null, dragOverIndex: null });
           return;
         }
@@ -556,16 +620,16 @@ const App = () => {
 
   const completeWorkout = () => {
     const workoutDetails = getCurrentWorkout();
+    if (!workoutDetails) return; // Guard against null workout
     const block = state.customPlan[0];
     
-    const workout = {
+    const workout: CompletedWorkout = {
       date: new Date().toISOString(),
       block: 0,
       blockName: block.name,
       week: state.currentWeek,
       day: state.currentDay,
-      completed: true,
-      details: workoutDetails
+      details: workoutDetails as Workout
     };
     
     let newDay = state.currentDay + 1;
@@ -595,14 +659,16 @@ const App = () => {
   const toggleSet = (exerciseIndex: number | string, setIndex: number) => {
     const key = `${exerciseIndex}-${setIndex}`;
     updateState({
-      completedSets: { ...state.completedSets, [key]: !(state.completedSets as any)[key] }
+      completedSets: { ...state.completedSets, [key]: !state.completedSets[key] }
     });
   };
 
-  const manageBlocks = (action: string, data: any) => {
+  const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
     switch(action) {
       case 'add': {
+        if (!data.blockType) return;
         const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS];
+        if (!blockConfig) return;
         updateState({
           customPlan: [...state.customPlan, { 
             name: blockConfig.name, 
@@ -649,14 +715,18 @@ const App = () => {
   };
 
   // Render functions using lookup tables
-  const renderSimpleWorkout = (type: string, workout: any) => {
+  const renderSimpleWorkout = (type: string, workout: Workout) => {
     const config = WORKOUT_CONFIGS[type as keyof typeof WORKOUT_CONFIGS];
     return (
       <div>
         <div className={`bg-gradient-to-r ${config.bg} text-white p-6 rounded-lg text-center`}>
-          <h3 className="text-2xl font-bold mb-2">{(config as any).title || workout.activity}</h3>
-          {(config as any).desc && <p className="opacity-90">{(config as any).desc}</p>}
-          {workout.duration && (
+          <h3 className="text-2xl font-bold mb-2">
+            {'title' in config ? config.title : 
+             'activity' in workout ? workout.activity : 
+             'Workout'}
+          </h3>
+          {'desc' in config && <p className="opacity-90">{config.desc}</p>}
+          {'duration' in workout && workout.duration && (
             <>
               <div className="text-4xl font-bold">{workout.duration}</div>
               {typeof workout.duration === 'number' && <div className="text-sm opacity-90 mt-1">minutes</div>}
@@ -670,7 +740,7 @@ const App = () => {
     );
   };
 
-  const renderExerciseSet = (exercise: string, exerciseIndex: number, setScheme: string, schemeIndex: number, intensity: number, weight: number, workout: any) => {
+  const renderExerciseSet = (exercise: string, exerciseIndex: number, setScheme: string, schemeIndex: number, intensity: number, weight: number, workout: StrengthWorkout | HypertrophyWorkout) => {
     const [sets, reps] = setScheme.split('x');
     const warmupSets = workout.type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight) : [];
     
@@ -695,11 +765,11 @@ const App = () => {
                   <button
                     onClick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      (state.completedSets as any)[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
+                      state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
                         ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
                     }`}
                   >
-                    {(state.completedSets as any)[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`] && <CheckCircle className="w-4 h-4" />}
+                    {state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`] && <CheckCircle className="w-4 h-4" />}
                   </button>
                 </div>
               ))}
@@ -731,11 +801,11 @@ const App = () => {
                 <button
                   onClick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                    (state.completedSets as any)[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
+                    state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
                       ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'
                   }`}
                 >
-                  {(state.completedSets as any)[`${exerciseIndex}-${schemeIndex}-${setIndex}`] && <CheckCircle className="w-5 h-5" />}
+                  {state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`] && <CheckCircle className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -750,26 +820,27 @@ const App = () => {
     if (!workout) return <div className="text-center text-gray-500 py-8"><p>Workout template not yet implemented</p></div>;
 
     if (['rest', 'deload', 'liss', 'hiit'].includes(workout.type)) {
-      return renderSimpleWorkout(workout.type, workout);
+      return renderSimpleWorkout(workout.type, workout as Workout);
     }
 
     if (workout.type === 'strength' || workout.type === 'hypertrophy') {
+      const strengthWorkout = workout as StrengthWorkout | HypertrophyWorkout;
       return (
         <div className="space-y-4">
-          {(workout.exercises || []).map((exercise: string, exerciseIndex: number) => {
-            const setSchemes = (workout.sets || '').split(',');
-            const intensities = String(workout.intensity).split(',');
-            const shouldMapByIndex = setSchemes.length === (workout.exercises || []).length;
+          {(strengthWorkout.exercises || []).map((exercise: string, exerciseIndex: number) => {
+            const setSchemes = (strengthWorkout.sets || '').split(',');
+            const intensities = String(strengthWorkout.intensity || 0).split(',');
+            const shouldMapByIndex = setSchemes.length === (strengthWorkout.exercises || []).length;
             const exerciseSetSchemes = shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes;
             
             return exerciseSetSchemes.map((setScheme, schemeIndex) => {
               const intensityIndex = shouldMapByIndex ? exerciseIndex : schemeIndex;
               const intensity = parseInt(intensities[intensityIndex] || intensities[0]);
-              const weight = workout.type === 'strength' ? 
+              const weight = strengthWorkout.type === 'strength' ? 
                 calculateWeight(exercise, intensity) : 
                 calculateHypertrophyWeight(exercise, intensity);
               
-              return renderExerciseSet(exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, workout);
+              return renderExerciseSet(exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, strengthWorkout);
             });
           })}
           <button onClick={completeWorkout} className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors">
@@ -858,11 +929,26 @@ const App = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {state.completedWorkouts.slice(-10).reverse().map((workout: any, index: number) => {
-                    const date = new Date((workout as any).date);
-                    const workoutType = (workout as any).details?.type || 'unknown';
+                  {state.completedWorkouts.slice(-10).reverse().map((workout: CompletedWorkout, index: number) => {
+                    const date = new Date(workout.date);
+                    const workoutType = workout.details?.type || 'unknown';
                     const config = HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest;
-                    const workoutSummary = (config as any).getSummary ? (config as any).getSummary((workout as any).details) : (config as any).summary;
+                    const workoutSummary = (() => {
+                      switch (workoutType) {
+                        case 'liss':
+                          return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`;
+                        case 'hiit':
+                          return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`;
+                        case 'strength':
+                          return (workout.details as StrengthWorkout).exercises?.join(', ') || 'Strength training';
+                        case 'hypertrophy': {
+                          const hyp = workout.details as HypertrophyWorkout;
+                          return hyp.exercises?.slice(0, 3).join(', ') + (hyp.exercises?.length > 3 ? '...' : '') || 'Accessory work';
+                        }
+                        default:
+                          return 'summary' in config ? config.summary : 'Workout completed';
+                      }
+                    })();
                     
                     return (
                       <div key={index} className="border-l-4 border-blue-500 pl-4 pb-3">
@@ -874,12 +960,13 @@ const App = () => {
                             {config.label}
                           </span>
                         </div>
-                        <div className="font-semibold text-gray-900">{(workout as any).blockName || 'Unknown Block'}</div>
-                        <div className="text-sm text-gray-600">Week {(workout as any).week}, Day {(workout as any).day}</div>
+                        <div className="font-semibold text-gray-900">{workout.blockName || 'Unknown Block'}</div>
+                        <div className="text-sm text-gray-600">Week {workout.week}, Day {workout.day}</div>
                         {workoutSummary && <div className="text-sm text-gray-700 mt-1 font-medium">{workoutSummary}</div>}
-                        {(workout as any).details?.sets && (
+                        {'sets' in workout.details && (
                           <div className="text-xs text-gray-500 mt-1">
-                            Sets: {(workout as any).details.sets}{(workout as any).details.intensity && ` @ ${(workout as any).details.intensity}%`}
+                            Sets: {(workout.details as StrengthWorkout | HypertrophyWorkout).sets}
+                            {'intensity' in workout.details && workout.details.intensity && ` @ ${workout.details.intensity}%`}
                           </div>
                         )}
                       </div>
@@ -991,7 +1078,7 @@ const App = () => {
                             <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
-                              value={(state.maxes as any)[exerciseKey] || ''}
+                              value={state.maxes[exerciseKey] || ''}
                               onChange={(e) => updateState({ 
                                 maxes: { ...state.maxes, [exerciseKey]: parseFloat(e.target.value) || 0 }
                               })}
@@ -1021,7 +1108,7 @@ const App = () => {
                             <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
-                              value={(state.tenRMs as any)[exerciseKey] || ''}
+                              value={state.tenRMs[exerciseKey] || ''}
                               onChange={(e) => updateState({ 
                                 tenRMs: { ...state.tenRMs, [exerciseKey]: parseFloat(e.target.value) || 0 }
                               })}
