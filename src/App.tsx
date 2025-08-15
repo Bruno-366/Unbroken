@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, Activity, Calendar, Settings, Clock, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, Clock, CheckCircle } from 'lucide-react';
 
 const App = () => {
   // Block Templates
@@ -532,7 +532,7 @@ const App = () => {
           updateState({ dragOverIndex: null });
         }
         break;
-      case 'drop':
+      case 'drop': {
         data.e.preventDefault();
         data.e.stopPropagation();
         if (state.draggedIndex === null || data.index === 0) {
@@ -547,6 +547,7 @@ const App = () => {
         newPlan.splice(insertIndex, 0, draggedBlock);
         updateState({ customPlan: newPlan, draggedIndex: null, dragOverIndex: null });
         break;
+      }
       case 'end':
         updateState({ draggedIndex: null, dragOverIndex: null });
         break;
@@ -600,7 +601,7 @@ const App = () => {
 
   const manageBlocks = (action, data) => {
     switch(action) {
-      case 'add':
+      case 'add': {
         const blockConfig = AVAILABLE_BLOCKS[data.blockType];
         updateState({
           customPlan: [...state.customPlan, { 
@@ -610,6 +611,7 @@ const App = () => {
           }]
         });
         break;
+      }
       case 'remove':
         if (state.customPlan.length <= 1) {
           alert('You must have at least one block in your plan.');
