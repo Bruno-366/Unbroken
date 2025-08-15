@@ -43,8 +43,8 @@ A modern React application built with TypeScript and Vite, ready for deployment 
 - **React 18** - UI library
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
 - **ESLint** - Code linting
-- **CSS3** - Styling
 
 ## 🌐 Deployment on Cloudflare Pages
 
@@ -93,19 +93,20 @@ A modern React application built with TypeScript and Vite, ready for deployment 
 
 ```
 Unbroken/
-├── public/          # Static assets
-├── src/             # Source code
-│   ├── App.tsx      # Main App component
-│   ├── App.css      # App styles
-│   ├── main.tsx     # Entry point
-│   └── index.css    # Global styles
-├── .github/         # GitHub Actions workflows
-├── dist/            # Build output (generated)
-├── index.html       # HTML template
-├── package.json     # Dependencies and scripts
-├── tsconfig.json    # TypeScript configuration
-├── vite.config.ts   # Vite configuration
-└── .eslintrc.cjs    # ESLint configuration
+├── public/             # Static assets
+├── src/                # Source code
+│   ├── App.tsx         # Main App component
+│   ├── main.tsx        # Entry point
+│   └── index.css       # Global styles with Tailwind CSS
+├── .github/            # GitHub Actions workflows
+├── dist/               # Build output (generated)
+├── index.html          # HTML template
+├── package.json        # Dependencies and scripts
+├── tsconfig.json       # TypeScript configuration
+├── vite.config.ts      # Vite configuration
+├── tailwind.config.js  # Tailwind CSS configuration
+├── postcss.config.js   # PostCSS configuration
+└── .eslintrc.cjs       # ESLint configuration
 ```
 
 ## 🔍 Adding Your React Component
@@ -135,19 +136,30 @@ The repository includes GitHub Actions workflow that runs on every push and pull
 ## 🛠️ Customization
 
 ### Styling
-- Modify `src/index.css` for global styles
-- Modify `src/App.css` for component-specific styles
-- Consider adding CSS frameworks like Tailwind CSS if needed
+- Built with **Tailwind CSS** for rapid UI development
+- Utility-first approach with responsive design support
+- Dark mode support included out of the box
+- Modify `src/index.css` to customize Tailwind configuration
+- Use Tailwind classes directly in your components for styling
+- Custom CSS can be added to `src/index.css` if needed
 
 ### Additional Dependencies
 ```bash
-# Example: Add a UI library
-npm install @mui/material @emotion/react @emotion/styled
+# Example: Add a UI library (compatible with Tailwind)
+npm install @headlessui/react @heroicons/react
 
 # Example: Add routing
 npm install react-router-dom
 npm install --save-dev @types/react-router-dom
+
+# Example: Add form handling
+npm install react-hook-form @hookform/resolvers zod
 ```
+
+### Tailwind CSS Customization
+- Modify `tailwind.config.js` to extend the theme, add custom colors, or configure plugins
+- Add custom utilities or components in `src/index.css`
+- Use Tailwind IntelliSense extension in VS Code for better development experience
 
 ### Environment Variables
 Create `.env` files for different environments:
