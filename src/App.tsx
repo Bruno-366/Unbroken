@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Activity, Clock, CheckCircle } from 'lucide-react';
 
 const App = () => {
@@ -364,10 +364,10 @@ const App = () => {
   const HISTORY_CONFIGS = {
     rest: { color: 'bg-slate-400', label: 'Rest', summary: 'Recovery day' },
     deload: { color: 'bg-slate-400', label: 'Deload', summary: 'Light activity' },
-    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w) => w.exercises?.join(', ') || 'Strength training' },
-    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
+    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w: any) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w: any) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
+    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w: any) => w.exercises?.join(', ') || 'Strength training' },
+    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w: any) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
   };
 
   const AVAILABLE_BLOCKS = {
@@ -381,7 +381,7 @@ const App = () => {
   };
 
   // Helper function to generate exercise key from name
-  const getExerciseKey = (exerciseName) => {
+  const getExerciseKey = (exerciseName: string) => {
     return exerciseName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
   };
 
@@ -390,16 +390,16 @@ const App = () => {
     const currentBlock = state.customPlan[0];
     if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] };
     
-    const blockTemplate = blockTemplates[currentBlock.type];
+    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates];
     if (!blockTemplate) return { strengthExercises: [], hypertrophyExercises: [] };
     
     const strengthExercises = new Set();
     const hypertrophyExercises = new Set();
     
-    blockTemplate.weeks.forEach(week => {
-      week.days.forEach(day => {
+    blockTemplate.weeks.forEach((week: any) => {
+      week.days.forEach((day: any) => {
         if (day.exercises) {
-          day.exercises.forEach(exercise => {
+          day.exercises.forEach((exercise: string) => {
             if (day.type === 'strength') {
               strengthExercises.add(exercise);
             } else if (day.type === 'hypertrophy') {
@@ -444,14 +444,14 @@ const App = () => {
   });
 
   // Unified state update function
-  const updateState = (updates) => setState(prev => ({ ...prev, ...updates }));
+  const updateState = (updates: any) => setState((prev: any) => ({ ...prev, ...updates }));
 
   // Consolidated utility functions
-  const calculateWeight = (exercise, percentage) => {
+  const calculateWeight = (exercise: string, percentage: number) => {
     const exerciseKey = getExerciseKey(exercise);
-    if (!exerciseKey || !state.maxes[exerciseKey]) return 0;
+    if (!exerciseKey || !(state.maxes as any)[exerciseKey]) return 0;
     
-    const calculatedWeight = state.maxes[exerciseKey] * (percentage / 100);
+    const calculatedWeight = (state.maxes as any)[exerciseKey] * (percentage / 100);
     const barbellExercises = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Front Squat', 'Trap Bar Deadlift', 'Power Clean', 'Romanian Deadlift'];
     
     if (barbellExercises.includes(exercise)) {
@@ -461,17 +461,17 @@ const App = () => {
     return Math.round(calculatedWeight);
   };
 
-  const calculateHypertrophyWeight = (exercise, percentage) => {
+  const calculateHypertrophyWeight = (exercise: string, percentage: number) => {
     const exerciseKey = getExerciseKey(exercise);
     
     // Convert 10RM input to estimated 1RM, then apply percentage
     let estimatedOneRM;
-    if (state.tenRMs[exerciseKey]) {
+    if ((state.tenRMs as any)[exerciseKey]) {
       // Convert 10RM to 1RM: 10RM / 0.75 = 1RM
-      estimatedOneRM = state.tenRMs[exerciseKey] / 0.75;
-    } else if (state.maxes[exerciseKey]) {
+      estimatedOneRM = (state.tenRMs as any)[exerciseKey] / 0.75;
+    } else if ((state.maxes as any)[exerciseKey]) {
       // Fallback to actual 1RM if available
-      estimatedOneRM = state.maxes[exerciseKey];
+      estimatedOneRM = (state.maxes as any)[exerciseKey];
     } else {
       return 0;
     }
@@ -481,12 +481,12 @@ const App = () => {
     return Math.round(calculatedWeight);
   };
 
-  const calculateWarmupSets = (exercise, workingWeight) => {
+  const calculateWarmupSets = (_exercise: string, workingWeight: number) => {
     if (!workingWeight || workingWeight <= 0) return [];
     
     const barbellWeight = state.weightUnit === 'kg' ? 20 : 45;
     const plateIncrement = state.weightUnit === 'kg' ? 2.5 : 5;
-    const roundToPlate = (weight) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
+    const roundToPlate = (weight: number) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
     
     const warmupSets = [
       { weight: roundToPlate(workingWeight * 0.5), reps: 5, type: 'warmup' },
@@ -500,7 +500,7 @@ const App = () => {
 
   const getCurrentWorkout = () => {
     const block = state.customPlan[0];
-    const blockTemplate = blockTemplates[block.type];
+    const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates];
     if (!blockTemplate) return null;
     
     const weekIndex = Math.min(state.currentWeek - 1, blockTemplate.weeks.length - 1);
@@ -509,7 +509,7 @@ const App = () => {
   };
 
   // Consolidated event handlers
-  const handleDrag = (action, data) => {
+  const handleDrag = (action: string, data: any) => {
     switch(action) {
       case 'start':
         if (data.index === 0) { data.e.preventDefault(); return; }
@@ -592,17 +592,17 @@ const App = () => {
     });
   };
 
-  const toggleSet = (exerciseIndex, setIndex) => {
+  const toggleSet = (exerciseIndex: number | string, setIndex: number) => {
     const key = `${exerciseIndex}-${setIndex}`;
     updateState({
-      completedSets: { ...state.completedSets, [key]: !state.completedSets[key] }
+      completedSets: { ...state.completedSets, [key]: !(state.completedSets as any)[key] }
     });
   };
 
-  const manageBlocks = (action, data) => {
+  const manageBlocks = (action: string, data: any) => {
     switch(action) {
       case 'add': {
-        const blockConfig = AVAILABLE_BLOCKS[data.blockType];
+        const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS];
         updateState({
           customPlan: [...state.customPlan, { 
             name: blockConfig.name, 
@@ -649,13 +649,13 @@ const App = () => {
   };
 
   // Render functions using lookup tables
-  const renderSimpleWorkout = (type, workout) => {
-    const config = WORKOUT_CONFIGS[type];
+  const renderSimpleWorkout = (type: string, workout: any) => {
+    const config = WORKOUT_CONFIGS[type as keyof typeof WORKOUT_CONFIGS];
     return (
       <div>
         <div className={`bg-gradient-to-r ${config.bg} text-white p-6 rounded-lg text-center`}>
-          <h3 className="text-2xl font-bold mb-2">{config.title || workout.activity}</h3>
-          {config.desc && <p className="opacity-90">{config.desc}</p>}
+          <h3 className="text-2xl font-bold mb-2">{(config as any).title || workout.activity}</h3>
+          {(config as any).desc && <p className="opacity-90">{(config as any).desc}</p>}
           {workout.duration && (
             <>
               <div className="text-4xl font-bold">{workout.duration}</div>
@@ -670,7 +670,7 @@ const App = () => {
     );
   };
 
-  const renderExerciseSet = (exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, workout) => {
+  const renderExerciseSet = (exercise: string, exerciseIndex: number, setScheme: string, schemeIndex: number, intensity: number, weight: number, workout: any) => {
     const [sets, reps] = setScheme.split('x');
     const warmupSets = workout.type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight) : [];
     
@@ -695,11 +695,11 @@ const App = () => {
                   <button
                     onClick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
+                      (state.completedSets as any)[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
                         ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
                     }`}
                   >
-                    {state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`] && <CheckCircle className="w-4 h-4" />}
+                    {(state.completedSets as any)[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`] && <CheckCircle className="w-4 h-4" />}
                   </button>
                 </div>
               ))}
@@ -731,11 +731,11 @@ const App = () => {
                 <button
                   onClick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                    state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
+                    (state.completedSets as any)[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
                       ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'
                   }`}
                 >
-                  {state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`] && <CheckCircle className="w-5 h-5" />}
+                  {(state.completedSets as any)[`${exerciseIndex}-${schemeIndex}-${setIndex}`] && <CheckCircle className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -756,10 +756,10 @@ const App = () => {
     if (workout.type === 'strength' || workout.type === 'hypertrophy') {
       return (
         <div className="space-y-4">
-          {workout.exercises.map((exercise, exerciseIndex) => {
-            const setSchemes = workout.sets.split(',');
+          {(workout.exercises || []).map((exercise: string, exerciseIndex: number) => {
+            const setSchemes = (workout.sets || '').split(',');
             const intensities = String(workout.intensity).split(',');
-            const shouldMapByIndex = setSchemes.length === workout.exercises.length;
+            const shouldMapByIndex = setSchemes.length === (workout.exercises || []).length;
             const exerciseSetSchemes = shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes;
             
             return exerciseSetSchemes.map((setScheme, schemeIndex) => {
@@ -858,11 +858,11 @@ const App = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {state.completedWorkouts.slice(-10).reverse().map((workout, index) => {
-                    const date = new Date(workout.date);
-                    const workoutType = workout.details?.type || 'unknown';
-                    const config = HISTORY_CONFIGS[workoutType] || HISTORY_CONFIGS.rest;
-                    const workoutSummary = config.getSummary ? config.getSummary(workout.details) : config.summary;
+                  {state.completedWorkouts.slice(-10).reverse().map((workout: any, index: number) => {
+                    const date = new Date((workout as any).date);
+                    const workoutType = (workout as any).details?.type || 'unknown';
+                    const config = HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest;
+                    const workoutSummary = (config as any).getSummary ? (config as any).getSummary((workout as any).details) : (config as any).summary;
                     
                     return (
                       <div key={index} className="border-l-4 border-blue-500 pl-4 pb-3">
@@ -874,12 +874,12 @@ const App = () => {
                             {config.label}
                           </span>
                         </div>
-                        <div className="font-semibold text-gray-900">{workout.blockName || 'Unknown Block'}</div>
-                        <div className="text-sm text-gray-600">Week {workout.week}, Day {workout.day}</div>
+                        <div className="font-semibold text-gray-900">{(workout as any).blockName || 'Unknown Block'}</div>
+                        <div className="text-sm text-gray-600">Week {(workout as any).week}, Day {(workout as any).day}</div>
                         {workoutSummary && <div className="text-sm text-gray-700 mt-1 font-medium">{workoutSummary}</div>}
-                        {workout.details?.sets && (
+                        {(workout as any).details?.sets && (
                           <div className="text-xs text-gray-500 mt-1">
-                            Sets: {workout.details.sets}{workout.details.intensity && ` @ ${workout.details.intensity}%`}
+                            Sets: {(workout as any).details.sets}{(workout as any).details.intensity && ` @ ${(workout as any).details.intensity}%`}
                           </div>
                         )}
                       </div>
@@ -983,15 +983,15 @@ const App = () => {
                       Strength Exercises (1RM - {state.weightUnit})
                     </h4>
                     <div className="space-y-3">
-                      {strengthExercises.map((exercise) => {
-                        const exerciseKey = getExerciseKey(exercise);
+                      {(strengthExercises as string[]).map((exercise: string) => {
+                        const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
                           <div key={exerciseKey} className="flex items-center gap-3">
-                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
-                              value={state.maxes[exerciseKey] || ''}
+                              value={(state.maxes as any)[exerciseKey] || ''}
                               onChange={(e) => updateState({ 
                                 maxes: { ...state.maxes, [exerciseKey]: parseFloat(e.target.value) || 0 }
                               })}
@@ -1013,15 +1013,15 @@ const App = () => {
                       Hypertrophy Exercises (10RM - {state.weightUnit})
                     </h4>
                     <div className="space-y-3">
-                      {hypertrophyExercises.map((exercise) => {
-                        const exerciseKey = getExerciseKey(exercise);
+                      {(hypertrophyExercises as string[]).map((exercise: string) => {
+                        const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
                           <div key={exerciseKey} className="flex items-center gap-3">
-                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+                            <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
                             <input
                               type="number"
-                              value={state.tenRMs[exerciseKey] || ''}
+                              value={(state.tenRMs as any)[exerciseKey] || ''}
                               onChange={(e) => updateState({ 
                                 tenRMs: { ...state.tenRMs, [exerciseKey]: parseFloat(e.target.value) || 0 }
                               })}
