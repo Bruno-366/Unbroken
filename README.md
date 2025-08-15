@@ -109,21 +109,6 @@ Unbroken/
 └── .eslintrc.cjs       # ESLint configuration
 ```
 
-## 🔍 Adding Your React Component
-
-To add your existing `.tsx` file:
-
-1. Place your component file in the `src/` directory
-2. Import and use it in `src/App.tsx`:
-   ```tsx
-   import YourComponent from './YourComponent';
-   
-   function App() {
-     return <YourComponent />;
-   }
-   ```
-3. Install any additional dependencies your component needs
-
 ## 🚨 CI/CD
 
 The repository includes GitHub Actions workflow that runs on every push and pull request:
