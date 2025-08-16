@@ -506,8 +506,8 @@ const App = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-0 md:p-4">
       <div className="w-full md:max-w-2xl mx-auto bg-white md:rounded-2xl rounded-none shadow-2xl overflow-hidden min-h-screen md:min-h-0">
         <div className="bg-gray-900 text-white p-6 text-center">
-          <h1 className="text-2xl font-bold">TACTICAL BARBELL</h1>
-          <p className="text-gray-400 text-sm mt-1">Hybrid Athlete Tracker</p>
+          <h1 className="text-2xl font-bold">UNBROKEN</h1>
+          <p className="text-gray-400 text-sm mt-1">Tactical Barbell Tracker</p>
         </div>
 
         <div className="flex bg-gray-100 border-b-2 border-gray-200">
