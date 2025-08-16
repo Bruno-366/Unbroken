@@ -406,15 +406,14 @@ const App = () => {
             <h5 className="text-sm font-semibold text-gray-700 mb-2">Warm-up Sets</h5>
             <div className="space-y-2">
               {warmupSets.map((warmupSet, warmupIndex) => (
-                <div key={`warmup-${warmupIndex}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-3 sm:gap-4 flex-1">
-                    <span className="text-xs font-medium text-blue-700 w-16 flex-shrink-0">Warm-up {warmupIndex + 1}</span>
-                    <span className="text-sm text-blue-800">{warmupSet.reps} reps</span>
-                    <span className="text-sm font-semibold text-blue-900">{warmupSet.weight} {state.weightUnit}</span>
+                <div key={`warmup-${warmupIndex}`} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-blue-700 w-16">Warm-up {warmupIndex + 1}</span>
+                    <span className="text-sm text-blue-800">{warmupSet.reps} reps @ {warmupSet.weight} {state.weightUnit}</span>
                   </div>
                   <button
                     onClick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 self-end sm:self-center ${
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                       state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
                         ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
                     }`}
@@ -430,27 +429,27 @@ const App = () => {
         <div className="space-y-3">
           <h5 className="text-sm font-semibold text-gray-700">Working Sets</h5>
           {Array.from({ length: parseInt(sets) }).map((_, setIndex) => (
-            <div key={setIndex} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-4 flex-1">
+            <div key={setIndex} className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-4">
                 <span className="text-sm font-semibold text-gray-700 w-14">Set {setIndex + 1}</span>
                 <span className="text-sm font-medium text-gray-600">{reps} reps</span>
-              </div>
-              <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end">
                 {weight > 0 && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-20 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                      defaultValue={weight}
-                      placeholder="Weight"
-                      step={state.weightUnit === 'kg' ? '2.5' : '5'}
-                    />
-                    <span className="text-xs text-gray-500 font-medium">{state.weightUnit}</span>
-                  </div>
+                  <span className="text-sm font-semibold text-gray-900">@ {weight} {state.weightUnit}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {weight > 0 && (
+                  <input
+                    type="number"
+                    className="w-20 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    defaultValue={weight}
+                    placeholder="Weight"
+                    step={state.weightUnit === 'kg' ? '2.5' : '5'}
+                  />
                 )}
                 <button
                   onClick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                     state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
                       ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'
                   }`}
@@ -507,8 +506,8 @@ const App = () => {
   const { strengthExercises, hypertrophyExercises } = getCurrentBlockExercises();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4 md:p-4 p-0">
-      <div className="max-w-2xl mx-auto bg-white md:rounded-2xl rounded-none shadow-2xl overflow-hidden min-h-screen md:min-h-0">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-0 md:p-4">
+      <div className="w-full md:max-w-2xl mx-auto bg-white md:rounded-2xl rounded-none shadow-2xl overflow-hidden min-h-screen md:min-h-0">
         <div className="bg-gray-900 text-white p-6 text-center">
           <h1 className="text-2xl font-bold">TACTICAL BARBELL</h1>
           <p className="text-gray-400 text-sm mt-1">Hybrid Athlete Tracker</p>
