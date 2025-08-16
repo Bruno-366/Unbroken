@@ -174,22 +174,6 @@ const App = () => {
   const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
 
   // Timer functions
-  const startRestTimer = async (workoutType: 'strength' | 'hypertrophy') => {
-    // Request notification permission if not already granted
-    await requestNotificationPermission();
-    
-    const initialTime = workoutType === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
-    updateState({
-      restTimer: {
-        isActive: true,
-        timeLeft: initialTime,
-        totalTime: initialTime,
-        workoutType,
-        phase: 'initial'
-      }
-    });
-  };
-
   const stopRestTimer = () => {
     updateState({
       restTimer: {
@@ -225,13 +209,17 @@ const App = () => {
 
   // Show notification when rest timer completes
   const showRestCompleteNotification = () => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('Get back to work!', {
-        body: 'Your rest time is over. Time for the next set!',
-        icon: '/icon-192x192.png',
-        tag: 'rest-timer',
-        requireInteraction: false
-      });
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Get back to work!', {
+          body: 'Your rest time is over. Time for the next set!',
+          icon: '/icon-192x192.png',
+          tag: 'rest-timer',
+          requireInteraction: false
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to show notification:', error);
     }
   };
 
@@ -243,11 +231,6 @@ const App = () => {
       interval = setInterval(() => {
         setState((prevState: AppState) => {
           const newTimeLeft = Math.max(0, prevState.restTimer.timeLeft - 1);
-          
-          // Show notification when timer reaches 0
-          if (prevState.restTimer.timeLeft === 1 && newTimeLeft === 0) {
-            showRestCompleteNotification();
-          }
           
           return {
             ...prevState,
@@ -264,6 +247,13 @@ const App = () => {
       if (interval) clearInterval(interval);
     };
   }, [state.restTimer.isActive, state.restTimer.timeLeft]);
+
+  // Separate effect to handle notification when timer reaches 0
+  useEffect(() => {
+    if (state.restTimer.isActive && state.restTimer.timeLeft === 0) {
+      showRestCompleteNotification();
+    }
+  }, [state.restTimer.timeLeft, state.restTimer.isActive]);
 
   // Consolidated utility functions
   const calculateWeight = (exercise: string, percentage: number) => {
@@ -420,21 +410,36 @@ const App = () => {
     });
   };
 
-  const toggleSet = async (exerciseIndex: number | string, setIndex: number) => {
-    const key = `${exerciseIndex}-${setIndex}`;
+  const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
+    const key = `${exerciseAndSchemeIndex}-${setIndex}`;
     const isBeingCompleted = !state.completedSets[key];
     
-    updateState({
-      completedSets: { ...state.completedSets, [key]: isBeingCompleted }
-    });
-
     // Start rest timer when completing a working set (not warm-up sets)
+    let restTimerUpdate = {};
     if (isBeingCompleted && !key.includes('warmup')) {
       const workout = getCurrentWorkout();
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
-        await startRestTimer(workout.type);
+        // Request notification permission if not already granted
+        await requestNotificationPermission();
+        
+        const initialTime = workout.type === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
+        restTimerUpdate = {
+          restTimer: {
+            isActive: true,
+            timeLeft: initialTime,
+            totalTime: initialTime,
+            workoutType: workout.type,
+            phase: 'initial'
+          }
+        };
       }
     }
+
+    // Combine both state updates into one
+    updateState({
+      completedSets: { ...state.completedSets, [key]: isBeingCompleted },
+      ...restTimerUpdate
+    });
   };
 
   const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
