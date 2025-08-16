@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { Activity, Clock, CheckCircle } from 'lucide-react';
 import { blockTemplates } from './blockTemplates';
@@ -173,7 +174,10 @@ const App = () => {
   const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
 
   // Timer functions
-  const startRestTimer = (workoutType: 'strength' | 'hypertrophy') => {
+  const startRestTimer = async (workoutType: 'strength' | 'hypertrophy') => {
+    // Request notification permission if not already granted
+    await requestNotificationPermission();
+    
     const initialTime = workoutType === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
     updateState({
       restTimer: {
@@ -212,19 +216,47 @@ const App = () => {
     }
   };
 
+  // Request notification permission
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+  };
+
+  // Show notification when rest timer completes
+  const showRestCompleteNotification = () => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Get back to work!', {
+        body: 'Your rest time is over. Time for the next set!',
+        icon: '/icon-192x192.png',
+        tag: 'rest-timer',
+        requireInteraction: false
+      });
+    }
+  };
+
   // Timer effect
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     
     if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
       interval = setInterval(() => {
-        setState(prevState => ({
-          ...prevState,
-          restTimer: {
-            ...prevState.restTimer,
-            timeLeft: Math.max(0, prevState.restTimer.timeLeft - 1)
+        setState((prevState: AppState) => {
+          const newTimeLeft = Math.max(0, prevState.restTimer.timeLeft - 1);
+          
+          // Show notification when timer reaches 0
+          if (prevState.restTimer.timeLeft === 1 && newTimeLeft === 0) {
+            showRestCompleteNotification();
           }
-        }));
+          
+          return {
+            ...prevState,
+            restTimer: {
+              ...prevState.restTimer,
+              timeLeft: newTimeLeft
+            }
+          };
+        });
       }, 1000);
     }
 
@@ -296,7 +328,7 @@ const App = () => {
   };
 
   // Consolidated event handlers
-  const handleDrag = (action: string, data: { index?: number; e?: React.DragEvent }) => {
+  const handleDrag = (action: string, data: { index?: number; e?: React.DragEvent<HTMLDivElement> }) => {
     switch(action) {
       case 'start':
         if (!data.index || data.index === 0) { data.e?.preventDefault(); return; }
@@ -388,7 +420,7 @@ const App = () => {
     });
   };
 
-  const toggleSet = (exerciseIndex: number | string, setIndex: number) => {
+  const toggleSet = async (exerciseIndex: number | string, setIndex: number) => {
     const key = `${exerciseIndex}-${setIndex}`;
     const isBeingCompleted = !state.completedSets[key];
     
@@ -400,7 +432,7 @@ const App = () => {
     if (isBeingCompleted && !key.includes('warmup')) {
       const workout = getCurrentWorkout();
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
-        startRestTimer(workout.type);
+        await startRestTimer(workout.type);
       }
     }
   };
@@ -429,7 +461,7 @@ const App = () => {
           alert('Cannot remove the currently active block. Complete it first or reset your progress.');
           return;
         }
-        updateState({ customPlan: state.customPlan.filter((_, i) => i !== data.index) });
+        updateState({ customPlan: state.customPlan.filter((_: CustomPlanBlock, i: number) => i !== data.index) });
         break;
     }
   };
