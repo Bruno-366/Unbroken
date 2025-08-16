@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#1f2937" stroke="#374151" stroke-width="32"/>
+  
+  <!-- Barbell design -->
+  <!-- Left weight plate -->
+  <circle cx="120" cy="256" r="60" fill="#6b7280" stroke="#9ca3af" stroke-width="4"/>
+  <circle cx="120" cy="256" r="40" fill="#374151"/>
+  
+  <!-- Right weight plate -->
+  <circle cx="392" cy="256" r="60" fill="#6b7280" stroke="#9ca3af" stroke-width="4"/>
+  <circle cx="392" cy="256" r="40" fill="#374151"/>
+  
+  <!-- Barbell bar -->
+  <rect x="180" y="240" width="152" height="32" fill="#9ca3af" rx="16"/>
+  
+  <!-- Center grip -->
+  <rect x="240" y="230" width="32" height="52" fill="#6b7280" rx="4"/>
+  
+  <!-- Text -->
+  <text x="256" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#e5e7eb">UB</text>
+</svg>
