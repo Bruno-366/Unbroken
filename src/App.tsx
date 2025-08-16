@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Activity, Clock, CheckCircle } from 'lucide-react';
 import { blockTemplates } from './blockTemplates';
 
@@ -61,6 +61,13 @@ interface AppState {
   draggedIndex: number | null;
   dragOverIndex: number | null;
   showResetConfirm: boolean;
+  restTimer: {
+    isActive: boolean;
+    timeLeft: number;
+    totalTime: number;
+    workoutType: 'strength' | 'hypertrophy' | null;
+    phase: 'initial' | 'extended';
+  };
 }
 
 const App = () => {
@@ -152,11 +159,79 @@ const App = () => {
     completedSets: {} as Record<string, boolean>,
     draggedIndex: null,
     dragOverIndex: null,
-    showResetConfirm: false
+    showResetConfirm: false,
+    restTimer: {
+      isActive: false,
+      timeLeft: 0,
+      totalTime: 0,
+      workoutType: null,
+      phase: 'initial'
+    }
   });
 
   // Unified state update function
   const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
+
+  // Timer functions
+  const startRestTimer = (workoutType: 'strength' | 'hypertrophy') => {
+    const initialTime = workoutType === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
+    updateState({
+      restTimer: {
+        isActive: true,
+        timeLeft: initialTime,
+        totalTime: initialTime,
+        workoutType,
+        phase: 'initial'
+      }
+    });
+  };
+
+  const stopRestTimer = () => {
+    updateState({
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial'
+      }
+    });
+  };
+
+  const extendRestTimer = () => {
+    if (state.restTimer.workoutType === 'strength' && state.restTimer.phase === 'initial') {
+      const extendedTime = 120; // Additional 2 minutes to reach 5 minutes total
+      updateState({
+        restTimer: {
+          ...state.restTimer,
+          timeLeft: extendedTime,
+          totalTime: extendedTime,
+          phase: 'extended'
+        }
+      });
+    }
+  };
+
+  // Timer effect
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    
+    if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
+      interval = setInterval(() => {
+        setState(prevState => ({
+          ...prevState,
+          restTimer: {
+            ...prevState.restTimer,
+            timeLeft: Math.max(0, prevState.restTimer.timeLeft - 1)
+          }
+        }));
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [state.restTimer.isActive, state.restTimer.timeLeft]);
 
   // Consolidated utility functions
   const calculateWeight = (exercise: string, percentage: number) => {
@@ -302,15 +377,32 @@ const App = () => {
       currentDay: newDay,
       currentWeek: newWeek,
       customPlan: newPlan,
-      activeTab: 'overview'
+      activeTab: 'overview',
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial'
+      }
     });
   };
 
   const toggleSet = (exerciseIndex: number | string, setIndex: number) => {
     const key = `${exerciseIndex}-${setIndex}`;
+    const isBeingCompleted = !state.completedSets[key];
+    
     updateState({
-      completedSets: { ...state.completedSets, [key]: !state.completedSets[key] }
+      completedSets: { ...state.completedSets, [key]: isBeingCompleted }
     });
+
+    // Start rest timer when completing a working set (not warm-up sets)
+    if (isBeingCompleted && !key.includes('warmup')) {
+      const workout = getCurrentWorkout();
+      if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
+        startRestTimer(workout.type);
+      }
+    }
   };
 
   const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
@@ -360,7 +452,14 @@ const App = () => {
         { name: "Strength Block", weeks: 6, type: "strength" },
         { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
       ],
-      showResetConfirm: false
+      showResetConfirm: false,
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial'
+      }
     });
   };
 
@@ -461,6 +560,59 @@ const App = () => {
     );
   };
 
+  const renderRestTimer = () => {
+    if (!state.restTimer.isActive) return null;
+
+    const progressPercent = ((state.restTimer.totalTime - state.restTimer.timeLeft) / state.restTimer.totalTime) * 100;
+    const isExtendedPhase = state.restTimer.phase === 'extended';
+    const minutes = Math.floor(state.restTimer.timeLeft / 60);
+    const seconds = state.restTimer.timeLeft % 60;
+    
+    return (
+      <div className="mb-4 p-4 bg-white rounded-lg border-2 border-orange-200">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-orange-600" />
+            <span className="text-sm font-semibold text-gray-700">
+              {isExtendedPhase ? 'Extended Rest' : 'Rest Time'}
+            </span>
+          </div>
+          <div className="text-lg font-bold text-gray-900">
+            {minutes}:{seconds.toString().padStart(2, '0')}
+          </div>
+        </div>
+        
+        <div className="mb-3">
+          <div className="bg-gray-200 h-3 rounded-full overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-300 ${
+                isExtendedPhase ? 'bg-red-500' : 'bg-orange-500'
+              }`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          <button
+            onClick={stopRestTimer}
+            className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+          >
+            Skip Rest
+          </button>
+          {state.restTimer.workoutType === 'strength' && !isExtendedPhase && state.restTimer.timeLeft === 0 && (
+            <button
+              onClick={extendRestTimer}
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+            >
+              Extend to 5 min
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderWorkout = () => {
     const workout = getCurrentWorkout();
     if (!workout) return <div className="text-center text-gray-500 py-8"><p>Workout template not yet implemented</p></div>;
@@ -473,6 +625,7 @@ const App = () => {
       const strengthWorkout = workout as StrengthWorkout | HypertrophyWorkout;
       return (
         <div className="space-y-4">
+          {renderRestTimer()}
           {(strengthWorkout.exercises || []).map((exercise: string, exerciseIndex: number) => {
             const setSchemes = (strengthWorkout.sets || '').split(',');
             const intensities = String(strengthWorkout.intensity || 0).split(',');
