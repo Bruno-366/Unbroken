@@ -251,7 +251,7 @@ const App = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [state.restTimer.isActive, state.restTimer.startTime]);
+  }, [state.restTimer.isActive, state.restTimer.timeLeft]);
 
   // Separate effect to handle notification when timer reaches 0
   useEffect(() => {
