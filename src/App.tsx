@@ -433,9 +433,6 @@ const App = () => {
               <div className="flex items-center gap-4">
                 <span className="text-sm font-semibold text-gray-700 w-14">Set {setIndex + 1}</span>
                 <span className="text-sm font-medium text-gray-600">{reps} reps</span>
-                {weight > 0 && (
-                  <span className="text-sm font-semibold text-gray-900">@ {weight} {state.weightUnit}</span>
-                )}
               </div>
               <div className="flex items-center gap-3">
                 {weight > 0 && (
