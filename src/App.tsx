@@ -205,6 +205,12 @@ const App = () => {
     }
   };
 
+  // Detect if we're on a mobile device
+  const isMobileDevice = () => {
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  };
+
   // Request notification permission
   const requestNotificationPermission = async () => {
     if ('Notification' in window && Notification.permission === 'default') {
@@ -213,9 +219,28 @@ const App = () => {
   };
 
   // Show notification when rest timer completes
-  const showRestCompleteNotification = () => {
+  const showRestCompleteNotification = async () => {
     try {
       if ('Notification' in window && Notification.permission === 'granted') {
+        // For mobile devices, try to use service worker for better reliability
+        if (isMobileDevice() && 'serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          
+          // Check if the service worker supports showNotification
+          if (registration.showNotification) {
+            await registration.showNotification('Get back to work!', {
+              body: 'Your rest time is over. Time for the next set!',
+              icon: '/icon-192x192.png',
+              badge: '/icon-192x192.png',
+              tag: 'rest-timer',
+              requireInteraction: false,
+              silent: false
+            });
+            return;
+          }
+        }
+        
+        // Fallback to regular notification for desktop or when service worker isn't available
         new Notification('Get back to work!', {
           body: 'Your rest time is over. Time for the next set!',
           icon: '/icon-192x192.png',
