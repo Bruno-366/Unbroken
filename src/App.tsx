@@ -596,9 +596,13 @@ const App = () => {
         <div className="flex gap-2">
           <button
             onClick={stopRestTimer}
-            className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+            className={`flex-1 ${
+              state.restTimer.timeLeft === 0 
+                ? 'bg-green-500 hover:bg-green-600' 
+                : 'bg-gray-500 hover:bg-gray-600'
+            } text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm`}
           >
-            Skip Rest
+            {state.restTimer.timeLeft === 0 ? 'Complete Rest' : 'Skip Rest'}
           </button>
           {state.restTimer.workoutType === 'strength' && !isExtendedPhase && state.restTimer.timeLeft === 0 && (
             <button
