@@ -1,152 +1,39 @@
 import { useState } from 'react';
-import { Activity, Clock, CheckCircle } from 'lucide-react';
-import { blockTemplates } from './blockTemplates';
-
-// TypeScript interfaces for workouts
-interface BaseWorkout {
-  type: string;
-}
-
-interface StrengthWorkout extends BaseWorkout {
-  type: 'strength';
-  exercises: string[];
-  sets: string;
-  intensity: number;
-}
-
-interface HypertrophyWorkout extends BaseWorkout {
-  type: 'hypertrophy';
-  exercises: string[];
-  sets?: string;
-  intensity?: number;
-}
-
-interface CardioWorkout extends BaseWorkout {
-  type: 'liss' | 'hiit';
-  activity: string;
-  duration: number | string;
-}
-
-interface RestWorkout extends BaseWorkout {
-  type: 'rest' | 'deload';
-}
-
-type Workout = StrengthWorkout | HypertrophyWorkout | CardioWorkout | RestWorkout;
-
-interface CustomPlanBlock {
-  name: string;
-  weeks: number;
-  type: string;
-}
-
-interface CompletedWorkout {
-  date: string;
-  block: number;
-  blockName: string;
-  week: number;
-  day: number;
-  details: Workout;
-}
-
-interface AppState {
-  activeTab: string;
-  currentWeek: number;
-  currentDay: number;
-  completedWorkouts: CompletedWorkout[];
-  customPlan: CustomPlanBlock[];
-  maxes: Record<string, number>;
-  tenRMs: Record<string, number>;
-  weightUnit: string;
-  completedSets: Record<string, boolean>;
-  draggedIndex: number | null;
-  dragOverIndex: number | null;
-  showResetConfirm: boolean;
-}
+import { Activity, Clock } from 'lucide-react';
+import { 
+  AppState, 
+  CompletedWorkout, 
+  Workout, 
+  StrengthWorkout, 
+  HypertrophyWorkout,
+  CardioWorkout 
+} from './types';
+import { 
+  HISTORY_CONFIGS, 
+  AVAILABLE_BLOCKS, 
+  DEFAULT_CUSTOM_PLAN, 
+  DEFAULT_MAXES 
+} from './config';
+import { 
+  getCurrentWorkout, 
+  getCurrentBlockExercises, 
+  getExerciseKey, 
+  calculateWeight, 
+  calculateHypertrophyWeight 
+} from './utils';
+import { ExerciseSet } from './components/ExerciseSet';
+import { SimpleWorkout } from './components/SimpleWorkout';
+import { ConfirmDialog } from './components/ConfirmDialog';
 
 const App = () => {
-  // Lookup tables for workout types and configurations
-  const WORKOUT_CONFIGS = {
-    rest: { bg: 'from-purple-500 to-pink-500', title: 'Rest Day', desc: 'Take a day off to recover', button: 'Complete Rest Day' },
-    deload: { bg: 'from-blue-500 to-teal-500', title: 'Deload', desc: 'Light activity or mobility work', button: 'Complete Deload Day' },
-    liss: { bg: 'from-green-500 to-blue-500', button: 'Complete LISS Cardio' },
-    hiit: { bg: 'from-orange-500 to-red-500', button: 'Complete HIIT Cardio' }
-  };
-
-  const HISTORY_CONFIGS = {
-    rest: { color: 'bg-slate-400', label: 'Rest', summary: 'Recovery day' },
-    deload: { color: 'bg-slate-400', label: 'Deload', summary: 'Light activity' },
-    liss: { color: 'bg-green-500', label: 'LISS', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    hiit: { color: 'bg-yellow-500', label: 'HIIT', getSummary: (w: CardioWorkout) => `${w.activity} - ${w.duration}${typeof w.duration === 'number' ? ' min' : ''}` },
-    strength: { color: 'bg-red-500', label: 'Strength', getSummary: (w: StrengthWorkout) => w.exercises?.join(', ') || 'Strength training' },
-    hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy', getSummary: (w: HypertrophyWorkout) => w.exercises?.slice(0, 3).join(', ') + (w.exercises?.length > 3 ? '...' : '') || 'Accessory work' }
-  };
-
-  const AVAILABLE_BLOCKS = {
-    endurance1: { name: "Endurance Block 1", weeks: 8 },
-    powerbuilding1: { name: "Powerbuilding Block 1", weeks: 3 },
-    powerbuilding2: { name: "Powerbuilding Block 2", weeks: 3 },
-    powerbuilding3: { name: "Powerbuilding Block 3", weeks: 3 },
-    powerbuilding3bulgarian: { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3 },
-    bodybuilding: { name: "Bodybuilding Block", weeks: 3 },
-    strength: { name: "Strength Block", weeks: 6 }
-  };
-
-  // Helper function to generate exercise key from name
-  const getExerciseKey = (exerciseName: string) => {
-    return exerciseName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
-  };
-
-  // Get exercises used in the current active block
-  const getCurrentBlockExercises = () => {
-    const currentBlock = state.customPlan[0];
-    if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] };
-    
-    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates];
-    if (!blockTemplate) return { strengthExercises: [], hypertrophyExercises: [] };
-    
-    const strengthExercises = new Set();
-    const hypertrophyExercises = new Set();
-    
-    blockTemplate.weeks.forEach((week: { days: unknown[] }) => {
-      week.days.forEach((day: unknown) => {
-        const dayObj = day as Record<string, unknown>;
-        if ('exercises' in dayObj && Array.isArray(dayObj.exercises)) {
-          (dayObj.exercises as string[]).forEach((exercise: string) => {
-            if (dayObj.type === 'strength') {
-              strengthExercises.add(exercise);
-            } else if (dayObj.type === 'hypertrophy') {
-              hypertrophyExercises.add(exercise);
-            }
-          });
-        }
-      });
-    });
-    
-    return {
-      strengthExercises: Array.from(strengthExercises),
-      hypertrophyExercises: Array.from(hypertrophyExercises)
-    };
-  };
-
   // Consolidated state
   const [state, setState] = useState<AppState>({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
     completedWorkouts: [] as CompletedWorkout[],
-    customPlan: [
-      { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
-      { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
-      { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
-      { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
-      { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-      { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-      { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-      { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
-      { name: "Strength Block", weeks: 6, type: "strength" },
-      { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
-    ],
-    maxes: { benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, romaniandeadlift: 120 } as Record<string, number>,
+    customPlan: DEFAULT_CUSTOM_PLAN,
+    maxes: DEFAULT_MAXES,
     tenRMs: {} as Record<string, number>,
     weightUnit: 'kg',
     completedSets: {} as Record<string, boolean>,
@@ -158,69 +45,7 @@ const App = () => {
   // Unified state update function
   const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
 
-  // Consolidated utility functions
-  const calculateWeight = (exercise: string, percentage: number) => {
-    const exerciseKey = getExerciseKey(exercise);
-    if (!exerciseKey || !state.maxes[exerciseKey]) return 0;
-    
-    const calculatedWeight = state.maxes[exerciseKey] * (percentage / 100);
-    const barbellExercises = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Front Squat', 'Trap Bar Deadlift', 'Power Clean', 'Romanian Deadlift'];
-    
-    if (barbellExercises.includes(exercise)) {
-      const increment = state.weightUnit === 'kg' ? 2.5 : 5;
-      return Math.round(calculatedWeight / increment) * increment;
-    }
-    return Math.round(calculatedWeight);
-  };
-
-  const calculateHypertrophyWeight = (exercise: string, percentage: number) => {
-    const exerciseKey = getExerciseKey(exercise);
-    
-    // Convert 10RM input to estimated 1RM, then apply percentage
-    let estimatedOneRM;
-    if (state.tenRMs[exerciseKey]) {
-      // Convert 10RM to 1RM: 10RM / 0.75 = 1RM
-      estimatedOneRM = state.tenRMs[exerciseKey] / 0.75;
-    } else if (state.maxes[exerciseKey]) {
-      // Fallback to actual 1RM if available
-      estimatedOneRM = state.maxes[exerciseKey];
-    } else {
-      return 0;
-    }
-    
-    // Apply the block's programmed percentage to the estimated 1RM
-    const calculatedWeight = estimatedOneRM * (percentage / 100);
-    return Math.round(calculatedWeight);
-  };
-
-  const calculateWarmupSets = (_exercise: string, workingWeight: number) => {
-    if (!workingWeight || workingWeight <= 0) return [];
-    
-    const barbellWeight = state.weightUnit === 'kg' ? 20 : 45;
-    const plateIncrement = state.weightUnit === 'kg' ? 2.5 : 5;
-    const roundToPlate = (weight: number) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
-    
-    const warmupSets = [
-      { weight: roundToPlate(workingWeight * 0.5), reps: 5, type: 'warmup' },
-      { weight: roundToPlate(workingWeight * 0.65), reps: 3, type: 'warmup' },
-      { weight: roundToPlate(workingWeight * 0.8), reps: 2, type: 'warmup' },
-      { weight: roundToPlate(workingWeight * 0.9), reps: 1, type: 'warmup' }
-    ];
-    
-    return warmupSets.filter(set => set.weight < workingWeight);
-  };
-
-  const getCurrentWorkout = () => {
-    const block = state.customPlan[0];
-    const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates];
-    if (!blockTemplate) return null;
-    
-    const weekIndex = Math.min(state.currentWeek - 1, blockTemplate.weeks.length - 1);
-    const dayIndex = state.currentDay - 1;
-    return blockTemplate.weeks[weekIndex].days[dayIndex];
-  };
-
-  // Consolidated event handlers
+  // Event handlers
   const handleDrag = (action: string, data: { index?: number; e?: React.DragEvent }) => {
     switch(action) {
       case 'start':
@@ -269,7 +94,7 @@ const App = () => {
   };
 
   const completeWorkout = () => {
-    const workoutDetails = getCurrentWorkout();
+    const workoutDetails = getCurrentWorkout(state.customPlan, state.currentWeek, state.currentDay);
     if (!workoutDetails) return; // Guard against null workout
     const block = state.customPlan[0];
     
@@ -348,129 +173,18 @@ const App = () => {
       currentDay: 1,
       completedWorkouts: [],
       completedSets: {},
-      customPlan: [
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
-        { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
-        { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
-        { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
-        { name: "Strength Block", weeks: 6, type: "strength" },
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
-      ],
+      customPlan: DEFAULT_CUSTOM_PLAN,
       showResetConfirm: false
     });
   };
 
   // Render functions using lookup tables
-  const renderSimpleWorkout = (type: string, workout: Workout) => {
-    const config = WORKOUT_CONFIGS[type as keyof typeof WORKOUT_CONFIGS];
-    return (
-      <div>
-        <div className={`bg-gradient-to-r ${config.bg} text-white p-6 rounded-lg text-center`}>
-          <h3 className="text-2xl font-bold mb-2">
-            {'title' in config ? config.title : 
-             'activity' in workout ? workout.activity : 
-             'Workout'}
-          </h3>
-          {'desc' in config && <p className="opacity-90">{config.desc}</p>}
-          {'duration' in workout && workout.duration && (
-            <>
-              <div className="text-4xl font-bold">{workout.duration}</div>
-              {typeof workout.duration === 'number' && <div className="text-sm opacity-90 mt-1">minutes</div>}
-            </>
-          )}
-        </div>
-        <button onClick={completeWorkout} className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors mt-4">
-          {config.button}
-        </button>
-      </div>
-    );
-  };
-
-  const renderExerciseSet = (exercise: string, exerciseIndex: number, setScheme: string, schemeIndex: number, intensity: number, weight: number, workout: StrengthWorkout | HypertrophyWorkout) => {
-    const [sets, reps] = setScheme.split('x');
-    const warmupSets = workout.type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight) : [];
-    
-    return (
-      <div key={`${exerciseIndex}-${schemeIndex}`} className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-        <h4 className="font-bold text-gray-900 mb-2 text-lg">{exercise}</h4>
-        <div className="text-sm text-gray-600 mb-4 font-medium">
-          {setScheme} @ {intensity}%{weight > 0 && ` (${weight} ${state.weightUnit})`}
-        </div>
-        
-        {warmupSets.length > 0 && (
-          <div className="mb-4">
-            <h5 className="text-sm font-semibold text-gray-700 mb-2">Warm-up Sets</h5>
-            <div className="space-y-2">
-              {warmupSets.map((warmupSet, warmupIndex) => (
-                <div key={`warmup-${warmupIndex}`} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs font-medium text-blue-700 w-16">Warm-up {warmupIndex + 1}</span>
-                    <span className="text-sm text-blue-800">{warmupSet.reps} reps</span>
-                    <span className="text-sm font-semibold text-blue-900">{warmupSet.weight} {state.weightUnit}</span>
-                  </div>
-                  <button
-                    onClick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
-                        ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
-                    }`}
-                  >
-                    {state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`] && <CheckCircle className="w-4 h-4" />}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <div className="space-y-3">
-          <h5 className="text-sm font-semibold text-gray-700">Working Sets</h5>
-          {Array.from({ length: parseInt(sets) }).map((_, setIndex) => (
-            <div key={setIndex} className="flex items-center justify-between gap-4 bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-4 flex-1">
-                <span className="text-sm font-semibold text-gray-700 w-14">Set {setIndex + 1}</span>
-                <span className="text-sm font-medium text-gray-600">{reps} reps</span>
-              </div>
-              <div className="flex items-center gap-4">
-                {weight > 0 && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-20 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                      defaultValue={weight}
-                      placeholder="Weight"
-                      step={state.weightUnit === 'kg' ? '2.5' : '5'}
-                    />
-                    <span className="text-xs text-gray-500 font-medium">{state.weightUnit}</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                    state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
-                      ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'
-                  }`}
-                >
-                  {state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`] && <CheckCircle className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   const renderWorkout = () => {
-    const workout = getCurrentWorkout();
+    const workout = getCurrentWorkout(state.customPlan, state.currentWeek, state.currentDay);
     if (!workout) return <div className="text-center text-gray-500 py-8"><p>Workout template not yet implemented</p></div>;
 
     if (['rest', 'deload', 'liss', 'hiit'].includes(workout.type)) {
-      return renderSimpleWorkout(workout.type, workout as Workout);
+      return <SimpleWorkout workoutType={workout.type} workout={workout as Workout} onComplete={completeWorkout} />;
     }
 
     if (workout.type === 'strength' || workout.type === 'hypertrophy') {
@@ -487,10 +201,23 @@ const App = () => {
               const intensityIndex = shouldMapByIndex ? exerciseIndex : schemeIndex;
               const intensity = parseInt(intensities[intensityIndex] || intensities[0]);
               const weight = strengthWorkout.type === 'strength' ? 
-                calculateWeight(exercise, intensity) : 
-                calculateHypertrophyWeight(exercise, intensity);
+                calculateWeight(exercise, intensity, state.maxes, state.weightUnit) : 
+                calculateHypertrophyWeight(exercise, intensity, state.tenRMs, state.maxes);
               
-              return renderExerciseSet(exercise, exerciseIndex, setScheme, schemeIndex, intensity, weight, strengthWorkout);
+              return (
+                <ExerciseSet
+                  key={`${exerciseIndex}-${schemeIndex}`}
+                  exercise={exercise}
+                  exerciseIndex={exerciseIndex}
+                  setScheme={setScheme}
+                  schemeIndex={schemeIndex}
+                  intensity={intensity}
+                  weight={weight}
+                  completedSets={state.completedSets}
+                  weightUnit={state.weightUnit}
+                  onToggleSet={toggleSet}
+                />
+              );
             });
           })}
           <button onClick={completeWorkout} className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors">
@@ -504,7 +231,7 @@ const App = () => {
 
   const currentBlockInfo = state.customPlan[0];
   const progressPercent = ((state.currentWeek - 1) / currentBlockInfo.weeks) * 100;
-  const { strengthExercises, hypertrophyExercises } = getCurrentBlockExercises();
+  const { strengthExercises, hypertrophyExercises } = getCurrentBlockExercises(state.customPlan);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4">
@@ -802,28 +529,13 @@ const App = () => {
                 Reset All Progress
               </button>
 
-              {state.showResetConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Reset All Progress?</h3>
-                    <p className="text-gray-600 mb-6">Are you sure you want to reset all progress? This cannot be undone.</p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => updateState({ showResetConfirm: false })}
-                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={resetProgress}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                      >
-                        Reset
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <ConfirmDialog
+                isOpen={state.showResetConfirm}
+                title="Reset All Progress?"
+                message="Are you sure you want to reset all progress? This cannot be undone."
+                onConfirm={resetProgress}
+                onCancel={() => updateState({ showResetConfirm: false })}
+              />
             </div>
           )}
         </div>
