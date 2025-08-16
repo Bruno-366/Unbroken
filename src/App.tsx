@@ -68,6 +68,7 @@ interface AppState {
     totalTime: number;
     workoutType: 'strength' | 'hypertrophy' | null;
     phase: 'initial' | 'extended';
+    startTime: number;
   };
 }
 
@@ -166,7 +167,8 @@ const App = () => {
       timeLeft: 0,
       totalTime: 0,
       workoutType: null,
-      phase: 'initial'
+      phase: 'initial',
+      startTime: 0
     }
   });
 
@@ -181,7 +183,8 @@ const App = () => {
         timeLeft: 0,
         totalTime: 0,
         workoutType: null,
-        phase: 'initial'
+        phase: 'initial',
+        startTime: 0
       }
     });
   };
@@ -189,12 +192,14 @@ const App = () => {
   const extendRestTimer = () => {
     if (state.restTimer.workoutType === 'strength' && state.restTimer.phase === 'initial') {
       const extendedTime = 120; // Additional 2 minutes to reach 5 minutes total
+      const now = Date.now();
       updateState({
         restTimer: {
           ...state.restTimer,
           timeLeft: extendedTime,
           totalTime: extendedTime,
-          phase: 'extended'
+          phase: 'extended',
+          startTime: now
         }
       });
     }
@@ -223,30 +228,30 @@ const App = () => {
     }
   };
 
-  // Timer effect
+  // Timer effect - timestamp-based to prevent background throttling
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     
     if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
       interval = setInterval(() => {
-        setState((prevState: AppState) => {
-          const newTimeLeft = Math.max(0, prevState.restTimer.timeLeft - 1);
-          
-          return {
-            ...prevState,
-            restTimer: {
-              ...prevState.restTimer,
-              timeLeft: newTimeLeft
-            }
-          };
-        });
-      }, 1000);
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - state.restTimer.startTime) / 1000);
+        const newTimeLeft = Math.max(0, state.restTimer.totalTime - elapsedSeconds);
+        
+        setState((prevState: AppState) => ({
+          ...prevState,
+          restTimer: {
+            ...prevState.restTimer,
+            timeLeft: newTimeLeft
+          }
+        }));
+      }, 100); // Check more frequently for smoother updates
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [state.restTimer.isActive, state.restTimer.timeLeft]);
+  }, [state.restTimer.isActive, state.restTimer.startTime]);
 
   // Separate effect to handle notification when timer reaches 0
   useEffect(() => {
@@ -405,7 +410,8 @@ const App = () => {
         timeLeft: 0,
         totalTime: 0,
         workoutType: null,
-        phase: 'initial'
+        phase: 'initial',
+        startTime: 0
       }
     });
   };
@@ -423,13 +429,15 @@ const App = () => {
         await requestNotificationPermission();
         
         const initialTime = workout.type === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
+        const now = Date.now();
         restTimerUpdate = {
           restTimer: {
             isActive: true,
             timeLeft: initialTime,
             totalTime: initialTime,
             workoutType: workout.type,
-            phase: 'initial'
+            phase: 'initial',
+            startTime: now
           }
         };
       }
@@ -495,7 +503,8 @@ const App = () => {
         timeLeft: 0,
         totalTime: 0,
         workoutType: null,
-        phase: 'initial'
+        phase: 'initial',
+        startTime: 0
       }
     });
   };
