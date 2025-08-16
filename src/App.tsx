@@ -406,15 +406,15 @@ const App = () => {
             <h5 className="text-sm font-semibold text-gray-700 mb-2">Warm-up Sets</h5>
             <div className="space-y-2">
               {warmupSets.map((warmupSet, warmupIndex) => (
-                <div key={`warmup-${warmupIndex}`} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs font-medium text-blue-700 w-16">Warm-up {warmupIndex + 1}</span>
+                <div key={`warmup-${warmupIndex}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1">
+                    <span className="text-xs font-medium text-blue-700 w-16 flex-shrink-0">Warm-up {warmupIndex + 1}</span>
                     <span className="text-sm text-blue-800">{warmupSet.reps} reps</span>
                     <span className="text-sm font-semibold text-blue-900">{warmupSet.weight} {state.weightUnit}</span>
                   </div>
                   <button
                     onClick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 self-end sm:self-center ${
                       state.completedSets[`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}-0`]
                         ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
                     }`}
@@ -430,12 +430,12 @@ const App = () => {
         <div className="space-y-3">
           <h5 className="text-sm font-semibold text-gray-700">Working Sets</h5>
           {Array.from({ length: parseInt(sets) }).map((_, setIndex) => (
-            <div key={setIndex} className="flex items-center justify-between gap-4 bg-white p-4 rounded-lg border border-gray-200">
+            <div key={setIndex} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-white p-4 rounded-lg border border-gray-200">
               <div className="flex items-center gap-4 flex-1">
                 <span className="text-sm font-semibold text-gray-700 w-14">Set {setIndex + 1}</span>
                 <span className="text-sm font-medium text-gray-600">{reps} reps</span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end">
                 {weight > 0 && (
                   <div className="flex items-center gap-2">
                     <input
@@ -450,7 +450,7 @@ const App = () => {
                 )}
                 <button
                   onClick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                     state.completedSets[`${exerciseIndex}-${schemeIndex}-${setIndex}`]
                       ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'
                   }`}
@@ -507,8 +507,8 @@ const App = () => {
   const { strengthExercises, hypertrophyExercises } = getCurrentBlockExercises();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4 md:p-4 p-0">
+      <div className="max-w-2xl mx-auto bg-white md:rounded-2xl rounded-none shadow-2xl overflow-hidden min-h-screen md:min-h-0">
         <div className="bg-gray-900 text-white p-6 text-center">
           <h1 className="text-2xl font-bold">TACTICAL BARBELL</h1>
           <p className="text-gray-400 text-sm mt-1">Hybrid Athlete Tracker</p>
@@ -519,7 +519,7 @@ const App = () => {
             <button
               key={tab}
               onClick={() => updateState({ activeTab: tab })}
-              className={`flex-1 py-4 px-4 font-semibold capitalize transition-colors ${
+              className={`flex-1 py-4 px-2 sm:px-4 font-semibold capitalize transition-colors text-sm sm:text-base ${
                 state.activeTab === tab ? 'text-blue-600 bg-white border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -528,7 +528,7 @@ const App = () => {
           ))}
         </div>
 
-        <div className="p-6 min-h-[500px]">
+        <div className="p-4 sm:p-6 min-h-[500px]">
           {state.activeTab === 'overview' && (
             <div>
               <div className="bg-gray-100 p-4 rounded-lg mb-6">
@@ -724,18 +724,21 @@ const App = () => {
                         const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
-                          <div key={exerciseKey} className="flex items-center gap-3">
+                          <div key={exerciseKey} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                             <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
-                            <input
-                              type="number"
-                              value={state.maxes[exerciseKey] || ''}
-                              onChange={(e) => updateState({ 
-                                maxes: { ...state.maxes, [exerciseKey]: parseFloat(e.target.value) || 0 }
-                              })}
-                              className="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
-                              placeholder="1RM"
-                              step={state.weightUnit === 'kg' ? '2.5' : '5'}
-                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={state.maxes[exerciseKey] || ''}
+                                onChange={(e) => updateState({ 
+                                  maxes: { ...state.maxes, [exerciseKey]: parseFloat(e.target.value) || 0 }
+                                })}
+                                className="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+                                placeholder="1RM"
+                                step={state.weightUnit === 'kg' ? '2.5' : '5'}
+                              />
+                              <span className="text-xs text-gray-500 font-medium w-8">{state.weightUnit}</span>
+                            </div>
                           </div>
                         );
                       })}
@@ -754,18 +757,21 @@ const App = () => {
                         const exerciseKey = getExerciseKey(exercise as string);
                         
                         return (
-                          <div key={exerciseKey} className="flex items-center gap-3">
+                          <div key={exerciseKey} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                             <label className="flex-1 text-sm text-gray-700 font-medium">{exercise as string}</label>
-                            <input
-                              type="number"
-                              value={state.tenRMs[exerciseKey] || ''}
-                              onChange={(e) => updateState({ 
-                                tenRMs: { ...state.tenRMs, [exerciseKey]: parseFloat(e.target.value) || 0 }
-                              })}
-                              className="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                              placeholder="10RM"
-                              step="1"
-                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={state.tenRMs[exerciseKey] || ''}
+                                onChange={(e) => updateState({ 
+                                  tenRMs: { ...state.tenRMs, [exerciseKey]: parseFloat(e.target.value) || 0 }
+                                })}
+                                className="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                                placeholder="10RM"
+                                step="1"
+                              />
+                              <span className="text-xs text-gray-500 font-medium w-8">{state.weightUnit}</span>
+                            </div>
                           </div>
                         );
                       })}
