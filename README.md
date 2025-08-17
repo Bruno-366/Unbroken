@@ -1,6 +1,17 @@
 # Unbroken
 
-A modern React application built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
+**Tactical Barbell Tracker** - A modern React application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
+
+## 📋 Features
+
+- **Training Block Management**: Organize workouts into structured training blocks (Endurance, Powerbuilding, Strength, Bodybuilding)
+- **Comprehensive Workout Tracking**: Support for strength, hypertrophy, LISS cardio, HIIT, rest, and deload workouts
+- **Exercise Database**: Track 1RM and 10RM personal records with automatic weight calculations
+- **Smart Warm-up Sets**: Automatically calculated warm-up progressions for strength workouts
+- **Rest Timer**: Built-in timer with notifications and extend options
+- **Workout History**: Complete tracking of all completed workouts
+- **Drag & Drop Planning**: Reorder training blocks with intuitive drag-and-drop interface
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## 🚀 Quick Start
 
@@ -40,11 +51,12 @@ A modern React application built with TypeScript and Vite, ready for deployment 
 
 ## 🏗️ Tech Stack
 
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **ESLint** - Code linting
+- **React 18** - UI library with hooks for state management
+- **TypeScript** - Type safety and enhanced developer experience
+- **Vite** - Build tool and dev server with hot module replacement
+- **Tailwind CSS** - Utility-first CSS framework for responsive design
+- **ESLint** - Code linting and quality enforcement
+- **Tactical Barbell Methodology** - Structured training approach for strength and conditioning
 
 ## 🌐 Deployment on Cloudflare Pages
 
@@ -93,22 +105,41 @@ A modern React application built with TypeScript and Vite, ready for deployment 
 
 ```
 Unbroken/
-├── public/             # Static assets
-├── src/                # Source code
-│   ├── App.tsx         # Main App component
-│   ├── main.tsx        # Entry point
-│   └── index.css       # Global styles with Tailwind CSS
-├── .github/            # GitHub Actions workflows
-├── dist/               # Build output (generated)
-├── index.html          # HTML template
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-├── vite.config.ts      # Vite configuration
-├── wrangler.jsonc      # Cloudflare Pages configuration
-├── tailwind.config.js  # Tailwind CSS configuration
-├── postcss.config.js   # PostCSS configuration
-└── .eslintrc.cjs       # ESLint configuration
+├── public/                      # Static assets
+├── src/                         # Source code
+│   ├── components/              # React components (refactored from monolithic App.tsx)
+│   │   ├── CardioWorkouts.tsx   # LISS and HIIT workout rendering
+│   │   ├── StrengthWorkouts.tsx # Strength/hypertrophy workouts with warm-up sets
+│   │   ├── RestWorkouts.tsx     # Rest and deload workout rendering
+│   │   ├── History.tsx          # Workout history display
+│   │   ├── TrainingPlan.tsx     # Training blocks drag & drop management
+│   │   └── ExerciseDatabase.tsx # 1RM and 10RM exercise input management
+│   ├── App.tsx                  # Main App component (reduced from 1,066 to 373 lines)
+│   ├── types.ts                 # Centralized TypeScript interfaces and types
+│   ├── utils.ts                 # Shared utility functions (weight calculations, notifications)
+│   ├── blockTemplates.ts        # Training block templates and configurations
+│   ├── main.tsx                 # Entry point
+│   └── index.css                # Global styles with Tailwind CSS
+├── .github/                     # GitHub Actions workflows
+├── dist/                        # Build output (generated)
+├── index.html                   # HTML template
+├── package.json                 # Dependencies and scripts
+├── tsconfig.json                # TypeScript configuration
+├── vite.config.ts               # Vite configuration
+├── wrangler.jsonc               # Cloudflare Pages configuration
+├── tailwind.config.js           # Tailwind CSS configuration
+├── postcss.config.js            # PostCSS configuration
+└── .eslintrc.cjs                # ESLint configuration
 ```
+
+### Component Architecture
+
+The application has been refactored from a monolithic structure into focused, maintainable components:
+
+- **Separation of Concerns**: Each component handles a specific aspect of functionality
+- **Type Safety**: Comprehensive TypeScript interfaces ensure code reliability
+- **Reusability**: Components are designed to be easily testable and modifiable
+- **Maintainability**: Reduced complexity makes debugging and feature additions simpler
 
 ## 🚨 CI/CD
 
@@ -134,12 +165,18 @@ The repository includes GitHub Actions workflow that runs on every push and pull
 # Example: Add a UI library (compatible with Tailwind)
 npm install @headlessui/react @heroicons/react
 
-# Example: Add routing
+# Example: Add routing (for multi-page functionality)
 npm install react-router-dom
 npm install --save-dev @types/react-router-dom
 
-# Example: Add form handling
+# Example: Add form handling and validation
 npm install react-hook-form @hookform/resolvers zod
+
+# Example: Add state management (if needed for larger scale)
+npm install zustand
+
+# Example: Add date/time utilities
+npm install date-fns
 ```
 
 ### Tailwind CSS Customization
@@ -158,6 +195,8 @@ Create `.env` files for different environments:
 - [React Documentation](https://react.dev/)
 - [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
 - [TypeScript Documentation](https://www.typescriptlang.org/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [Tactical Barbell Official](https://www.tacticalbarbell.com/) - Learn about the training methodology
 
 ## 🤝 Contributing
 
