@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Activity, Clock, CheckCircle } from 'lucide-react';
 import { blockTemplates } from './blockTemplates';
 
@@ -206,10 +206,10 @@ const App = () => {
   };
 
   // Detect if we're on a mobile device
-  const isMobileDevice = () => {
+  const isMobileDevice = useCallback(() => {
     return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
            (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-  };
+  }, []);
 
   // Request notification permission
   const requestNotificationPermission = async () => {
@@ -219,7 +219,7 @@ const App = () => {
   };
 
   // Show notification when rest timer completes
-  const showRestCompleteNotification = async () => {
+  const showRestCompleteNotification = useCallback(async () => {
     try {
       if ('Notification' in window && Notification.permission === 'granted') {
         // For mobile devices, try to use service worker for better reliability
@@ -251,7 +251,7 @@ const App = () => {
     } catch (error) {
       console.warn('Failed to show notification:', error);
     }
-  };
+  }, [isMobileDevice]);
 
   // Timer effect - timestamp-based to prevent background throttling
   useEffect(() => {
@@ -276,14 +276,14 @@ const App = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [state.restTimer.isActive, state.restTimer.timeLeft]);
+  }, [state.restTimer.isActive, state.restTimer.timeLeft, state.restTimer.startTime, state.restTimer.totalTime]);
 
   // Separate effect to handle notification when timer reaches 0
   useEffect(() => {
     if (state.restTimer.isActive && state.restTimer.timeLeft === 0) {
       showRestCompleteNotification();
     }
-  }, [state.restTimer.timeLeft, state.restTimer.isActive]);
+  }, [state.restTimer.timeLeft, state.restTimer.isActive, showRestCompleteNotification]);
 
   // Consolidated utility functions
   const calculateWeight = (exercise: string, percentage: number) => {
