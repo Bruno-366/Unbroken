@@ -135,33 +135,33 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x8,4x12", intensity: "70,55" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
           { type: "liss", activity: "Walk", duration: 60 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift"], sets: "4x8,4x12", intensity: "70,55" },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
           { type: "liss", activity: "LISS run", duration: 30 },
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x8,4x12", intensity: "70,55" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
           { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x6,4x10", intensity: "75,60" },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
           { type: "liss", activity: "Walk", duration: 60 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift"], sets: "4x6,4x10", intensity: "75,60" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
           { type: "liss", activity: "LISS run", duration: 30 },
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x6,4x10", intensity: "75,60" },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
           { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x3,4x8", intensity: "80,65" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
           { type: "liss", activity: "Walk", duration: 60 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift"], sets: "4x3,4x8", intensity: "80,65" },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
           { type: "liss", activity: "LISS run", duration: 30 },
-          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "4x3,4x8", intensity: "80,65" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
           { type: "rest" },
           { type: "rest" }
         ]
