@@ -1,3 +1,5 @@
+<img width="2560" height="1280" alt="image" src="https://github.com/user-attachments/assets/898953e8-f582-4d5a-86ad-f3e7769c3562" />
+
 # Unbroken
 
 **Tactical Barbell Tracker** - A modern React application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
