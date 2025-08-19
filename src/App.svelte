@@ -12,7 +12,6 @@
   import History from './components/History.svelte'
   import TrainingPlan from './components/TrainingPlan.svelte'
   import ExerciseDatabase from './components/ExerciseDatabase.svelte'
-  import RestTimer from './components/RestTimer.svelte'
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -315,9 +314,7 @@
   }
 
   // Derived values
-  const currentBlockInfo = $derived(() => {
-    return state.customPlan[0] || { name: 'No active block', weeks: 0 }
-  })
+  const currentBlockInfo = $derived(state.customPlan[0] || { name: 'No active block', weeks: 0 })
 
   const currentWorkout = $derived(() => getCurrentWorkout())
 
@@ -365,36 +362,32 @@
 
     <div class="p-6 space-y-6">
       {#if state.activeTab === 'overview'}
-        <div class="text-center space-y-4">
-          <div class="text-sm opacity-90 mb-1">Week {state.currentWeek}, Day {state.currentDay}</div>
-          <div class="text-xl font-bold">{currentBlockInfo.name}</div>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button 
-            onclick={() => state.activeTab = 'workout'}
-            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
-          >
-            Start Today's Workout
-          </button>
-          <button 
-            onclick={() => state.activeTab = 'history'}
-            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
-          >
-            View History
-          </button>
-        </div>
-        
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h3 class="font-semibold mb-3">Upcoming Blocks</h3>
-          <div class="space-y-2">
-            {#each state.customPlan.slice(0, 5) as block, index}
-              <div class="flex justify-between items-center py-2 px-3 bg-white rounded border {index === 0 ? 'border-blue-300 bg-blue-50' : 'border-gray-200'}">
-                <span class="font-medium {index === 0 ? 'text-blue-700' : 'text-gray-700'}">{block.name}</span>
-                <span class="text-sm text-gray-500">{block.weeks} weeks</span>
+        <div>
+          <div class="bg-gray-100 p-4 rounded-lg mb-6">
+            <h3 class="text-sm text-gray-600 mb-2">Current Block</h3>
+            <div class="text-xl font-bold text-gray-900 mb-3">{currentBlockInfo.name}</div>
+            <div class="bg-gray-300 h-2 rounded-full overflow-hidden mb-2">
+              <div class="bg-green-500 h-full transition-all duration-300" style="width: {((state.currentWeek - 1) / currentBlockInfo.weeks) * 100}%"></div>
+            </div>
+            <div class="text-xs text-gray-600">Week {state.currentWeek} of {currentBlockInfo.weeks}</div>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-600 uppercase mb-3">Upcoming Blocks</h3>
+            {#each state.customPlan.slice(1, 4) as block}
+              <div class="bg-gray-100 p-3 rounded-lg mb-2">
+                <div class="font-semibold text-gray-800">{block.name}</div>
+                <div class="text-xs text-gray-600">{block.weeks} weeks</div>
               </div>
             {/each}
           </div>
+
+          <button
+            onclick={() => state.activeTab = 'workout'}
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+          >
+            Start Today's Workout
+          </button>
         </div>
       {/if}
 
@@ -496,14 +489,4 @@
       {/if}
     </div>
   </div>
-
-  <!-- Rest Timer Component -->
-  <RestTimer 
-    bind:isActive={state.restTimer.isActive}
-    bind:timeLeft={state.restTimer.timeLeft}
-    bind:totalTime={state.restTimer.totalTime}
-    bind:workoutType={state.restTimer.workoutType}
-    bind:phase={state.restTimer.phase}
-    bind:startTime={state.restTimer.startTime}
-  />
 </div>
