@@ -24,8 +24,8 @@
     strength: { name: "Strength Block", weeks: 6 }
   }
 
-  // Default state configuration
-  const getDefaultState = (): AppState => ({
+  // Reactive state using Svelte 5 runes
+  let state = $state<AppState>({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
@@ -58,9 +58,6 @@
       startTime: 0
     }
   })
-
-  // Reactive state using Svelte 5 runes
-  let state = $state<AppState>(getDefaultState())
 
   // Get exercises used in the current active block
   const getCurrentBlockExercises = () => {
@@ -95,48 +92,57 @@
   }
 
   // Load state from IndexedDB on mount
-  onMount(() => {
-    const loadPersistedState = async () => {
-      try {
-        const persistedState = await loadStateFromStorage()
-        if (persistedState) {
-          // Merge persisted state with default state to ensure all properties exist
-          state = {
-            ...state,
-            ...persistedState,
-            // Always reset transient UI state to defaults
-            draggedIndex: null,
-            dragOverIndex: null,
-            showResetConfirm: false,
-            restTimer: {
-              isActive: false,
-              timeLeft: 0,
-              totalTime: 0,
-              workoutType: null,
-              phase: 'initial',
-              startTime: 0
-            }
+  onMount(async () => {
+    try {
+      const persistedState = await loadStateFromStorage()
+      if (persistedState) {
+        // Merge persisted state with current state, excluding transient UI state
+        state = {
+          ...state,
+          ...persistedState,
+          // Always reset transient UI state to defaults
+          draggedIndex: null,
+          dragOverIndex: null,
+          showResetConfirm: false,
+          restTimer: {
+            isActive: false,
+            timeLeft: 0,
+            totalTime: 0,
+            workoutType: null,
+            phase: 'initial',
+            startTime: 0
           }
         }
-      } catch (error) {
-        console.warn('Failed to load persisted state:', error)
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted state:', error)
+    }
+  })
+
+  // Automatic state persistence using $effect - more idiomatic than manual updateState
+  $effect(() => {
+    // Create a clean state object for persistence (exclude transient UI state)
+    const stateToSave: AppState = {
+      ...state,
+      // Don't persist transient UI state
+      draggedIndex: null,
+      dragOverIndex: null,
+      showResetConfirm: false,
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial',
+        startTime: 0
       }
     }
 
-    loadPersistedState()
-  })
-
-  // Unified state update function that also persists to IndexedDB
-  const updateState = (updates: Partial<AppState>) => {
-    const newState = { ...state, ...updates }
-    
     // Save to IndexedDB asynchronously (don't wait for it)
-    saveStateToStorage(newState).catch(error => {
+    saveStateToStorage(stateToSave).catch(error => {
       console.warn('Failed to save state to IndexedDB:', error)
     })
-    
-    state = newState
-  }
+  })
 
   const getCurrentWorkout = (): Workout | null => {
     const block = state.customPlan[0]
@@ -152,8 +158,10 @@
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
     const isBeingCompleted = !state.completedSets[key]
     
+    // Update completed sets directly
+    state.completedSets[key] = isBeingCompleted
+    
     // Start rest timer when completing a working set (not warm-up sets)
-    let restTimerUpdate = {}
     if (isBeingCompleted && !key.includes('warmup')) {
       const workout = getCurrentWorkout()
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
@@ -162,24 +170,16 @@
         
         const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
         const now = Date.now()
-        restTimerUpdate = {
-          restTimer: {
-            isActive: true,
-            timeLeft: initialTime,
-            totalTime: initialTime,
-            workoutType: workout.type,
-            phase: 'initial' as const,
-            startTime: now
-          }
-        }
+        
+        // Update rest timer state directly
+        state.restTimer.isActive = true
+        state.restTimer.timeLeft = initialTime
+        state.restTimer.totalTime = initialTime
+        state.restTimer.workoutType = workout.type
+        state.restTimer.phase = 'initial'
+        state.restTimer.startTime = now
       }
     }
-
-    // Combine both state updates into one
-    updateState({
-      completedSets: { ...state.completedSets, [key]: isBeingCompleted },
-      ...restTimerUpdate
-    })
   }
 
   const completeWorkout = () => {
@@ -196,6 +196,13 @@
       details: workoutDetails as Workout
     }
     
+    // Add completed workout
+    state.completedWorkouts = [...state.completedWorkouts, workout]
+    
+    // Reset completed sets
+    state.completedSets = {}
+    
+    // Progress to next day/week/block
     let newDay = state.currentDay + 1
     let newWeek = state.currentWeek
     let newPlan = state.customPlan
@@ -210,22 +217,18 @@
       }
     }
     
-    updateState({
-      completedWorkouts: [...state.completedWorkouts, workout],
-      completedSets: {},
-      currentDay: newDay,
-      currentWeek: newWeek,
-      customPlan: newPlan,
-      activeTab: 'overview',
-      restTimer: {
-        isActive: false,
-        timeLeft: 0,
-        totalTime: 0,
-        workoutType: null,
-        phase: 'initial',
-        startTime: 0
-      }
-    })
+    state.currentDay = newDay
+    state.currentWeek = newWeek
+    state.customPlan = newPlan
+    state.activeTab = 'overview'
+    
+    // Reset rest timer
+    state.restTimer.isActive = false
+    state.restTimer.timeLeft = 0
+    state.restTimer.totalTime = 0
+    state.restTimer.workoutType = null
+    state.restTimer.phase = 'initial'
+    state.restTimer.startTime = 0
   }
 
   const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
@@ -234,13 +237,11 @@
         if (!data.blockType) return
         const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS]
         if (!blockConfig) return
-        updateState({
-          customPlan: [...state.customPlan, { 
-            name: blockConfig.name, 
-            weeks: blockConfig.weeks, 
-            type: data.blockType 
-          }]
-        })
+        state.customPlan = [...state.customPlan, { 
+          name: blockConfig.name, 
+          weeks: blockConfig.weeks, 
+          type: data.blockType 
+        }]
         break
       }
       case 'remove':
@@ -251,7 +252,7 @@
         if (data.index !== undefined) {
           const newPlan = [...state.customPlan]
           newPlan.splice(data.index, 1)
-          updateState({ customPlan: newPlan })
+          state.customPlan = newPlan
         }
         break
       case 'reorder':
@@ -261,11 +262,9 @@
           const draggedBlock = newPlan[state.draggedIndex]
           newPlan.splice(state.draggedIndex, 1)
           newPlan.splice(state.dragOverIndex, 0, draggedBlock)
-          updateState({ 
-            customPlan: newPlan,
-            draggedIndex: null,
-            dragOverIndex: null
-          })
+          state.customPlan = newPlan
+          state.draggedIndex = null
+          state.dragOverIndex = null
         }
         break
     }
@@ -275,8 +274,43 @@
   const handleReset = async () => {
     try {
       await clearStorage()
-      state = getDefaultState()
-      updateState({ showResetConfirm: false })
+      
+      // Reset all state to defaults using direct assignment
+      state.activeTab = 'overview'
+      state.currentWeek = 1
+      state.currentDay = 1
+      state.completedWorkouts = []
+      state.customPlan = [
+        { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
+        { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
+        { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
+        { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
+        { name: "Strength Block", weeks: 6, type: "strength" },
+        { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
+      ]
+      state.maxes = { 
+        benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, 
+        overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, 
+        romaniandeadlift: 120 
+      }
+      state.tenRMs = {}
+      state.weightUnit = 'kg'
+      state.completedSets = {}
+      state.draggedIndex = null
+      state.dragOverIndex = null
+      state.showResetConfirm = false
+      state.restTimer = {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial',
+        startTime: 0
+      }
     } catch (error) {
       console.error('Failed to reset app:', error)
     }
@@ -319,7 +353,7 @@
     <div class="flex bg-gray-100 border-b-2 border-gray-200">
       {#each ['overview', 'workout', 'history', 'settings'] as tab}
         <button
-          onclick={() => updateState({ activeTab: tab })}
+          onclick={() => state.activeTab = tab}
           class="flex-1 py-4 px-2 sm:px-4 font-semibold capitalize transition-colors text-sm sm:text-base {
             state.activeTab === tab 
               ? 'bg-white text-gray-900 border-b-2 border-blue-500' 
@@ -340,13 +374,13 @@
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button 
-            onclick={() => updateState({ activeTab: 'workout' })}
+            onclick={() => state.activeTab = 'workout'}
             class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
           >
             Start Today's Workout
           </button>
           <button 
-            onclick={() => updateState({ activeTab: 'history' })}
+            onclick={() => state.activeTab = 'history'}
             class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
           >
             View History
@@ -404,7 +438,10 @@
         <div>
           <TrainingPlan 
             {state}
-            onUpdateState={updateState}
+            onUpdateState={(updates) => {
+              if ('draggedIndex' in updates) state.draggedIndex = updates.draggedIndex ?? null
+              if ('dragOverIndex' in updates) state.dragOverIndex = updates.dragOverIndex ?? null
+            }}
             onManageBlocks={manageBlocks}
           />
 
@@ -413,7 +450,10 @@
             strengthExercises={strengthExercises()}
             hypertrophyExercises={hypertrophyExercises()}
             currentBlockName={currentBlockInfo.name}
-            onUpdateState={updateState}
+            onUpdateState={(updates) => {
+              if ('maxes' in updates) state.maxes = updates.maxes || state.maxes
+              if ('tenRMs' in updates) state.tenRMs = updates.tenRMs || state.tenRMs
+            }}
           />
 
           <div class="mb-6">
@@ -430,7 +470,7 @@
           </div>
 
           <button
-            onclick={() => updateState({ showResetConfirm: true })}
+            onclick={() => state.showResetConfirm = true}
             class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors"
           >
             Reset All Progress
@@ -449,7 +489,7 @@
                     Delete Everything
                   </button>
                   <button
-                    onclick={() => updateState({ showResetConfirm: false })}
+                    onclick={() => state.showResetConfirm = false}
                     class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Cancel
