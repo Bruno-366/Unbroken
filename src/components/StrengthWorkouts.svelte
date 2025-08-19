@@ -22,12 +22,6 @@
 
   let { workout, state, onCompleteWorkout, onUpdateRestTimer }: StrengthWorkoutsProps = $props()
 
-  // Get current workout function
-  const getCurrentWorkout = (): Workout | null => {
-    // Since we already have the workout as a prop, just return it
-    return workout
-  }
-
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
     const isBeingCompleted = !state.completedSets[key]
@@ -37,7 +31,6 @@
     
     // Start rest timer when completing a working set (not warm-up sets)
     if (isBeingCompleted && !key.includes('warmup')) {
-      const workout = getCurrentWorkout()
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
         // Request notification permission if not already granted
         await requestNotificationPermission()
@@ -58,10 +51,10 @@
     }
   }
 
-  // Derive strength workout with proper typing
+  // Derive strength workout with proper typing - more idiomatic than casting everywhere
   const strengthWorkout = $derived(() => workout as StrengthWorkout | HypertrophyWorkout)
 
-  // Helper function to calculate exercise data
+  // Extract helper functions outside reactive context - they don't need to be reactive
   const getExerciseData = (exerciseIndex: number, schemeIndex: number) => {
     const setSchemes = (strengthWorkout().sets || '').split(',')
     const intensities = String(strengthWorkout().intensity || 0).split(',')
@@ -73,7 +66,6 @@
     return { intensity, shouldMapByIndex }
   }
 
-  // Helper function to check if a set is completed
   const isSetCompleted = (key: string) => Boolean(state.completedSets[key])
 </script>
 

@@ -9,7 +9,7 @@
 
   let { customPlan = $bindable(), currentWeek, currentDay }: TrainingPlanProps = $props()
 
-  // Available blocks configuration
+  // Available blocks configuration - static data, doesn't need to be reactive
   const AVAILABLE_BLOCKS = {
     endurance1: { name: "Endurance Block 1", weeks: 8 },
     powerbuilding1: { name: "Powerbuilding Block 1", weeks: 3 },
@@ -18,18 +18,21 @@
     powerbuilding3bulgarian: { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3 },
     bodybuilding: { name: "Bodybuilding Block", weeks: 3 },
     strength: { name: "Strength Block", weeks: 6 }
-  }
+  } as const
 
+  // Simplify manageBlocks - more idiomatic with direct object destructuring
   const manageBlocks = (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => {
+    const { blockType, index, draggedIndex, dropIndex } = data
+    
     switch(action) {
       case 'add': {
-        if (!data.blockType) return
-        const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS]
+        if (!blockType) return
+        const blockConfig = AVAILABLE_BLOCKS[blockType as keyof typeof AVAILABLE_BLOCKS]
         if (!blockConfig) return
         customPlan = [...customPlan, { 
           name: blockConfig.name, 
           weeks: blockConfig.weeks, 
-          type: data.blockType 
+          type: blockType 
         }]
         break
       }
@@ -38,25 +41,19 @@
           alert('You must have at least one block in your plan.')
           return
         }
-        if (data.index !== undefined) {
-          const newPlan = [...customPlan]
-          newPlan.splice(data.index, 1)
-          customPlan = newPlan
+        if (index !== undefined) {
+          customPlan = customPlan.filter((_, i) => i !== index)
         }
         break
       case 'reorder':
         // Handle reordering via drag & drop with cleaner logic
-        if (data.draggedIndex !== undefined && data.dropIndex !== undefined && data.draggedIndex !== data.dropIndex) {
+        if (draggedIndex !== undefined && dropIndex !== undefined && draggedIndex !== dropIndex) {
           const newPlan = [...customPlan]
-          const draggedBlock = newPlan[data.draggedIndex]
-          newPlan.splice(data.draggedIndex, 1)
+          const draggedBlock = newPlan[draggedIndex]
+          newPlan.splice(draggedIndex, 1)
           
           // Adjust drop index if dragging from before the drop position
-          let insertIndex = data.dropIndex
-          if (data.draggedIndex < data.dropIndex) {
-            insertIndex = data.dropIndex - 1
-          }
-          
+          const insertIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex
           newPlan.splice(insertIndex, 0, draggedBlock)
           customPlan = newPlan
         }
@@ -70,7 +67,7 @@
     dragOverIndex: null as number | null
   })
 
-  // Simplified drag handlers using Svelte 5 patterns
+  // Extract drag handlers as standalone functions for better readability
   const handleDragStart = (e: DragEvent, index: number) => {
     if (index === 0) {
       e.preventDefault()
@@ -117,7 +114,7 @@
       return
     }
     
-    // Use the new simplified manageBlocks interface
+    // Use the simplified manageBlocks interface
     manageBlocks('reorder', {
       draggedIndex: dragState.draggedIndex,
       dropIndex: index

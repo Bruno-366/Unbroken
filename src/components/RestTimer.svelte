@@ -10,10 +10,45 @@
 
   let intervalId: number | null = null
 
-  // Rest timer handlers
+  // Extract helper functions outside reactive context for better performance
   const updateRestTimer = (updates: Partial<typeof restTimer>) => {
     Object.assign(restTimer, updates)
   }
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const handleSkipRest = () => {
+    updateRestTimer({
+      isActive: false,
+      timeLeft: 0,
+      totalTime: 0,
+      workoutType: null,
+      phase: 'initial',
+      startTime: 0
+    })
+  }
+
+  const handleExtendRest = () => {
+    const extensionTime = restTimer.workoutType === 'strength' ? 120 : 60 // 2 min for strength, 1 min for hypertrophy
+    const now = Date.now()
+    
+    updateRestTimer({
+      totalTime: restTimer.totalTime + extensionTime,
+      timeLeft: restTimer.timeLeft + extensionTime,
+      startTime: now - (restTimer.totalTime - restTimer.timeLeft),
+      phase: 'extended'
+    })
+  }
+
+  // Derived progress percentage - more idiomatic than function
+  const progressPercent = $derived(() => {
+    if (restTimer.totalTime === 0) return 0
+    return ((restTimer.totalTime - restTimer.timeLeft) / restTimer.totalTime) * 100
+  })
 
   // Start timer interval when timer becomes active
   $effect(() => {
@@ -49,40 +84,6 @@
       }
     }
   })
-
-  const handleSkipRest = () => {
-    updateRestTimer({
-      isActive: false,
-      timeLeft: 0,
-      totalTime: 0,
-      workoutType: null,
-      phase: 'initial',
-      startTime: 0
-    })
-  }
-
-  const handleExtendRest = () => {
-    const extensionTime = restTimer.workoutType === 'strength' ? 120 : 60 // 2 min for strength, 1 min for hypertrophy
-    const now = Date.now()
-    
-    updateRestTimer({
-      totalTime: restTimer.totalTime + extensionTime,
-      timeLeft: restTimer.timeLeft + extensionTime,
-      startTime: now - (restTimer.totalTime - restTimer.timeLeft),
-      phase: 'extended'
-    })
-  }
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const progressPercent = $derived(() => {
-    if (restTimer.totalTime === 0) return 0
-    return ((restTimer.totalTime - restTimer.timeLeft) / restTimer.totalTime) * 100
-  })
 </script>
 
 {#if restTimer.isActive}
@@ -97,7 +98,7 @@
     <div class="bg-orange-200 h-2 rounded-full overflow-hidden mb-3">
       <div 
         class="bg-orange-500 h-full transition-all duration-1000" 
-        style="width: {progressPercent()}%"
+        style="width: {progressPercent}%"
       ></div>
     </div>
     

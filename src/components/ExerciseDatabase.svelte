@@ -14,7 +14,7 @@
 
   let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, customPlan, currentBlockName }: ExerciseDatabaseProps = $props()
 
-  // Get exercises used in the current active block
+  // Extract function outside reactive context - better performance
   const getCurrentBlockExercises = () => {
     const currentBlock = customPlan[0]
     if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] }
@@ -46,7 +46,7 @@
     }
   }
 
-  // Derived values using the local function
+  // More idiomatic derived values - calculate once when dependencies change
   const exerciseData = $derived(getCurrentBlockExercises())
   const strengthExercises = $derived(exerciseData.strengthExercises)
   const hypertrophyExercises = $derived(exerciseData.hypertrophyExercises)

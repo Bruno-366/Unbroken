@@ -13,7 +13,7 @@
 
   let { completedWorkouts }: HistoryProps = $props()
 
-  // History configuration for different workout types
+  // History configuration for different workout types - static, no need to be reactive
   const HISTORY_CONFIGS = {
     rest: { color: 'bg-slate-400', label: 'Rest', summary: 'Recovery day' },
     deload: { color: 'bg-slate-400', label: 'Deload', summary: 'Light activity' },
@@ -21,12 +21,12 @@
     hiit: { color: 'bg-yellow-500', label: 'HIIT' },
     strength: { color: 'bg-red-500', label: 'Strength' },
     hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy' }
-  }
+  } as const
 
-  // Derived recent workouts (last 10, reversed)
-  const recentWorkouts = $derived(() => completedWorkouts.slice(-10).reverse())
+  // Derived recent workouts (last 10, reversed) - more idiomatic than function
+  const recentWorkouts = $derived(completedWorkouts.slice(-10).reverse())
 
-  // Helper function to get workout summary with proper typing
+  // Extract helper functions outside reactive context for better performance
   const getWorkoutSummary = (workout: CompletedWorkout): string => {
     const workoutType = workout.details?.type || 'unknown'
     
@@ -54,12 +54,10 @@
     }
   }
 
-  // Helper function to get workout config
   const getWorkoutConfig = (workoutType: string) => {
     return HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest
   }
 
-  // Helper function to format date and time
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return {
@@ -77,7 +75,7 @@
   </div>
 {:else}
   <div class="space-y-4">
-    {#each recentWorkouts() as workout}
+    {#each recentWorkouts as workout}
       {@const workoutType = workout.details?.type || 'unknown'}
       {@const config = getWorkoutConfig(workoutType)}
       {@const workoutSummary = getWorkoutSummary(workout)}

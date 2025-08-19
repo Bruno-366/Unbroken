@@ -96,18 +96,21 @@
     })
   })
 
-  const getCurrentWorkout = (): Workout | null => {
+  // Convert function to derived - more idiomatic for reactive values
+  const getCurrentWorkout = $derived.by((): Workout | null => {
     const block = state.customPlan[0]
+    if (!block) return null
+    
     const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates]
     if (!blockTemplate) return null
     
     const weekIndex = Math.min(state.currentWeek - 1, blockTemplate.weeks.length - 1)
     const dayIndex = state.currentDay - 1
     return blockTemplate.weeks[weekIndex].days[dayIndex] as Workout
-  }
+  })
 
   const completeWorkout = () => {
-    const workoutDetails = getCurrentWorkout()
+    const workoutDetails = getCurrentWorkout
     if (!workoutDetails) return // Guard against null workout
     const block = state.customPlan[0]
     
@@ -155,13 +158,11 @@
     state.restTimer.startTime = 0
   }
 
-  // Derived values
+  // Derived values - more idiomatic than manual getter functions
   const currentBlockInfo = $derived(state.customPlan[0] || { name: 'No active block', weeks: 0 })
 
-  const currentWorkout = $derived(() => getCurrentWorkout())
-
-  const renderWorkout = () => {
-    const workout = getCurrentWorkout()
+  const renderWorkout = $derived(() => {
+    const workout = getCurrentWorkout
     if (!workout) {
       return 'none'
     }
@@ -174,7 +175,7 @@
       return 'rest'
     }
     return 'unknown'
-  }
+  })
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-0 md:p-4">
@@ -237,22 +238,22 @@
             <div class="text-xl font-bold">{currentBlockInfo.name}</div>
           </div>
           
-          {#if renderWorkout() === 'strength' && currentWorkout()}
+          {#if renderWorkout() === 'strength' && getCurrentWorkout}
             <StrengthWorkouts 
-              workout={currentWorkout()!}
+              workout={getCurrentWorkout}
               {state}
               onCompleteWorkout={completeWorkout}
               onUpdateRestTimer={(updates) => Object.assign(state.restTimer, updates)}
             />
             <RestTimer bind:restTimer={state.restTimer} />
-          {:else if renderWorkout() === 'cardio' && currentWorkout()}
+          {:else if renderWorkout() === 'cardio' && getCurrentWorkout}
             <CardioWorkouts 
-              workout={currentWorkout()!}
+              workout={getCurrentWorkout}
               onCompleteWorkout={completeWorkout}
             />
-          {:else if renderWorkout() === 'rest' && currentWorkout()}
+          {:else if renderWorkout() === 'rest' && getCurrentWorkout}
             <RestWorkouts 
-              workout={currentWorkout()!}
+              workout={getCurrentWorkout}
               onCompleteWorkout={completeWorkout}
             />
           {:else}
