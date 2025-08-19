@@ -12,6 +12,7 @@
   import History from './components/History.svelte'
   import TrainingPlan from './components/TrainingPlan.svelte'
   import ExerciseDatabase from './components/ExerciseDatabase.svelte'
+  import RestTimer from './components/RestTimer.svelte'
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -495,4 +496,14 @@
       {/if}
     </div>
   </div>
+
+  <!-- Rest Timer Component -->
+  <RestTimer 
+    bind:isActive={state.restTimer.isActive}
+    bind:timeLeft={state.restTimer.timeLeft}
+    bind:totalTime={state.restTimer.totalTime}
+    bind:workoutType={state.restTimer.workoutType}
+    bind:phase={state.restTimer.phase}
+    bind:startTime={state.restTimer.startTime}
+  />
 </div>

@@ -23,24 +23,48 @@
     hypertrophy: { color: 'bg-blue-500', label: 'Hypertrophy' }
   }
 
-  const getWorkoutSummary = (workout: CompletedWorkout) => {
+  // Derived recent workouts (last 10, reversed)
+  const recentWorkouts = $derived(() => completedWorkouts.slice(-10).reverse())
+
+  // Helper function to get workout summary with proper typing
+  const getWorkoutSummary = (workout: CompletedWorkout): string => {
     const workoutType = workout.details?.type || 'unknown'
     
     switch (workoutType) {
       case 'liss':
-        return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`
-      case 'hiit':
-        return `${(workout.details as CardioWorkout).activity} - ${(workout.details as CardioWorkout).duration}${typeof (workout.details as CardioWorkout).duration === 'number' ? ' min' : ''}`
-      case 'strength':
-        return (workout.details as StrengthWorkout).exercises?.join(', ') || 'Strength training'
+      case 'hiit': {
+        const cardio = workout.details as CardioWorkout
+        const duration = cardio.duration
+        const durationStr = typeof duration === 'number' ? ` - ${duration} min` : duration ? ` - ${duration}` : ''
+        return `${cardio.activity}${durationStr}`
+      }
+      case 'strength': {
+        const strength = workout.details as StrengthWorkout
+        return strength.exercises?.join(', ') || 'Strength training'
+      }
       case 'hypertrophy': {
         const hyp = workout.details as HypertrophyWorkout
-        return hyp.exercises?.slice(0, 3).join(', ') + (hyp.exercises?.length > 3 ? '...' : '') || 'Accessory work'
+        const exercises = hyp.exercises || []
+        return exercises.slice(0, 3).join(', ') + (exercises.length > 3 ? '...' : '') || 'Accessory work'
       }
       default: {
         const config = HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest
         return 'summary' in config ? config.summary : 'Workout completed'
       }
+    }
+  }
+
+  // Helper function to get workout config
+  const getWorkoutConfig = (workoutType: string) => {
+    return HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest
+  }
+
+  // Helper function to format date and time
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return {
+      date: date.toLocaleDateString(),
+      time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   }
 </script>
@@ -53,16 +77,16 @@
   </div>
 {:else}
   <div class="space-y-4">
-    {#each completedWorkouts.slice(-10).reverse() as workout}
-      {@const date = new Date(workout.date)}
+    {#each recentWorkouts() as workout}
       {@const workoutType = workout.details?.type || 'unknown'}
-      {@const config = HISTORY_CONFIGS[workoutType as keyof typeof HISTORY_CONFIGS] || HISTORY_CONFIGS.rest}
+      {@const config = getWorkoutConfig(workoutType)}
       {@const workoutSummary = getWorkoutSummary(workout)}
+      {@const { date, time } = formatDateTime(workout.date)}
       
       <div class="border-l-4 border-blue-500 pl-4 pb-3">
         <div class="flex items-center gap-2 mb-1">
           <div class="text-xs text-gray-600">
-            {date.toLocaleDateString()} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {date} at {time}
           </div>
           <span class="{config.color} text-white text-xs px-2 py-1 rounded-full font-semibold">
             {config.label}
@@ -74,10 +98,11 @@
           <div class="text-sm text-gray-700 mt-1 font-medium">{workoutSummary}</div>
         {/if}
         {#if 'sets' in workout.details}
+          {@const workoutDetails = workout.details as StrengthWorkout | HypertrophyWorkout}
           <div class="text-xs text-gray-500 mt-1">
-            Sets: {(workout.details as StrengthWorkout | HypertrophyWorkout).sets}
-            {#if 'intensity' in workout.details && workout.details.intensity}
-              @ {workout.details.intensity}%
+            Sets: {workoutDetails.sets}
+            {#if 'intensity' in workoutDetails && workoutDetails.intensity}
+              @ {workoutDetails.intensity}%
             {/if}
           </div>
         {/if}
