@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Clock, CheckCircle } from 'lucide-svelte'
+  import { CheckCircle } from 'lucide-svelte'
   import type { 
     Workout, 
     StrengthWorkout, 
@@ -9,8 +9,7 @@
   import { 
     calculateWeight, 
     calculateHypertrophyWeight, 
-    calculateWarmupSets,
-    showRestCompleteNotification
+    calculateWarmupSets
   } from '../utils'
 
   interface StrengthWorkoutsProps {
@@ -22,56 +21,8 @@
 
   let { workout, state, onCompleteWorkout, onToggleSet }: StrengthWorkoutsProps = $props()
 
-  // Timer effect - timestamp-based to prevent background throttling
-  let timerInterval: number
-  
-  $effect(() => {
-    if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
-      timerInterval = window.setInterval(() => {
-        const now = Date.now()
-        const elapsedSeconds = Math.floor((now - state.restTimer.startTime) / 1000)
-        const newTimeLeft = Math.max(0, state.restTimer.totalTime - elapsedSeconds)
-        
-        // Update the timer directly on the state since it's passed by reference
-        state.restTimer.timeLeft = newTimeLeft
-      }, 100) // Check more frequently for smoother updates
-    }
-
-    return () => {
-      if (timerInterval) clearInterval(timerInterval)
-    }
-  })
-
-  // Separate effect to handle notification when timer reaches 0
-  $effect(() => {
-    if (state.restTimer.isActive && state.restTimer.timeLeft === 0) {
-      showRestCompleteNotification()
-    }
-  })
-
   // Derive strength workout with proper typing
   const strengthWorkout = $derived(() => workout as StrengthWorkout | HypertrophyWorkout)
-
-  // Timer functions
-  const stopRestTimer = () => {
-    state.restTimer.isActive = false
-    state.restTimer.timeLeft = 0
-    state.restTimer.totalTime = 0
-    state.restTimer.workoutType = null
-    state.restTimer.phase = 'initial'
-    state.restTimer.startTime = 0
-  }
-
-  const extendRestTimer = () => {
-    if (state.restTimer.workoutType === 'strength' && state.restTimer.phase === 'initial') {
-      const extendedTime = 120 // Additional 2 minutes to reach 5 minutes total
-      const now = Date.now()
-      state.restTimer.timeLeft = extendedTime
-      state.restTimer.totalTime = extendedTime
-      state.restTimer.phase = 'extended'
-      state.restTimer.startTime = now
-    }
-  }
 
   // Helper function to calculate exercise data
   const getExerciseData = (exerciseIndex: number, schemeIndex: number) => {
@@ -91,56 +42,6 @@
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
   <div class="space-y-4">
-    <!-- Rest Timer -->
-    {#if state.restTimer.isActive}
-      {@const progressPercent = ((state.restTimer.totalTime - state.restTimer.timeLeft) / state.restTimer.totalTime) * 100}
-      {@const isExtendedPhase = state.restTimer.phase === 'extended'}
-      {@const minutes = Math.floor(state.restTimer.timeLeft / 60)}
-      {@const seconds = state.restTimer.timeLeft % 60}
-      
-      <div class="mb-4 p-4 bg-white rounded-lg border-2 border-orange-200">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <Clock class="w-5 h-5 text-orange-600" />
-            <span class="text-sm font-semibold text-gray-700">
-              {isExtendedPhase ? 'Extended Rest' : 'Rest Time'}
-            </span>
-          </div>
-          <div class="text-lg font-bold text-gray-900">
-            {minutes}:{seconds.toString().padStart(2, '0')}
-          </div>
-        </div>
-        
-        <div class="mb-3">
-          <div class="bg-gray-200 h-3 rounded-full overflow-hidden">
-            <div 
-              class="h-full transition-all duration-300 {isExtendedPhase ? 'bg-red-500' : 'bg-orange-500'}"
-              style="width: {progressPercent}%"
-            ></div>
-          </div>
-        </div>
-        
-        <div class="flex gap-2">
-          <button
-            onclick={stopRestTimer}
-            class="flex-1 {state.restTimer.timeLeft === 0 
-              ? 'bg-green-500 hover:bg-green-600' 
-              : 'bg-gray-500 hover:bg-gray-600'} text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-          >
-            {state.restTimer.timeLeft === 0 ? 'Complete Rest' : 'Skip Rest'}
-          </button>
-          {#if state.restTimer.workoutType === 'strength' && !isExtendedPhase && state.restTimer.timeLeft === 0}
-            <button
-              onclick={extendRestTimer}
-              class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-            >
-              Extend to 5 min
-            </button>
-          {/if}
-        </div>
-      </div>
-    {/if}
-
     {#each (strengthWorkout().exercises || []) as exercise, exerciseIndex}
       {@const setSchemes = (strengthWorkout().sets || '').split(',')}
       {@const exerciseSetSchemes = getExerciseData(exerciseIndex, 0).shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes}

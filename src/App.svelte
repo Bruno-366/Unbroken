@@ -12,6 +12,8 @@
   import History from './components/History.svelte'
   import TrainingPlan from './components/TrainingPlan.svelte'
   import ExerciseDatabase from './components/ExerciseDatabase.svelte'
+  import RestTimer from './components/RestTimer.svelte'
+  import ResetProgress from './components/ResetProgress.svelte'
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -313,6 +315,11 @@
     }
   }
 
+  // Rest timer handlers
+  const updateRestTimer = (updates: Partial<typeof state.restTimer>) => {
+    Object.assign(state.restTimer, updates)
+  }
+
   // Derived values
   const currentBlockInfo = $derived(state.customPlan[0] || { name: 'No active block', weeks: 0 })
 
@@ -351,8 +358,8 @@
           onclick={() => state.activeTab = tab}
           class="flex-1 py-4 px-2 sm:px-4 font-semibold capitalize transition-colors text-sm sm:text-base {
             state.activeTab === tab 
-              ? 'bg-white text-gray-900 border-b-2 border-blue-500' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'text-blue-600 bg-white border-b-2 border-blue-600' 
+              : 'text-gray-600 hover:text-gray-800'
           }"
         >
           {tab}
@@ -393,7 +400,7 @@
 
       {#if state.activeTab === 'workout'}
         <div>
-          <div class="text-center mb-6">
+          <div class="bg-blue-600 text-white p-4 rounded-lg mb-6 text-center">
             <div class="text-sm opacity-90 mb-1">Week {state.currentWeek}, Day {state.currentDay}</div>
             <div class="text-xl font-bold">{currentBlockInfo.name}</div>
           </div>
@@ -404,6 +411,10 @@
               {state}
               onCompleteWorkout={completeWorkout}
               onToggleSet={toggleSet}
+            />
+            <RestTimer 
+              restTimer={state.restTimer}
+              onUpdateTimer={updateRestTimer}
             />
           {:else if renderWorkout() === 'cardio' && currentWorkout()}
             <CardioWorkouts 
@@ -456,35 +467,12 @@
             </select>
           </div>
 
-          <button
-            onclick={() => state.showResetConfirm = true}
-            class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors"
-          >
-            Reset All Progress
-          </button>
-
-          {#if state.showResetConfirm}
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900">Reset Confirmation</h3>
-                <p class="text-gray-600 mb-6">This will permanently delete all your workout data, progress, and settings. This action cannot be undone.</p>
-                <div class="flex gap-3">
-                  <button
-                    onclick={handleReset}
-                    class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                  >
-                    Delete Everything
-                  </button>
-                  <button
-                    onclick={() => state.showResetConfirm = false}
-                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          {/if}
+          <ResetProgress 
+            showResetConfirm={state.showResetConfirm}
+            onShowReset={() => state.showResetConfirm = true}
+            onCancelReset={() => state.showResetConfirm = false}
+            onConfirmReset={handleReset}
+          />
         </div>
       {/if}
     </div>
