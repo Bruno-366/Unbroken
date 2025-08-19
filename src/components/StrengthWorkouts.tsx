@@ -33,7 +33,10 @@ const StrengthWorkouts: React.FC<StrengthWorkoutsProps> = ({
     let interval: ReturnType<typeof setInterval>;
     
     if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
-      const { startTime, totalTime } = state.restTimer; // Capture values to avoid stale closure
+      // Use the dependency values directly to avoid stale closure issues
+      const startTime = state.restTimer.startTime;
+      const totalTime = state.restTimer.totalTime;
+      
       interval = setInterval(() => {
         const now = Date.now();
         const elapsedSeconds = Math.floor((now - startTime) / 1000);
@@ -52,8 +55,7 @@ const StrengthWorkouts: React.FC<StrengthWorkoutsProps> = ({
     return () => {
       if (interval) clearInterval(interval);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.restTimer.isActive, state.restTimer.startTime, state.restTimer.totalTime, onUpdateState]);
+  }, [state.restTimer.isActive, state.restTimer.startTime, state.restTimer.totalTime, state.restTimer.timeLeft, onUpdateState]);
 
   // Separate effect to handle notification when timer reaches 0
   useEffect(() => {
