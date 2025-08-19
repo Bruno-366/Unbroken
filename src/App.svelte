@@ -15,7 +15,7 @@
   import ResetProgress from './components/ResetProgress.svelte'
 
   // Reactive state using Svelte 5 runes
-  let state = $state<AppState>({
+  let state: AppState = $state({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
@@ -45,7 +45,38 @@
       phase: 'initial',
       startTime: 0
     }
-  })
+  } as AppState)
+
+  // Flag to track if state has been loaded from storage
+  let isStateLoaded = false
+
+  // Helper function to update state and save to storage
+  const updateState = (newState: AppState) => {
+    // Only save if state has been loaded to prevent overwriting persisted data
+    if (!isStateLoaded) return
+
+    // Create a clean state object for persistence (exclude transient UI state)
+    const stateToSave = {
+      ...newState,
+      // Don't persist transient UI state
+      showResetConfirm: false,
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null as "strength" | "hypertrophy" | null,
+        phase: 'initial' as "initial" | "extended",
+        startTime: 0
+      }
+    } as AppState
+
+    // Save to IndexedDB asynchronously (don't wait for it)
+    saveStateToStorage(stateToSave).catch(error => {
+      console.warn('Failed to save state to IndexedDB:', error)
+    })
+
+    state = newState
+  }
 
   // Load state from IndexedDB on mount
   onMount(async () => {
@@ -62,21 +93,26 @@
             isActive: false,
             timeLeft: 0,
             totalTime: 0,
-            workoutType: null,
-            phase: 'initial',
+            workoutType: null as "strength" | "hypertrophy" | null,
+            phase: 'initial' as "initial" | "extended",
             startTime: 0
           }
         }
       }
     } catch (error) {
       console.warn('Failed to load persisted state:', error)
+    } finally {
+      // Mark state as loaded, enabling automatic persistence
+      isStateLoaded = true
     }
   })
 
-  // Automatic state persistence using $effect - more idiomatic than manual updateState
+  // Watch for changes to bound properties and save them
   $effect(() => {
-    // Create a clean state object for persistence (exclude transient UI state)
-    const stateToSave: AppState = {
+    if (!isStateLoaded) return
+
+    // Save changes to bound properties automatically
+    const stateToSave = {
       ...state,
       // Don't persist transient UI state
       showResetConfirm: false,
@@ -84,13 +120,12 @@
         isActive: false,
         timeLeft: 0,
         totalTime: 0,
-        workoutType: null,
-        phase: 'initial',
+        workoutType: null as "strength" | "hypertrophy" | null,
+        phase: 'initial' as "initial" | "extended",
         startTime: 0
       }
-    }
+    } as AppState
 
-    // Save to IndexedDB asynchronously (don't wait for it)
     saveStateToStorage(stateToSave).catch(error => {
       console.warn('Failed to save state to IndexedDB:', error)
     })
@@ -123,12 +158,6 @@
       details: workoutDetails as Workout
     }
     
-    // Add completed workout
-    state.completedWorkouts = [...state.completedWorkouts, workout]
-    
-    // Reset completed sets
-    state.completedSets = {}
-    
     // Progress to next day/week/block
     let newDay = state.currentDay + 1
     let newWeek = state.currentWeek
@@ -144,18 +173,24 @@
       }
     }
     
-    state.currentDay = newDay
-    state.currentWeek = newWeek
-    state.customPlan = newPlan
-    state.activeTab = 'overview'
-    
-    // Reset rest timer
-    state.restTimer.isActive = false
-    state.restTimer.timeLeft = 0
-    state.restTimer.totalTime = 0
-    state.restTimer.workoutType = null
-    state.restTimer.phase = 'initial'
-    state.restTimer.startTime = 0
+    // Update state with all changes
+    updateState({
+      ...state,
+      completedWorkouts: [...state.completedWorkouts, workout],
+      completedSets: {},
+      currentDay: newDay,
+      currentWeek: newWeek,
+      customPlan: newPlan,
+      activeTab: 'overview',
+      restTimer: {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null as "strength" | "hypertrophy" | null,
+        phase: 'initial' as "initial" | "extended",
+        startTime: 0
+      }
+    })
   }
 
   // Derived values - more idiomatic than manual getter functions
@@ -188,7 +223,7 @@
     <div class="flex bg-gray-100 border-b-2 border-gray-200">
       {#each ['overview', 'workout', 'history', 'settings'] as tab}
         <button
-          onclick={() => state.activeTab = tab}
+          onclick={() => updateState({ ...state, activeTab: tab } as AppState)}
           class="flex-1 py-4 px-2 sm:px-4 font-semibold capitalize transition-colors text-sm sm:text-base {
             state.activeTab === tab 
               ? 'text-blue-600 bg-white border-b-2 border-blue-600' 
@@ -223,7 +258,7 @@
           </div>
 
           <button
-            onclick={() => state.activeTab = 'workout'}
+            onclick={() => updateState({ ...state, activeTab: 'workout' } as AppState)}
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
           >
             Start Today's Workout
@@ -243,7 +278,10 @@
               workout={getCurrentWorkout}
               {state}
               onCompleteWorkout={completeWorkout}
-              onUpdateRestTimer={(updates) => Object.assign(state.restTimer, updates)}
+              onUpdateRestTimer={(updates) => updateState({ 
+                ...state, 
+                restTimer: { ...state.restTimer, ...updates } 
+              } as AppState)}
             />
             <RestTimer bind:restTimer={state.restTimer} />
           {:else if renderWorkout() === 'cardio' && getCurrentWorkout}
@@ -298,8 +336,8 @@
           <ResetProgress 
             showResetConfirm={state.showResetConfirm}
             {state}
-            onShowReset={() => state.showResetConfirm = true}
-            onCancelReset={() => state.showResetConfirm = false}
+            onShowReset={() => updateState({ ...state, showResetConfirm: true } as AppState)}
+            onCancelReset={() => updateState({ ...state, showResetConfirm: false } as AppState)}
           />
         </div>
       {/if}
