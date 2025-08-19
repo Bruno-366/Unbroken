@@ -127,9 +127,10 @@ const App = () => {
   }, []);
 
   // Unified state update function that also persists to IndexedDB
-  const updateState = (updates: Partial<AppState>) => {
+  const updateState = (updates: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) => {
     setState((prev: AppState) => {
-      const newState = { ...prev, ...updates };
+      const updateObject = typeof updates === 'function' ? updates(prev) : updates;
+      const newState = { ...prev, ...updateObject };
       
       // Save to IndexedDB asynchronously (don't wait for it)
       saveStateToStorage(newState).catch(error => {
@@ -318,7 +319,7 @@ const App = () => {
   };
 
   const currentBlockInfo = state.customPlan[0];
-  const progressPercent = ((state.currentWeek - 1) / currentBlockInfo.weeks) * 100;
+  const progressPercent = currentBlockInfo ? ((state.currentWeek - 1) / currentBlockInfo.weeks) * 100 : 0;
   const { strengthExercises, hypertrophyExercises } = getCurrentBlockExercises();
 
   return (
@@ -344,7 +345,7 @@ const App = () => {
         </div>
 
         <div className="p-4 sm:p-6 min-h-[500px]">
-          {state.activeTab === 'overview' && (
+          {state.activeTab === 'overview' && currentBlockInfo && (
             <div>
               <div className="bg-gray-100 p-4 rounded-lg mb-6">
                 <h3 className="text-sm text-gray-600 mb-2">Current Block</h3>
@@ -374,7 +375,7 @@ const App = () => {
             </div>
           )}
 
-          {state.activeTab === 'workout' && (
+          {state.activeTab === 'workout' && currentBlockInfo && (
             <div>
               <div className="bg-blue-600 text-white p-4 rounded-lg mb-6 text-center">
                 <div className="text-sm opacity-90 mb-1">Week {state.currentWeek}, Day {state.currentDay}</div>
@@ -400,7 +401,7 @@ const App = () => {
                 state={state}
                 strengthExercises={strengthExercises}
                 hypertrophyExercises={hypertrophyExercises}
-                currentBlockName={currentBlockInfo.name}
+                currentBlockName={currentBlockInfo?.name || 'Unknown Block'}
                 onUpdateState={updateState}
               />
 

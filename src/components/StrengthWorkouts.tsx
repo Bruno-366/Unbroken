@@ -18,7 +18,7 @@ interface StrengthWorkoutsProps {
   state: AppState;
   onCompleteWorkout: () => void;
   onToggleSet: (exerciseAndSchemeIndex: string, setIndex: number) => Promise<void>;
-  onUpdateState: (updates: Partial<AppState>) => void;
+  onUpdateState: (updates: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) => void;
 }
 
 const StrengthWorkouts: React.FC<StrengthWorkoutsProps> = ({
@@ -33,24 +33,26 @@ const StrengthWorkouts: React.FC<StrengthWorkoutsProps> = ({
     let interval: ReturnType<typeof setInterval>;
     
     if (state.restTimer.isActive && state.restTimer.timeLeft > 0) {
+      const { startTime, totalTime } = state.restTimer; // Capture values to avoid stale closure
       interval = setInterval(() => {
         const now = Date.now();
-        const elapsedSeconds = Math.floor((now - state.restTimer.startTime) / 1000);
-        const newTimeLeft = Math.max(0, state.restTimer.totalTime - elapsedSeconds);
+        const elapsedSeconds = Math.floor((now - startTime) / 1000);
+        const newTimeLeft = Math.max(0, totalTime - elapsedSeconds);
         
-        onUpdateState({
+        // Use functional update to get current state and avoid stale closure
+        onUpdateState((prevState: AppState) => ({
           restTimer: {
-            ...state.restTimer,
+            ...prevState.restTimer,
             timeLeft: newTimeLeft
           }
-        });
+        }));
       }, 100); // Check more frequently for smoother updates
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [state.restTimer, onUpdateState]);
+  }, [state.restTimer.isActive, state.restTimer.startTime, state.restTimer.totalTime, onUpdateState]);
 
   // Separate effect to handle notification when timer reaches 0
   useEffect(() => {
