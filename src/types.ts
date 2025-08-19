@@ -36,6 +36,9 @@ export interface CustomPlanBlock {
   type: string;
 }
 
+// Alias for consistency
+export type TrainingBlock = CustomPlanBlock;
+
 export interface CompletedWorkout {
   date: string;
   block: number;
@@ -55,8 +58,6 @@ export interface AppState {
   tenRMs: Record<string, number>;
   weightUnit: string;
   completedSets: Record<string, boolean>;
-  draggedIndex: number | null;
-  dragOverIndex: number | null;
   showResetConfirm: boolean;
   restTimer: {
     isActive: boolean;

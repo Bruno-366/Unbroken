@@ -1,17 +1,17 @@
 <script lang="ts">
   import { Activity } from 'lucide-svelte'
-  import type { AppState } from '../types'
   import { getExerciseKey } from '../utils'
 
   interface ExerciseDatabaseProps {
-    state: AppState
+    maxes: Record<string, number>
+    tenRMs: Record<string, number>
+    weightUnit: string
     strengthExercises: string[]
     hypertrophyExercises: string[]
     currentBlockName: string
-    onUpdateState: (updates: Partial<AppState>) => void
   }
 
-  let { state, strengthExercises, hypertrophyExercises, currentBlockName, onUpdateState }: ExerciseDatabaseProps = $props()
+  let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, strengthExercises, hypertrophyExercises, currentBlockName }: ExerciseDatabaseProps = $props()
 </script>
 
 <div class="mb-6">
@@ -24,7 +24,7 @@
     <div class="mb-6">
       <h4 class="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2">
         <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-        Strength Exercises (1RM - {state.weightUnit})
+        Strength Exercises (1RM - {weightUnit})
       </h4>
       <div class="space-y-3">
         {#each strengthExercises as exercise}
@@ -36,18 +36,12 @@
               <input
                 id="max-{exerciseKey}"
                 type="number"
-                bind:value={state.maxes[exerciseKey]}
-                oninput={(e) => {
-                  const target = e.target as HTMLInputElement
-                  onUpdateState({ 
-                    maxes: { ...state.maxes, [exerciseKey]: parseFloat(target.value) || 0 }
-                  })
-                }}
+                bind:value={maxes[exerciseKey]}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
                 placeholder="1RM"
-                step={state.weightUnit === 'kg' ? '2.5' : '5'}
+                step={weightUnit === 'kg' ? '2.5' : '5'}
               />
-              <span class="text-xs text-gray-500 font-medium w-8">{state.weightUnit}</span>
+              <span class="text-xs text-gray-500 font-medium w-8">{weightUnit}</span>
             </div>
           </div>
         {/each}
@@ -59,7 +53,7 @@
     <div class="mb-6">
       <h4 class="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2">
         <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-        Hypertrophy Exercises (10RM - {state.weightUnit})
+        Hypertrophy Exercises (10RM - {weightUnit})
       </h4>
       <div class="space-y-3">
         {#each hypertrophyExercises as exercise}
@@ -71,18 +65,12 @@
               <input
                 id="tenrm-{exerciseKey}"
                 type="number"
-                bind:value={state.tenRMs[exerciseKey]}
-                oninput={(e) => {
-                  const target = e.target as HTMLInputElement
-                  onUpdateState({ 
-                    tenRMs: { ...state.tenRMs, [exerciseKey]: parseFloat(target.value) || 0 }
-                  })
-                }}
+                bind:value={tenRMs[exerciseKey]}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 placeholder="10RM"
                 step="1"
               />
-              <span class="text-xs text-gray-500 font-medium w-8">{state.weightUnit}</span>
+              <span class="text-xs text-gray-500 font-medium w-8">{weightUnit}</span>
             </div>
           </div>
         {/each}

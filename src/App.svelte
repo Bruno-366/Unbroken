@@ -46,8 +46,6 @@
     tenRMs: {} as Record<string, number>,
     weightUnit: 'kg',
     completedSets: {} as Record<string, boolean>,
-    draggedIndex: null,
-    dragOverIndex: null,
     showResetConfirm: false,
     restTimer: {
       isActive: false,
@@ -101,8 +99,6 @@
           ...state,
           ...persistedState,
           // Always reset transient UI state to defaults
-          draggedIndex: null,
-          dragOverIndex: null,
           showResetConfirm: false,
           restTimer: {
             isActive: false,
@@ -125,8 +121,6 @@
     const stateToSave: AppState = {
       ...state,
       // Don't persist transient UI state
-      draggedIndex: null,
-      dragOverIndex: null,
       showResetConfirm: false,
       restTimer: {
         isActive: false,
@@ -231,7 +225,7 @@
     state.restTimer.startTime = 0
   }
 
-  const manageBlocks = (action: string, data: { blockType?: string; index?: number }) => {
+  const manageBlocks = (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => {
     switch(action) {
       case 'add': {
         if (!data.blockType) return
@@ -256,15 +250,20 @@
         }
         break
       case 'reorder':
-        // Handle reordering via drag & drop
-        if (state.draggedIndex !== null && state.dragOverIndex !== null) {
+        // Handle reordering via drag & drop with cleaner logic
+        if (data.draggedIndex !== undefined && data.dropIndex !== undefined && data.draggedIndex !== data.dropIndex) {
           const newPlan = [...state.customPlan]
-          const draggedBlock = newPlan[state.draggedIndex]
-          newPlan.splice(state.draggedIndex, 1)
-          newPlan.splice(state.dragOverIndex, 0, draggedBlock)
+          const draggedBlock = newPlan[data.draggedIndex]
+          newPlan.splice(data.draggedIndex, 1)
+          
+          // Adjust drop index if dragging from before the drop position
+          let insertIndex = data.dropIndex
+          if (data.draggedIndex < data.dropIndex) {
+            insertIndex = data.dropIndex - 1
+          }
+          
+          newPlan.splice(insertIndex, 0, draggedBlock)
           state.customPlan = newPlan
-          state.draggedIndex = null
-          state.dragOverIndex = null
         }
         break
     }
@@ -300,8 +299,6 @@
       state.tenRMs = {}
       state.weightUnit = 'kg'
       state.completedSets = {}
-      state.draggedIndex = null
-      state.dragOverIndex = null
       state.showResetConfirm = false
       state.restTimer = {
         isActive: false,
@@ -437,23 +434,19 @@
       {#if state.activeTab === 'settings'}
         <div>
           <TrainingPlan 
-            {state}
-            onUpdateState={(updates) => {
-              if ('draggedIndex' in updates) state.draggedIndex = updates.draggedIndex ?? null
-              if ('dragOverIndex' in updates) state.dragOverIndex = updates.dragOverIndex ?? null
-            }}
-            onManageBlocks={manageBlocks}
+            bind:customPlan={state.customPlan}
+            currentWeek={state.currentWeek}
+            currentDay={state.currentDay}
+            {manageBlocks}
           />
 
           <ExerciseDatabase 
-            {state}
+            bind:maxes={state.maxes}
+            bind:tenRMs={state.tenRMs}
+            weightUnit={state.weightUnit}
             strengthExercises={strengthExercises()}
             hypertrophyExercises={hypertrophyExercises()}
             currentBlockName={currentBlockInfo.name}
-            onUpdateState={(updates) => {
-              if ('maxes' in updates) state.maxes = updates.maxes || state.maxes
-              if ('tenRMs' in updates) state.tenRMs = updates.tenRMs || state.tenRMs
-            }}
           />
 
           <div class="mb-6">

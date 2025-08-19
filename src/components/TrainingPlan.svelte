@@ -1,13 +1,14 @@
 <script lang="ts">
-  import type { AppState } from '../types'
+  import type { TrainingBlock } from '../types'
 
   interface TrainingPlanProps {
-    state: AppState
-    onUpdateState: (updates: Partial<AppState>) => void
-    onManageBlocks: (action: string, data: { blockType?: string; index?: number }) => void
+    customPlan: TrainingBlock[]
+    currentWeek: number
+    currentDay: number
+    manageBlocks: (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => void
   }
 
-  let { state: appState, onUpdateState, onManageBlocks }: TrainingPlanProps = $props()
+  let { customPlan = $bindable(), currentWeek, currentDay, manageBlocks }: TrainingPlanProps = $props()
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -20,54 +21,73 @@
     strength: { name: "Strength Block", weeks: 6 }
   }
 
-  const handleDrag = (action: string, data: { index?: number; e?: DragEvent }) => {
-    switch(action) {
-      case 'start':
-        if (!data.index || data.index === 0) { 
-          data.e?.preventDefault()
-          return
-        }
-        onUpdateState({ draggedIndex: data.index, dragOverIndex: null })
-        if (data.e) {
-          data.e.dataTransfer!.effectAllowed = 'move'
-          data.e.dataTransfer!.setData('text/plain', data.index.toString())
-        }
-        break
-      case 'over':
-        data.e?.preventDefault()
-        if (data.e) data.e.dataTransfer!.dropEffect = 'move'
-        break
-      case 'enter':
-        data.e?.preventDefault()
-        if (data.index && data.index > 0 && appState.draggedIndex !== null && data.index !== appState.draggedIndex) {
-          onUpdateState({ dragOverIndex: data.index })
-        }
-        break
-      case 'leave':
-        if (data.e && data.e.currentTarget && data.e.currentTarget instanceof Element && !data.e.currentTarget.contains(data.e.relatedTarget as Node)) {
-          onUpdateState({ dragOverIndex: null })
-        }
-        break
-      case 'drop': {
-        data.e?.preventDefault()
-        data.e?.stopPropagation()
-        if (appState.draggedIndex === null || !data.index || data.index === 0) {
-          onUpdateState({ draggedIndex: null, dragOverIndex: null })
-          return
-        }
-        const newPlan = [...appState.customPlan]
-        const draggedBlock = newPlan[appState.draggedIndex]
-        newPlan.splice(appState.draggedIndex, 1)
-        let insertIndex = data.index
-        if (appState.draggedIndex < data.index) insertIndex = data.index - 1
-        newPlan.splice(insertIndex, 0, draggedBlock)
-        onUpdateState({ customPlan: newPlan, draggedIndex: null, dragOverIndex: null })
-        break
-      }
-      case 'end':
-        onUpdateState({ draggedIndex: null, dragOverIndex: null })
-        break
+  // Local drag state - more idiomatic than global state for UI interactions
+  let dragState = $state({
+    draggedIndex: null as number | null,
+    dragOverIndex: null as number | null
+  })
+
+  // Simplified drag handlers using Svelte 5 patterns
+  const handleDragStart = (e: DragEvent, index: number) => {
+    if (index === 0) {
+      e.preventDefault()
+      return
     }
+    
+    dragState.draggedIndex = index
+    dragState.dragOverIndex = null
+    
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', index.toString())
+    }
+  }
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault()
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move'
+    }
+  }
+
+  const handleDragEnter = (e: DragEvent, index: number) => {
+    e.preventDefault()
+    if (index > 0 && dragState.draggedIndex !== null && index !== dragState.draggedIndex) {
+      dragState.dragOverIndex = index
+    }
+  }
+
+  const handleDragLeave = (e: DragEvent) => {
+    // Only clear drag over if actually leaving the element
+    if (e.currentTarget && e.currentTarget instanceof Element && !e.currentTarget.contains(e.relatedTarget as Node)) {
+      dragState.dragOverIndex = null
+    }
+  }
+
+  const handleDrop = (e: DragEvent, index: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (dragState.draggedIndex === null || index === 0) {
+      dragState.draggedIndex = null
+      dragState.dragOverIndex = null
+      return
+    }
+    
+    // Use the new simplified manageBlocks interface
+    manageBlocks('reorder', {
+      draggedIndex: dragState.draggedIndex,
+      dropIndex: index
+    })
+    
+    // Reset drag state
+    dragState.draggedIndex = null
+    dragState.dragOverIndex = null
+  }
+
+  const handleDragEnd = () => {
+    dragState.draggedIndex = null
+    dragState.dragOverIndex = null
   }
 
   let selectedType = $state('')
@@ -76,22 +96,22 @@
 <div class="mb-6">
   <h3 class="text-lg font-semibold mb-4">Training Plan</h3>
   <div class="mb-4">
-    {#each appState.customPlan as block, index}
+    {#each customPlan as block, index}
       <div>
         {#if index > 0}
           <div 
             role="region"
             aria-label="Drop zone for reordering training blocks"
-            ondragover={(e) => handleDrag('over', { e })}
-            ondragenter={(e) => handleDrag('enter', { e, index })}
-            ondragleave={(e) => handleDrag('leave', { e })}
-            ondrop={(e) => handleDrag('drop', { e, index })}
-            class="{appState.draggedIndex !== null && appState.dragOverIndex === index
+            ondragover={handleDragOver}
+            ondragenter={(e) => handleDragEnter(e, index)}
+            ondragleave={handleDragLeave}
+            ondrop={(e) => handleDrop(e, index)}
+            class="{dragState.draggedIndex !== null && dragState.dragOverIndex === index
               ? 'min-h-16 border-2 border-dashed border-blue-400 bg-blue-50 rounded-lg flex items-center justify-center mb-3 p-3'
               : 'h-3 mb-3'
             }"
           >
-            {#if appState.draggedIndex !== null && appState.dragOverIndex === index}
+            {#if dragState.draggedIndex !== null && dragState.dragOverIndex === index}
               <span class="text-xs text-blue-600 font-medium">Drop here</span>
             {/if}
           </div>
@@ -102,11 +122,11 @@
           tabindex={index === 0 ? -1 : 0}
           aria-label={index === 0 ? 'Current training block (not draggable)' : `Drag to reorder ${block.name} training block`}
           draggable={index !== 0}
-          ondragstart={(e) => handleDrag('start', { e, index })}
-          ondragend={() => handleDrag('end', {})}
+          ondragstart={(e) => handleDragStart(e, index)}
+          ondragend={handleDragEnd}
           class="border rounded-lg p-3 {
             index === 0 ? 'border-blue-500 bg-blue-50 border-2' : 'border-gray-200 hover:shadow-md cursor-move'
-          } {appState.draggedIndex === index ? 'opacity-50 transform rotate-2' : ''}"
+          } {dragState.draggedIndex === index ? 'opacity-50 transform rotate-2' : ''}"
         >
           <div class="flex items-center gap-3">
             {#if index !== 0}
@@ -123,7 +143,7 @@
             </div>
             {#if index !== 0}
               <button
-                onclick={() => onManageBlocks('remove', { index })}
+                onclick={() => manageBlocks('remove', { index })}
                 class="p-1 text-red-500 hover:text-red-700"
               >
                 ✕
@@ -132,7 +152,7 @@
           </div>
           {#if index === 0}
             <div class="text-xs text-blue-600 mt-2 font-medium">
-              Week {appState.currentWeek} of {block.weeks} • Day {appState.currentDay}
+              Week {currentWeek} of {block.weeks} • Day {currentDay}
             </div>
           {/if}
         </div>
@@ -148,7 +168,7 @@
       onchange={(e) => {
         const target = e.target as HTMLSelectElement
         if (target.value) {
-          onManageBlocks('add', { blockType: target.value })
+          manageBlocks('add', { blockType: target.value })
           selectedType = ''
         }
       }}
