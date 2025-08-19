@@ -52,6 +52,7 @@ const StrengthWorkouts: React.FC<StrengthWorkoutsProps> = ({
     return () => {
       if (interval) clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.restTimer.isActive, state.restTimer.startTime, state.restTimer.totalTime, onUpdateState]);
 
   // Separate effect to handle notification when timer reaches 0

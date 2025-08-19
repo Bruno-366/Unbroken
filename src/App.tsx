@@ -161,7 +161,11 @@ const App = () => {
       const workout = getCurrentWorkout();
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
         // Request notification permission if not already granted
-        await requestNotificationPermission();
+        try {
+          await requestNotificationPermission();
+        } catch (error) {
+          console.warn('Failed to request notification permission:', error);
+        }
         
         const initialTime = workout.type === 'strength' ? 180 : 90; // 3 min for strength, 1.5 min for hypertrophy
         const now = Date.now();
