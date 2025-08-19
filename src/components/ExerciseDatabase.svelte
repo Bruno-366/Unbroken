@@ -31,9 +31,10 @@
           {@const exerciseKey = getExerciseKey(exercise)}
           
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <label class="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+            <label for="max-{exerciseKey}" class="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
             <div class="flex items-center gap-2">
               <input
+                id="max-{exerciseKey}"
                 type="number"
                 bind:value={state.maxes[exerciseKey]}
                 oninput={(e) => {
@@ -65,9 +66,10 @@
           {@const exerciseKey = getExerciseKey(exercise)}
           
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <label class="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
+            <label for="tenrm-{exerciseKey}" class="flex-1 text-sm text-gray-700 font-medium">{exercise}</label>
             <div class="flex items-center gap-2">
               <input
+                id="tenrm-{exerciseKey}"
                 type="number"
                 bind:value={state.tenRMs[exerciseKey]}
                 oninput={(e) => {

@@ -7,7 +7,7 @@
     onManageBlocks: (action: string, data: { blockType?: string; index?: number }) => void
   }
 
-  let { state, onUpdateState, onManageBlocks }: TrainingPlanProps = $props()
+  let { state: appState, onUpdateState, onManageBlocks }: TrainingPlanProps = $props()
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -39,27 +39,27 @@
         break
       case 'enter':
         data.e?.preventDefault()
-        if (data.index && data.index > 0 && state.draggedIndex !== null && data.index !== state.draggedIndex) {
+        if (data.index && data.index > 0 && appState.draggedIndex !== null && data.index !== appState.draggedIndex) {
           onUpdateState({ dragOverIndex: data.index })
         }
         break
       case 'leave':
-        if (data.e && !data.e.currentTarget!.contains(data.e.relatedTarget as Node)) {
+        if (data.e && data.e.currentTarget && data.e.currentTarget instanceof Element && !data.e.currentTarget.contains(data.e.relatedTarget as Node)) {
           onUpdateState({ dragOverIndex: null })
         }
         break
       case 'drop': {
         data.e?.preventDefault()
         data.e?.stopPropagation()
-        if (state.draggedIndex === null || !data.index || data.index === 0) {
+        if (appState.draggedIndex === null || !data.index || data.index === 0) {
           onUpdateState({ draggedIndex: null, dragOverIndex: null })
           return
         }
-        const newPlan = [...state.customPlan]
-        const draggedBlock = newPlan[state.draggedIndex]
-        newPlan.splice(state.draggedIndex, 1)
+        const newPlan = [...appState.customPlan]
+        const draggedBlock = newPlan[appState.draggedIndex]
+        newPlan.splice(appState.draggedIndex, 1)
         let insertIndex = data.index
-        if (state.draggedIndex < data.index) insertIndex = data.index - 1
+        if (appState.draggedIndex < data.index) insertIndex = data.index - 1
         newPlan.splice(insertIndex, 0, draggedBlock)
         onUpdateState({ customPlan: newPlan, draggedIndex: null, dragOverIndex: null })
         break
@@ -70,38 +70,43 @@
     }
   }
 
-  let selectedBlockType = ''
+  let selectedType = $state('')
 </script>
 
 <div class="mb-6">
   <h3 class="text-lg font-semibold mb-4">Training Plan</h3>
   <div class="mb-4">
-    {#each state.customPlan as block, index}
+    {#each appState.customPlan as block, index}
       <div>
         {#if index > 0}
           <div 
+            role="region"
+            aria-label="Drop zone for reordering training blocks"
             ondragover={(e) => handleDrag('over', { e })}
             ondragenter={(e) => handleDrag('enter', { e, index })}
             ondragleave={(e) => handleDrag('leave', { e })}
             ondrop={(e) => handleDrag('drop', { e, index })}
-            class="{state.draggedIndex !== null && state.dragOverIndex === index
+            class="{appState.draggedIndex !== null && appState.dragOverIndex === index
               ? 'min-h-16 border-2 border-dashed border-blue-400 bg-blue-50 rounded-lg flex items-center justify-center mb-3 p-3'
               : 'h-3 mb-3'
             }"
           >
-            {#if state.draggedIndex !== null && state.dragOverIndex === index}
+            {#if appState.draggedIndex !== null && appState.dragOverIndex === index}
               <span class="text-xs text-blue-600 font-medium">Drop here</span>
             {/if}
           </div>
         {/if}
         
         <div 
+          role="button"
+          tabindex={index === 0 ? -1 : 0}
+          aria-label={index === 0 ? 'Current training block (not draggable)' : `Drag to reorder ${block.name} training block`}
           draggable={index !== 0}
           ondragstart={(e) => handleDrag('start', { e, index })}
           ondragend={() => handleDrag('end', {})}
           class="border rounded-lg p-3 {
             index === 0 ? 'border-blue-500 bg-blue-50 border-2' : 'border-gray-200 hover:shadow-md cursor-move'
-          } {state.draggedIndex === index ? 'opacity-50 transform rotate-2' : ''}"
+          } {appState.draggedIndex === index ? 'opacity-50 transform rotate-2' : ''}"
         >
           <div class="flex items-center gap-3">
             {#if index !== 0}
@@ -127,7 +132,7 @@
           </div>
           {#if index === 0}
             <div class="text-xs text-blue-600 mt-2 font-medium">
-              Week {state.currentWeek} of {block.weeks} • Day {state.currentDay}
+              Week {appState.currentWeek} of {block.weeks} • Day {appState.currentDay}
             </div>
           {/if}
         </div>
@@ -136,14 +141,15 @@
   </div>
 
   <div class="mb-4">
-    <label class="block text-sm text-gray-600 mb-2">Add Block</label>
+    <label for="add-block-select" class="block text-sm text-gray-600 mb-2">Add Block</label>
     <select
-      bind:value={selectedBlockType}
+      id="add-block-select"
+      bind:value={selectedType}
       onchange={(e) => {
         const target = e.target as HTMLSelectElement
         if (target.value) {
           onManageBlocks('add', { blockType: target.value })
-          selectedBlockType = ''
+          selectedType = ''
         }
       }}
       class="w-full p-3 border-2 border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer hover:border-gray-400"

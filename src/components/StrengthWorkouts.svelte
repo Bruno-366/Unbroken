@@ -17,10 +17,9 @@
     state: AppState
     onCompleteWorkout: () => void
     onToggleSet: (exerciseAndSchemeIndex: string, setIndex: number) => Promise<void>
-    onUpdateState: (updates: Partial<AppState>) => void
   }
 
-  let { workout, state, onCompleteWorkout, onToggleSet, onUpdateState }: StrengthWorkoutsProps = $props()
+  let { workout, state, onCompleteWorkout, onToggleSet }: StrengthWorkoutsProps = $props()
 
   const strengthWorkout = workout as StrengthWorkout | HypertrophyWorkout
 </script>

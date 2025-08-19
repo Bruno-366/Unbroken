@@ -138,14 +138,14 @@
     state = newState
   }
 
-  const getCurrentWorkout = () => {
+  const getCurrentWorkout = (): Workout | null => {
     const block = state.customPlan[0]
     const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates]
     if (!blockTemplate) return null
     
     const weekIndex = Math.min(state.currentWeek - 1, blockTemplate.weeks.length - 1)
     const dayIndex = state.currentDay - 1
-    return blockTemplate.weeks[weekIndex].days[dayIndex]
+    return blockTemplate.weeks[weekIndex].days[dayIndex] as Workout
   }
 
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
@@ -373,27 +373,22 @@
             <div class="text-xl font-bold">{currentBlockInfo.name}</div>
           </div>
           
-          {#if renderWorkout() === 'strength' && currentWorkout}
+          {#if renderWorkout() === 'strength' && currentWorkout()}
             <StrengthWorkouts 
-              workout={currentWorkout()}
+              workout={currentWorkout()!}
               {state}
               onCompleteWorkout={completeWorkout}
               onToggleSet={toggleSet}
-              onUpdateState={updateState}
             />
-          {:else if renderWorkout() === 'cardio' && currentWorkout}
+          {:else if renderWorkout() === 'cardio' && currentWorkout()}
             <CardioWorkouts 
-              workout={currentWorkout()}
-              {state}
+              workout={currentWorkout()!}
               onCompleteWorkout={completeWorkout}
-              onUpdateState={updateState}
             />
-          {:else if renderWorkout() === 'rest' && currentWorkout}
+          {:else if renderWorkout() === 'rest' && currentWorkout()}
             <RestWorkouts 
-              workout={currentWorkout()}
-              {state}
+              workout={currentWorkout()!}
               onCompleteWorkout={completeWorkout}
-              onUpdateState={updateState}
             />
           {:else}
             <p class="text-red-500 font-semibold">No workout found for the current week and day</p>
@@ -423,8 +418,9 @@
 
           <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4">Preferences</h3>
-            <label class="block text-sm text-gray-600 mb-1">Weight Unit</label>
+            <label for="weight-unit-select" class="block text-sm text-gray-600 mb-1">Weight Unit</label>
             <select
+              id="weight-unit-select"
               bind:value={state.weightUnit}
               class="w-full p-3 border-2 border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer hover:border-gray-400"
             >
