@@ -1,6 +1,6 @@
 # Unbroken - Tactical Barbell Tracker
 
-Unbroken is a React + TypeScript Progressive Web App (PWA) built with Vite for tracking Tactical Barbell workouts. It features workout tracking, rest timers, exercise database, and training block templates. The app is deployed on Cloudflare Pages.
+Unbroken is a Svelte 5 + TypeScript Progressive Web App (PWA) built with Vite for tracking Tactical Barbell workouts. It features workout tracking, rest timers, exercise database, and training block templates. The app is deployed on Cloudflare Pages.
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
@@ -61,34 +61,35 @@ After making changes, always test these key scenarios:
 ├── postcss.config.js          # PostCSS configuration for Tailwind
 ├── public/                    # Static assets (icons, favicons)
 ├── src/                       # Source code
-│   ├── App.tsx                # Main application component
+│   ├── App.svelte             # Main application component
 │   ├── blockTemplates.ts      # Training block templates and configurations
-│   ├── components/            # React components (StrengthWorkouts, CardioWorkouts, etc.)
-│   ├── index.css             # Global styles with Tailwind CSS
-│   ├── main.tsx              # Entry point
-│   ├── storage.ts            # LocalStorage utilities
-│   ├── types.ts              # TypeScript type definitions
-│   └── utils.ts              # Shared utility functions (weight calculations, notifications)
+│   ├── components/            # Svelte components (StrengthWorkouts, CardioWorkouts, etc.)
+│   ├── app.css                # Global styles with Tailwind CSS
+│   ├── main.ts                # Entry point
+│   ├── storage.ts             # LocalStorage utilities
+│   ├── types.ts               # TypeScript type definitions
+│   └── utils.ts               # Shared utility functions (weight calculations, notifications)
 ├── tailwind.config.js         # Tailwind CSS configuration
-├── tsconfig.json             # TypeScript configuration
-├── vite.config.ts            # Vite configuration with PWA plugin
-└── wrangler.jsonc            # Cloudflare Pages configuration
+├── tsconfig.json              # TypeScript configuration
+├── vite.config.ts             # Vite configuration with PWA plugin
+├── svelte.config.js           # Svelte configuration
+└── wrangler.jsonc             # Cloudflare Pages configuration
 ```
 
 ### Key Components and Files
 - `src/blockTemplates.ts` - Core training block configurations (endurance, powerbuilding, strength blocks)
-- `src/components/StrengthWorkouts.tsx` - Main workout interface with rest timers and set tracking
+- `src/components/StrengthWorkouts.svelte` - Main workout interface with rest timers and set tracking
 - `src/types.ts` - All TypeScript interfaces and types for workouts, exercises, and app state
 - `src/utils.ts` - Weight calculations, notifications, and utility functions
 - `src/storage.ts` - LocalStorage persistence for app state and workout history
 
 ### Framework and Technology Stack
-- **React 18** with TypeScript
+- **Svelte 5** with TypeScript and runes for reactive state management
 - **Vite** for build tooling and development server
 - **Tailwind CSS** for styling (utility-first CSS framework)
 - **PWA** capabilities via vite-plugin-pwa
-- **Lucide React** for icons
-- **ESLint** for code quality
+- **Lucide Svelte** for icons
+- **ESLint** for code quality with Svelte plugin
 - **Cloudflare Pages** for deployment
 
 ### Prerequisites
@@ -97,8 +98,8 @@ After making changes, always test these key scenarios:
 
 ### CI/CD Pipeline
 The repository includes GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on every push and pull request:
-- **Linting**: ESLint checks for code quality
-- **Type Checking**: TypeScript compiler validates types  
+- **Linting**: ESLint checks for code quality (includes Svelte components)
+- **Type Checking**: Svelte type checking validates components and TypeScript
 - **Build**: Ensures the project builds successfully
 - **Artifact Upload**: Stores build output for review
 
@@ -110,7 +111,7 @@ The repository includes GitHub Actions workflow (`.github/workflows/ci.yml`) tha
 
 ### Styling and Customization
 - Uses Tailwind CSS utility classes for styling
-- Custom styles can be added to `src/index.css`
+- Custom styles can be added to `src/app.css`
 - Tailwind configuration in `tailwind.config.js`
 - PWA theming configured in `vite.config.ts` and `index.html`
 
@@ -129,6 +130,7 @@ package.json
 postcss.config.js
 public/
 src/
+svelte.config.js
 tailwind.config.js
 tsconfig.json
 tsconfig.node.json
@@ -140,11 +142,11 @@ wrangler.jsonc
 ```json
 {
   "dev": "vite",
-  "build": "tsc && vite build", 
+  "build": "vite build", 
   "preview": "vite preview",
-  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-  "lint:fix": "eslint . --ext ts,tsx --fix",
-  "type-check": "tsc --noEmit"
+  "lint": "eslint . --ext ts,js,svelte --report-unused-disable-directives --max-warnings 0",
+  "lint:fix": "eslint . --ext ts,js,svelte --fix",
+  "type-check": "svelte-check --tsconfig tsconfig.json"
 }
 ```
 
@@ -157,11 +159,12 @@ wrangler.jsonc
 
 ### Timing Expectations
 - `npm install`: ~45 seconds
-- `npm run build`: ~6.5 seconds total (TypeScript compilation + Vite build)
+- `npm run build`: ~6.5 seconds total (Vite build with Svelte compilation)
 - `npm run lint`: ~1.5 seconds
-- `npm run type-check`: ~2 seconds
+- `npm run type-check`: ~2 seconds (svelte-check)
 - `npm run dev`: <1 second to start server
 
 ### Known Issues and Warnings
 - TypeScript version warning in ESLint (does not affect functionality)
 - Various npm deprecation warnings during install (do not affect build or runtime)
+- Svelte 5 is stable but some third-party libraries may not yet support runes syntax

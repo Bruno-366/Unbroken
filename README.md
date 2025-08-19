@@ -2,7 +2,7 @@
 
 # Unbroken
 
-**Tactical Barbell Tracker** - A modern React application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
+**Tactical Barbell Tracker** - A modern Svelte 5 application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
 
 ## 📋 Features
 
@@ -49,11 +49,11 @@
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run type-check` - Run TypeScript type checking
+- `npm run type-check` - Run Svelte type checking
 
 ## 🏗️ Tech Stack
 
-- **React 18** - UI library with hooks for state management
+- **Svelte 5** - Modern reactive framework with runes for state management
 - **TypeScript** - Type safety and enhanced developer experience
 - **Vite** - Build tool and dev server with hot module replacement
 - **Tailwind CSS** - Utility-first CSS framework for responsive design
@@ -109,19 +109,21 @@
 Unbroken/
 ├── public/                      # Static assets
 ├── src/                         # Source code
-│   ├── components/              # React components (refactored from monolithic App.tsx)
-│   │   ├── CardioWorkouts.tsx   # LISS and HIIT workout rendering
-│   │   ├── StrengthWorkouts.tsx # Strength/hypertrophy workouts with warm-up sets
-│   │   ├── RestWorkouts.tsx     # Rest and deload workout rendering
-│   │   ├── History.tsx          # Workout history display
-│   │   ├── TrainingPlan.tsx     # Training blocks drag & drop management
-│   │   └── ExerciseDatabase.tsx # 1RM and 10RM exercise input management
-│   ├── App.tsx                  # Main App component (reduced from 1,066 to 373 lines)
+│   ├── components/              # Svelte components (refactored from monolithic App.svelte)
+│   │   ├── CardioWorkouts.svelte   # LISS and HIIT workout rendering
+│   │   ├── StrengthWorkouts.svelte # Strength/hypertrophy workouts with warm-up sets
+│   │   ├── RestWorkouts.svelte     # Rest and deload workout rendering
+│   │   ├── History.svelte          # Workout history display
+│   │   ├── TrainingPlan.svelte     # Training blocks drag & drop management
+│   │   ├── ExerciseDatabase.svelte # 1RM and 10RM exercise input management
+│   │   ├── RestTimer.svelte        # Rest timer with visual feedback
+│   │   └── ResetProgress.svelte    # Reset confirmation modal
+│   ├── App.svelte                  # Main App component with reactive state management
 │   ├── types.ts                 # Centralized TypeScript interfaces and types
 │   ├── utils.ts                 # Shared utility functions (weight calculations, notifications)
 │   ├── blockTemplates.ts        # Training block templates and configurations
-│   ├── main.tsx                 # Entry point
-│   └── index.css                # Global styles with Tailwind CSS
+│   ├── main.ts                  # Entry point
+│   └── app.css                  # Global styles with Tailwind CSS
 ├── .github/                     # GitHub Actions workflows
 ├── dist/                        # Build output (generated)
 ├── index.html                   # HTML template
@@ -131,24 +133,26 @@ Unbroken/
 ├── wrangler.jsonc               # Cloudflare Pages configuration
 ├── tailwind.config.js           # Tailwind CSS configuration
 ├── postcss.config.js            # PostCSS configuration
+├── svelte.config.js             # Svelte configuration
 └── .eslintrc.cjs                # ESLint configuration
 ```
 
 ### Component Architecture
 
-The application has been refactored from a monolithic structure into focused, maintainable components:
+The application has been built with Svelte 5's modern reactive architecture using runes for state management:
 
-- **Separation of Concerns**: Each component handles a specific aspect of functionality
+- **Reactive State Management**: Svelte 5 runes ($state, $derived, $effect) provide automatic reactivity
+- **Component Composition**: Each component handles a specific aspect of functionality
 - **Type Safety**: Comprehensive TypeScript interfaces ensure code reliability
 - **Reusability**: Components are designed to be easily testable and modifiable
-- **Maintainability**: Reduced complexity makes debugging and feature additions simpler
+- **Maintainability**: Svelte's compile-time optimizations and clean syntax improve maintainability
 
 ## 🚨 CI/CD
 
 The repository includes GitHub Actions workflow that runs on every push and pull request:
 
-- **Linting**: ESLint checks for code quality
-- **Type Checking**: TypeScript compiler validates types
+- **Linting**: ESLint checks for code quality (Svelte components included)
+- **Type Checking**: Svelte type checking validates components and TypeScript
 - **Build**: Ensures the project builds successfully
 - **Artifact Upload**: Stores build output for review
 
@@ -164,18 +168,17 @@ The repository includes GitHub Actions workflow that runs on every push and pull
 
 ### Additional Dependencies
 ```bash
-# Example: Add a UI library (compatible with Tailwind)
-npm install @headlessui/react @heroicons/react
+# Example: Add a UI library (compatible with Tailwind and Svelte)
+npm install @floating-ui/dom
 
 # Example: Add routing (for multi-page functionality)
-npm install react-router-dom
-npm install --save-dev @types/react-router-dom
+npm install svelte-spa-router
 
 # Example: Add form handling and validation
-npm install react-hook-form @hookform/resolvers zod
+npm install felte @felte/validator-zod zod
 
 # Example: Add state management (if needed for larger scale)
-npm install zustand
+npm install svelte/store
 
 # Example: Add date/time utilities
 npm install date-fns
@@ -183,8 +186,9 @@ npm install date-fns
 
 ### Tailwind CSS Customization
 - Modify `tailwind.config.js` to extend the theme, add custom colors, or configure plugins
-- Add custom utilities or components in `src/index.css`
+- Add custom utilities or components in `src/app.css`
 - Use Tailwind IntelliSense extension in VS Code for better development experience
+- Svelte components work seamlessly with Tailwind's utility classes
 
 ### Environment Variables
 Create `.env` files for different environments:
@@ -194,7 +198,7 @@ Create `.env` files for different environments:
 ## 📚 Resources
 
 - [Vite Documentation](https://vitejs.dev/)
-- [React Documentation](https://react.dev/)
+- [Svelte 5 Documentation](https://svelte.dev/)
 - [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
 - [TypeScript Documentation](https://www.typescriptlang.org/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/)
