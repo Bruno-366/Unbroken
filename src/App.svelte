@@ -4,8 +4,7 @@
   
   // Import types and components
   import type { AppState, CompletedWorkout, Workout } from './types'
-  import { requestNotificationPermission } from './utils'
-  import { loadStateFromStorage, saveStateToStorage, clearStorage } from './storage'
+  import { loadStateFromStorage, saveStateToStorage } from './storage'
   import CardioWorkouts from './components/CardioWorkouts.svelte'
   import StrengthWorkouts from './components/StrengthWorkouts.svelte'
   import RestWorkouts from './components/RestWorkouts.svelte'
@@ -14,17 +13,6 @@
   import ExerciseDatabase from './components/ExerciseDatabase.svelte'
   import RestTimer from './components/RestTimer.svelte'
   import ResetProgress from './components/ResetProgress.svelte'
-
-  // Available blocks configuration
-  const AVAILABLE_BLOCKS = {
-    endurance1: { name: "Endurance Block 1", weeks: 8 },
-    powerbuilding1: { name: "Powerbuilding Block 1", weeks: 3 },
-    powerbuilding2: { name: "Powerbuilding Block 2", weeks: 3 },
-    powerbuilding3: { name: "Powerbuilding Block 3", weeks: 3 },
-    powerbuilding3bulgarian: { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3 },
-    bodybuilding: { name: "Bodybuilding Block", weeks: 3 },
-    strength: { name: "Strength Block", weeks: 6 }
-  }
 
   // Reactive state using Svelte 5 runes
   let state = $state<AppState>({
@@ -58,38 +46,6 @@
       startTime: 0
     }
   })
-
-  // Get exercises used in the current active block
-  const getCurrentBlockExercises = () => {
-    const currentBlock = state.customPlan[0]
-    if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] }
-    
-    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates]
-    if (!blockTemplate) return { strengthExercises: [], hypertrophyExercises: [] }
-    
-    const strengthExercises = new Set<string>()
-    const hypertrophyExercises = new Set<string>()
-    
-    blockTemplate.weeks.forEach((week: { days: unknown[] }) => {
-      week.days.forEach((day: unknown) => {
-        const dayObj = day as Record<string, unknown>
-        if ('exercises' in dayObj && Array.isArray(dayObj.exercises)) {
-          (dayObj.exercises as string[]).forEach((exercise: string) => {
-            if (dayObj.type === 'strength') {
-              strengthExercises.add(exercise)
-            } else if (dayObj.type === 'hypertrophy') {
-              hypertrophyExercises.add(exercise)
-            }
-          })
-        }
-      })
-    })
-    
-    return {
-      strengthExercises: Array.from(strengthExercises),
-      hypertrophyExercises: Array.from(hypertrophyExercises)
-    }
-  }
 
   // Load state from IndexedDB on mount
   onMount(async () => {
@@ -150,34 +106,6 @@
     return blockTemplate.weeks[weekIndex].days[dayIndex] as Workout
   }
 
-  const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
-    const key = `${exerciseAndSchemeIndex}-${setIndex}`
-    const isBeingCompleted = !state.completedSets[key]
-    
-    // Update completed sets directly
-    state.completedSets[key] = isBeingCompleted
-    
-    // Start rest timer when completing a working set (not warm-up sets)
-    if (isBeingCompleted && !key.includes('warmup')) {
-      const workout = getCurrentWorkout()
-      if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
-        // Request notification permission if not already granted
-        await requestNotificationPermission()
-        
-        const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
-        const now = Date.now()
-        
-        // Update rest timer state directly
-        state.restTimer.isActive = true
-        state.restTimer.timeLeft = initialTime
-        state.restTimer.totalTime = initialTime
-        state.restTimer.workoutType = workout.type
-        state.restTimer.phase = 'initial'
-        state.restTimer.startTime = now
-      }
-    }
-  }
-
   const completeWorkout = () => {
     const workoutDetails = getCurrentWorkout()
     if (!workoutDetails) return // Guard against null workout
@@ -227,106 +155,10 @@
     state.restTimer.startTime = 0
   }
 
-  const manageBlocks = (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => {
-    switch(action) {
-      case 'add': {
-        if (!data.blockType) return
-        const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS]
-        if (!blockConfig) return
-        state.customPlan = [...state.customPlan, { 
-          name: blockConfig.name, 
-          weeks: blockConfig.weeks, 
-          type: data.blockType 
-        }]
-        break
-      }
-      case 'remove':
-        if (state.customPlan.length <= 1) {
-          alert('You must have at least one block in your plan.')
-          return
-        }
-        if (data.index !== undefined) {
-          const newPlan = [...state.customPlan]
-          newPlan.splice(data.index, 1)
-          state.customPlan = newPlan
-        }
-        break
-      case 'reorder':
-        // Handle reordering via drag & drop with cleaner logic
-        if (data.draggedIndex !== undefined && data.dropIndex !== undefined && data.draggedIndex !== data.dropIndex) {
-          const newPlan = [...state.customPlan]
-          const draggedBlock = newPlan[data.draggedIndex]
-          newPlan.splice(data.draggedIndex, 1)
-          
-          // Adjust drop index if dragging from before the drop position
-          let insertIndex = data.dropIndex
-          if (data.draggedIndex < data.dropIndex) {
-            insertIndex = data.dropIndex - 1
-          }
-          
-          newPlan.splice(insertIndex, 0, draggedBlock)
-          state.customPlan = newPlan
-        }
-        break
-    }
-  }
-
-  // Reset functionality
-  const handleReset = async () => {
-    try {
-      await clearStorage()
-      
-      // Reset all state to defaults using direct assignment
-      state.activeTab = 'overview'
-      state.currentWeek = 1
-      state.currentDay = 1
-      state.completedWorkouts = []
-      state.customPlan = [
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
-        { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
-        { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
-        { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
-        { name: "Strength Block", weeks: 6, type: "strength" },
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
-      ]
-      state.maxes = { 
-        benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, 
-        overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, 
-        romaniandeadlift: 120 
-      }
-      state.tenRMs = {}
-      state.weightUnit = 'kg'
-      state.completedSets = {}
-      state.showResetConfirm = false
-      state.restTimer = {
-        isActive: false,
-        timeLeft: 0,
-        totalTime: 0,
-        workoutType: null,
-        phase: 'initial',
-        startTime: 0
-      }
-    } catch (error) {
-      console.error('Failed to reset app:', error)
-    }
-  }
-
-  // Rest timer handlers
-  const updateRestTimer = (updates: Partial<typeof state.restTimer>) => {
-    Object.assign(state.restTimer, updates)
-  }
-
   // Derived values
   const currentBlockInfo = $derived(state.customPlan[0] || { name: 'No active block', weeks: 0 })
 
   const currentWorkout = $derived(() => getCurrentWorkout())
-
-  const strengthExercises = $derived(() => getCurrentBlockExercises().strengthExercises)
-  const hypertrophyExercises = $derived(() => getCurrentBlockExercises().hypertrophyExercises)
 
   const renderWorkout = () => {
     const workout = getCurrentWorkout()
@@ -410,12 +242,9 @@
               workout={currentWorkout()!}
               {state}
               onCompleteWorkout={completeWorkout}
-              onToggleSet={toggleSet}
+              onUpdateRestTimer={(updates) => Object.assign(state.restTimer, updates)}
             />
-            <RestTimer 
-              restTimer={state.restTimer}
-              onUpdateTimer={updateRestTimer}
-            />
+            <RestTimer bind:restTimer={state.restTimer} />
           {:else if renderWorkout() === 'cardio' && currentWorkout()}
             <CardioWorkouts 
               workout={currentWorkout()!}
@@ -442,15 +271,13 @@
             bind:customPlan={state.customPlan}
             currentWeek={state.currentWeek}
             currentDay={state.currentDay}
-            {manageBlocks}
           />
 
           <ExerciseDatabase 
             bind:maxes={state.maxes}
             bind:tenRMs={state.tenRMs}
             weightUnit={state.weightUnit}
-            strengthExercises={strengthExercises()}
-            hypertrophyExercises={hypertrophyExercises()}
+            customPlan={state.customPlan}
             currentBlockName={currentBlockInfo.name}
           />
 
@@ -469,9 +296,9 @@
 
           <ResetProgress 
             showResetConfirm={state.showResetConfirm}
+            {state}
             onShowReset={() => state.showResetConfirm = true}
             onCancelReset={() => state.showResetConfirm = false}
-            onConfirmReset={handleReset}
           />
         </div>
       {/if}

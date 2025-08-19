@@ -5,10 +5,9 @@
     customPlan: TrainingBlock[]
     currentWeek: number
     currentDay: number
-    manageBlocks: (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => void
   }
 
-  let { customPlan = $bindable(), currentWeek, currentDay, manageBlocks }: TrainingPlanProps = $props()
+  let { customPlan = $bindable(), currentWeek, currentDay }: TrainingPlanProps = $props()
 
   // Available blocks configuration
   const AVAILABLE_BLOCKS = {
@@ -19,6 +18,50 @@
     powerbuilding3bulgarian: { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3 },
     bodybuilding: { name: "Bodybuilding Block", weeks: 3 },
     strength: { name: "Strength Block", weeks: 6 }
+  }
+
+  const manageBlocks = (action: string, data: { blockType?: string; index?: number; draggedIndex?: number; dropIndex?: number }) => {
+    switch(action) {
+      case 'add': {
+        if (!data.blockType) return
+        const blockConfig = AVAILABLE_BLOCKS[data.blockType as keyof typeof AVAILABLE_BLOCKS]
+        if (!blockConfig) return
+        customPlan = [...customPlan, { 
+          name: blockConfig.name, 
+          weeks: blockConfig.weeks, 
+          type: data.blockType 
+        }]
+        break
+      }
+      case 'remove':
+        if (customPlan.length <= 1) {
+          alert('You must have at least one block in your plan.')
+          return
+        }
+        if (data.index !== undefined) {
+          const newPlan = [...customPlan]
+          newPlan.splice(data.index, 1)
+          customPlan = newPlan
+        }
+        break
+      case 'reorder':
+        // Handle reordering via drag & drop with cleaner logic
+        if (data.draggedIndex !== undefined && data.dropIndex !== undefined && data.draggedIndex !== data.dropIndex) {
+          const newPlan = [...customPlan]
+          const draggedBlock = newPlan[data.draggedIndex]
+          newPlan.splice(data.draggedIndex, 1)
+          
+          // Adjust drop index if dragging from before the drop position
+          let insertIndex = data.dropIndex
+          if (data.draggedIndex < data.dropIndex) {
+            insertIndex = data.dropIndex - 1
+          }
+          
+          newPlan.splice(insertIndex, 0, draggedBlock)
+          customPlan = newPlan
+        }
+        break
+    }
   }
 
   // Local drag state - more idiomatic than global state for UI interactions

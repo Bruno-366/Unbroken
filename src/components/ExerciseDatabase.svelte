@@ -1,17 +1,55 @@
 <script lang="ts">
   import { Activity } from 'lucide-svelte'
   import { getExerciseKey } from '../utils'
+  import { blockTemplates } from '../blockTemplates'
+  import type { TrainingBlock } from '../types'
 
   interface ExerciseDatabaseProps {
     maxes: Record<string, number>
     tenRMs: Record<string, number>
     weightUnit: string
-    strengthExercises: string[]
-    hypertrophyExercises: string[]
+    customPlan: TrainingBlock[]
     currentBlockName: string
   }
 
-  let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, strengthExercises, hypertrophyExercises, currentBlockName }: ExerciseDatabaseProps = $props()
+  let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, customPlan, currentBlockName }: ExerciseDatabaseProps = $props()
+
+  // Get exercises used in the current active block
+  const getCurrentBlockExercises = () => {
+    const currentBlock = customPlan[0]
+    if (!currentBlock) return { strengthExercises: [], hypertrophyExercises: [] }
+    
+    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates]
+    if (!blockTemplate) return { strengthExercises: [], hypertrophyExercises: [] }
+    
+    const strengthExercises = new Set<string>()
+    const hypertrophyExercises = new Set<string>()
+    
+    blockTemplate.weeks.forEach((week: { days: unknown[] }) => {
+      week.days.forEach((day: unknown) => {
+        const dayObj = day as Record<string, unknown>
+        if ('exercises' in dayObj && Array.isArray(dayObj.exercises)) {
+          (dayObj.exercises as string[]).forEach((exercise: string) => {
+            if (dayObj.type === 'strength') {
+              strengthExercises.add(exercise)
+            } else if (dayObj.type === 'hypertrophy') {
+              hypertrophyExercises.add(exercise)
+            }
+          })
+        }
+      })
+    })
+    
+    return {
+      strengthExercises: Array.from(strengthExercises),
+      hypertrophyExercises: Array.from(hypertrophyExercises)
+    }
+  }
+
+  // Derived values using the local function
+  const exerciseData = $derived(getCurrentBlockExercises())
+  const strengthExercises = $derived(exerciseData.strengthExercises)
+  const hypertrophyExercises = $derived(exerciseData.hypertrophyExercises)
 </script>
 
 <div class="mb-6">

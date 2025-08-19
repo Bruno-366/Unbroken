@@ -9,17 +9,54 @@
   import { 
     calculateWeight, 
     calculateHypertrophyWeight, 
-    calculateWarmupSets
+    calculateWarmupSets,
+    requestNotificationPermission
   } from '../utils'
 
   interface StrengthWorkoutsProps {
     workout: Workout
     state: AppState
     onCompleteWorkout: () => void
-    onToggleSet: (exerciseAndSchemeIndex: string, setIndex: number) => Promise<void>
+    onUpdateRestTimer: (updates: Partial<AppState['restTimer']>) => void
   }
 
-  let { workout, state, onCompleteWorkout, onToggleSet }: StrengthWorkoutsProps = $props()
+  let { workout, state, onCompleteWorkout, onUpdateRestTimer }: StrengthWorkoutsProps = $props()
+
+  // Get current workout function
+  const getCurrentWorkout = (): Workout | null => {
+    // Since we already have the workout as a prop, just return it
+    return workout
+  }
+
+  const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
+    const key = `${exerciseAndSchemeIndex}-${setIndex}`
+    const isBeingCompleted = !state.completedSets[key]
+    
+    // Update completed sets directly
+    state.completedSets[key] = isBeingCompleted
+    
+    // Start rest timer when completing a working set (not warm-up sets)
+    if (isBeingCompleted && !key.includes('warmup')) {
+      const workout = getCurrentWorkout()
+      if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
+        // Request notification permission if not already granted
+        await requestNotificationPermission()
+        
+        const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
+        const now = Date.now()
+        
+        // Update rest timer state using callback
+        onUpdateRestTimer({
+          isActive: true,
+          timeLeft: initialTime,
+          totalTime: initialTime,
+          workoutType: workout.type,
+          phase: 'initial',
+          startTime: now
+        })
+      }
+    }
+  }
 
   // Derive strength workout with proper typing
   const strengthWorkout = $derived(() => workout as StrengthWorkout | HypertrophyWorkout)
@@ -73,7 +110,7 @@
                       <span class="text-sm text-blue-800">{warmupSet.reps} reps @ {warmupSet.weight} {state.weightUnit}</span>
                     </div>
                     <button
-                      onclick={() => onToggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
+                      onclick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
                       class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all {
                         isSetCompleted(warmupKey)
                           ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300 hover:border-blue-400 bg-white'
@@ -110,7 +147,7 @@
                     />
                   {/if}
                   <button
-                    onclick={() => onToggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
+                    onclick={() => toggleSet(`${exerciseIndex}-${schemeIndex}`, setIndex)}
                     class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all {
                       isSetCompleted(setKey)
                         ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400 bg-white'

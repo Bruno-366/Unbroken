@@ -1,12 +1,59 @@
 <script lang="ts">
+  import { clearStorage } from '../storage'
+  import type { AppState } from '../types'
+
   interface Props {
     showResetConfirm: boolean
+    state: AppState
     onShowReset: () => void
     onCancelReset: () => void
-    onConfirmReset: () => void
   }
 
-  let { showResetConfirm, onShowReset, onCancelReset, onConfirmReset }: Props = $props()
+  let { showResetConfirm, state, onShowReset, onCancelReset }: Props = $props()
+
+  // Reset functionality
+  const handleReset = async () => {
+    try {
+      await clearStorage()
+      
+      // Reset all state to defaults using direct assignment
+      state.activeTab = 'overview'
+      state.currentWeek = 1
+      state.currentDay = 1
+      state.completedWorkouts = []
+      state.customPlan = [
+        { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
+        { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
+        { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
+        { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
+        { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
+        { name: "Strength Block", weeks: 6, type: "strength" },
+        { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
+      ]
+      state.maxes = { 
+        benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, 
+        overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, 
+        romaniandeadlift: 120 
+      }
+      state.tenRMs = {}
+      state.weightUnit = 'kg'
+      state.completedSets = {}
+      state.showResetConfirm = false
+      state.restTimer = {
+        isActive: false,
+        timeLeft: 0,
+        totalTime: 0,
+        workoutType: null,
+        phase: 'initial',
+        startTime: 0
+      }
+    } catch (error) {
+      console.error('Failed to reset app:', error)
+    }
+  }
 </script>
 
 <div class="mb-6">
@@ -30,7 +77,7 @@
             Cancel
           </button>
           <button
-            onclick={onConfirmReset}
+            onclick={handleReset}
             class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
           >
             Reset

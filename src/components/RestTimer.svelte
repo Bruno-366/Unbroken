@@ -1,21 +1,19 @@
 <script lang="ts">
   import { showRestCompleteNotification } from '../utils'
+  import type { AppState } from '../types'
 
   interface Props {
-    restTimer: {
-      isActive: boolean
-      timeLeft: number
-      totalTime: number
-      workoutType: 'strength' | 'hypertrophy' | null
-      phase: 'initial' | 'extended'
-      startTime: number
-    }
-    onUpdateTimer: (updates: Partial<Props['restTimer']>) => void
+    restTimer: AppState['restTimer']
   }
 
-  let { restTimer, onUpdateTimer }: Props = $props()
+  let { restTimer = $bindable() }: Props = $props()
 
   let intervalId: number | null = null
+
+  // Rest timer handlers
+  const updateRestTimer = (updates: Partial<typeof restTimer>) => {
+    Object.assign(restTimer, updates)
+  }
 
   // Start timer interval when timer becomes active
   $effect(() => {
@@ -28,12 +26,12 @@
         if (newTimeLeft === 0 && restTimer.phase === 'initial') {
           // Timer completed - show notification and update phase
           showRestCompleteNotification()
-          onUpdateTimer({ 
+          updateRestTimer({ 
             phase: 'extended',
             timeLeft: 0
           })
         } else if (newTimeLeft > 0) {
-          onUpdateTimer({ timeLeft: newTimeLeft })
+          updateRestTimer({ timeLeft: newTimeLeft })
         }
       }, 1000)
     } else if (!restTimer.isActive && intervalId) {
@@ -53,7 +51,7 @@
   })
 
   const handleSkipRest = () => {
-    onUpdateTimer({
+    updateRestTimer({
       isActive: false,
       timeLeft: 0,
       totalTime: 0,
@@ -67,7 +65,7 @@
     const extensionTime = restTimer.workoutType === 'strength' ? 120 : 60 // 2 min for strength, 1 min for hypertrophy
     const now = Date.now()
     
-    onUpdateTimer({
+    updateRestTimer({
       totalTime: restTimer.totalTime + extensionTime,
       timeLeft: restTimer.timeLeft + extensionTime,
       startTime: now - (restTimer.totalTime - restTimer.timeLeft),
