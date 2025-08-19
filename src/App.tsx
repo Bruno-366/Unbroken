@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { blockTemplates } from './blockTemplates';
 
 // Import types and components
 import type { AppState, CompletedWorkout, CustomPlanBlock, Workout } from './types';
 import { requestNotificationPermission } from './utils';
+import { loadStateFromStorage, saveStateToStorage, clearStorage } from './storage';
 import CardioWorkouts from './components/CardioWorkouts';
 import StrengthWorkouts from './components/StrengthWorkouts';
 import RestWorkouts from './components/RestWorkouts';
@@ -55,8 +56,8 @@ const App = () => {
     };
   };
 
-  // Consolidated state
-  const [state, setState] = useState<AppState>({
+  // Default state configuration
+  const getDefaultState = (): AppState => ({
     activeTab: 'overview',
     currentWeek: 1,
     currentDay: 1,
@@ -90,8 +91,54 @@ const App = () => {
     }
   });
 
-  // Unified state update function
-  const updateState = (updates: Partial<AppState>) => setState((prev: AppState) => ({ ...prev, ...updates }));
+  // Consolidated state
+  const [state, setState] = useState<AppState>(getDefaultState());
+
+  // Load state from IndexedDB on mount
+  useEffect(() => {
+    const loadPersistedState = async () => {
+      try {
+        const persistedState = await loadStateFromStorage();
+        if (persistedState) {
+          // Merge persisted state with default state to ensure all properties exist
+          setState(prev => ({
+            ...prev,
+            ...persistedState,
+            // Always reset transient UI state to defaults
+            draggedIndex: null,
+            dragOverIndex: null,
+            showResetConfirm: false,
+            restTimer: {
+              isActive: false,
+              timeLeft: 0,
+              totalTime: 0,
+              workoutType: null,
+              phase: 'initial',
+              startTime: 0
+            }
+          }));
+        }
+      } catch (error) {
+        console.warn('Failed to load persisted state:', error);
+      }
+    };
+
+    loadPersistedState();
+  }, []);
+
+  // Unified state update function that also persists to IndexedDB
+  const updateState = (updates: Partial<AppState>) => {
+    setState((prev: AppState) => {
+      const newState = { ...prev, ...updates };
+      
+      // Save to IndexedDB asynchronously (don't wait for it)
+      saveStateToStorage(newState).catch(error => {
+        console.warn('Failed to save state to IndexedDB:', error);
+      });
+      
+      return newState;
+    });
+  };
 
   const getCurrentWorkout = () => {
     const block = state.customPlan[0];
@@ -212,33 +259,20 @@ const App = () => {
     }
   };
 
-  const resetProgress = () => {
+  const resetProgress = async () => {
+    // Clear IndexedDB storage
+    await clearStorage();
+    
+    // Reset to default state
+    const defaultState = getDefaultState();
     updateState({
-      currentWeek: 1,
-      currentDay: 1,
-      completedWorkouts: [],
-      completedSets: {},
-      customPlan: [
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
-        { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
-        { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
-        { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-        { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
-        { name: "Strength Block", weeks: 6, type: "strength" },
-        { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
-      ],
+      currentWeek: defaultState.currentWeek,
+      currentDay: defaultState.currentDay,
+      completedWorkouts: defaultState.completedWorkouts,
+      completedSets: defaultState.completedSets,
+      customPlan: defaultState.customPlan,
       showResetConfirm: false,
-      restTimer: {
-        isActive: false,
-        timeLeft: 0,
-        totalTime: 0,
-        workoutType: null,
-        phase: 'initial',
-        startTime: 0
-      }
+      restTimer: defaultState.restTimer
     });
   };
 
