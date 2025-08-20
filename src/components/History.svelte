@@ -1,17 +1,15 @@
 <script lang="ts">
   import { Clock } from 'lucide-svelte'
+  import { workoutStore } from '../stores'
   import type { 
     CompletedWorkout, 
     CardioWorkout, 
     StrengthWorkout, 
     HypertrophyWorkout 
   } from '../types'
-
-  interface HistoryProps {
-    completedWorkouts: CompletedWorkout[]
-  }
-
-  let { completedWorkouts }: HistoryProps = $props()
+  
+  // Access completed workouts directly from store
+  const completedWorkouts = $derived($workoutStore.completedWorkouts)
 
   // History configuration for different workout types - static, no need to be reactive
   const HISTORY_CONFIGS = {

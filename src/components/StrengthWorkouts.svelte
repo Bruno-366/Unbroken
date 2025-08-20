@@ -1,10 +1,10 @@
 <script lang="ts">
   import { CheckCircle } from 'lucide-svelte'
+  import { workoutStore, exerciseStore, preferencesStore, uiStore } from '../stores'
   import type { 
     Workout, 
     StrengthWorkout, 
-    HypertrophyWorkout, 
-    AppState 
+    HypertrophyWorkout
   } from '../types'
   import { 
     calculateWeight, 
@@ -15,19 +15,29 @@
 
   interface StrengthWorkoutsProps {
     workout: Workout
-    state: AppState
     onCompleteWorkout: () => void
-    onUpdateRestTimer: (updates: Partial<AppState['restTimer']>) => void
   }
 
-  let { workout, state, onCompleteWorkout, onUpdateRestTimer }: StrengthWorkoutsProps = $props()
+  let { workout, onCompleteWorkout }: StrengthWorkoutsProps = $props()
+  
+  // Access stores directly
+  const completedSets = $derived($workoutStore.completedSets)
+  const maxes = $derived($exerciseStore.maxes)
+  const tenRMs = $derived($exerciseStore.tenRMs)
+  const weightUnit = $derived($preferencesStore.weightUnit)
 
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
-    const isBeingCompleted = !state.completedSets[key]
+    const isBeingCompleted = !completedSets[key]
     
-    // Update completed sets directly
-    state.completedSets[key] = isBeingCompleted
+    // Update completed sets in store
+    workoutStore.update(state => ({
+      ...state,
+      completedSets: {
+        ...state.completedSets,
+        [key]: isBeingCompleted
+      }
+    }))
     
     // Start rest timer when completing a working set (not warm-up sets)
     if (isBeingCompleted && !key.includes('warmup')) {
@@ -38,15 +48,18 @@
         const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
         const now = Date.now()
         
-        // Update rest timer state using callback
-        onUpdateRestTimer({
-          isActive: true,
-          timeLeft: initialTime,
-          totalTime: initialTime,
-          workoutType: workout.type,
-          phase: 'initial',
-          startTime: now
-        })
+        // Update rest timer state in store
+        uiStore.update(state => ({
+          ...state,
+          restTimer: {
+            isActive: true,
+            timeLeft: initialTime,
+            totalTime: initialTime,
+            workoutType: workout.type as 'strength' | 'hypertrophy',
+            phase: 'initial',
+            startTime: now
+          }
+        }))
       }
     }
   }
@@ -66,7 +79,7 @@
     return { intensity, shouldMapByIndex }
   }
 
-  const isSetCompleted = (key: string) => Boolean(state.completedSets[key])
+  const isSetCompleted = (key: string) => Boolean(completedSets[key])
 </script>
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
@@ -78,15 +91,15 @@
       {#each exerciseSetSchemes as setScheme, schemeIndex}
         {@const { intensity } = getExerciseData(exerciseIndex, schemeIndex)}
         {@const weight = strengthWorkout().type === 'strength' ? 
-          calculateWeight(exercise, intensity, state) : 
-          calculateHypertrophyWeight(exercise, intensity, state)}
+          calculateWeight(exercise, intensity, { maxes, weightUnit }) : 
+          calculateHypertrophyWeight(exercise, intensity, { tenRMs, maxes })}
         {@const [sets, reps] = setScheme.split('x')}
-        {@const warmupSets = strengthWorkout().type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight, state) : []}
+        {@const warmupSets = strengthWorkout().type === 'strength' && weight > 0 ? calculateWarmupSets(exercise, weight, { weightUnit }) : []}
         
         <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
           <h4 class="font-bold text-gray-900 mb-2 text-lg">{exercise}</h4>
           <div class="text-sm text-gray-600 mb-4 font-medium">
-            {setScheme} @ {intensity}%{weight > 0 ? ` (${weight} ${state.weightUnit})` : ''}
+            {setScheme} @ {intensity}%{weight > 0 ? ` (${weight} ${weightUnit})` : ''}
           </div>
           
           {#if warmupSets.length > 0}
@@ -99,7 +112,7 @@
                   <div class="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
                     <div class="flex items-center gap-3">
                       <span class="text-xs font-medium text-blue-700 w-16">Warm-up {warmupIndex + 1}</span>
-                      <span class="text-sm text-blue-800">{warmupSet.reps} reps @ {warmupSet.weight} {state.weightUnit}</span>
+                      <span class="text-sm text-blue-800">{warmupSet.reps} reps @ {warmupSet.weight} {weightUnit}</span>
                     </div>
                     <button
                       onclick={() => toggleSet(`warmup-${exerciseIndex}-${schemeIndex}-${warmupIndex}`, 0)}
@@ -135,7 +148,7 @@
                       class="w-20 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                       value={weight}
                       placeholder="Weight"
-                      step={state.weightUnit === 'kg' ? '2.5' : '5'}
+                      step={weightUnit === 'kg' ? '2.5' : '5'}
                     />
                   {/if}
                   <button

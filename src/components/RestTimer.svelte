@@ -1,19 +1,23 @@
 <script lang="ts">
   import { showRestCompleteNotification } from '../utils'
-  import type { AppState } from '../types'
-
-  interface Props {
-    restTimer: AppState['restTimer']
-  }
-
-  let { restTimer = $bindable() }: Props = $props()
-
-  let intervalId: number | null = null
-
-  // Extract helper functions outside reactive context for better performance
+  import { uiStore } from '../stores'
+  
+  // Access rest timer directly from store
+  let restTimer = $state($uiStore.restTimer)
+  
+  // Subscribe to store changes to update local state
+  $effect(() => {
+    restTimer = $uiStore.restTimer
+  })
+  
+  // Update store when local state changes
   const updateRestTimer = (updates: Partial<typeof restTimer>) => {
-    Object.assign(restTimer, updates)
+    const newTimer = { ...restTimer, ...updates }
+    restTimer = newTimer
+    uiStore.update(state => ({ ...state, restTimer: newTimer }))
   }
+  
+  let intervalId: number | null = null
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60)

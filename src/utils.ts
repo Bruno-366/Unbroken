@@ -1,6 +1,6 @@
 // Shared utility functions for the Unbroken Tactical Barbell Tracker
 
-import type { AppState, WarmupSet } from './types';
+import type { WarmupSet } from './types';
 
 // Helper function to generate exercise key from name
 export const getExerciseKey = (exerciseName: string): string => {
@@ -8,32 +8,32 @@ export const getExerciseKey = (exerciseName: string): string => {
 };
 
 // Calculate weight for strength exercises based on 1RM percentage
-export const calculateWeight = (exercise: string, percentage: number, state: AppState): number => {
+export const calculateWeight = (exercise: string, percentage: number, { maxes, weightUnit }: { maxes: Record<string, number>, weightUnit: string }): number => {
   const exerciseKey = getExerciseKey(exercise);
-  if (!exerciseKey || !state.maxes[exerciseKey]) return 0;
+  if (!exerciseKey || !maxes[exerciseKey]) return 0;
   
-  const calculatedWeight = state.maxes[exerciseKey] * (percentage / 100);
+  const calculatedWeight = maxes[exerciseKey] * (percentage / 100);
   const barbellExercises = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Front Squat', 'Trap Bar Deadlift', 'Power Clean', 'Romanian Deadlift'];
   
   if (barbellExercises.includes(exercise)) {
-    const increment = state.weightUnit === 'kg' ? 2.5 : 5;
+    const increment = weightUnit === 'kg' ? 2.5 : 5;
     return Math.round(calculatedWeight / increment) * increment;
   }
   return Math.round(calculatedWeight);
 };
 
 // Calculate weight for hypertrophy exercises based on 10RM
-export const calculateHypertrophyWeight = (exercise: string, percentage: number, state: AppState): number => {
+export const calculateHypertrophyWeight = (exercise: string, percentage: number, { tenRMs, maxes }: { tenRMs: Record<string, number>, maxes?: Record<string, number> }): number => {
   const exerciseKey = getExerciseKey(exercise);
   
   // Convert 10RM input to estimated 1RM, then apply percentage
   let estimatedOneRM;
-  if (state.tenRMs[exerciseKey]) {
+  if (tenRMs[exerciseKey]) {
     // Convert 10RM to 1RM: 10RM / 0.75 = 1RM
-    estimatedOneRM = state.tenRMs[exerciseKey] / 0.75;
-  } else if (state.maxes[exerciseKey]) {
+    estimatedOneRM = tenRMs[exerciseKey] / 0.75;
+  } else if (maxes && maxes[exerciseKey]) {
     // Fallback to actual 1RM if available
-    estimatedOneRM = state.maxes[exerciseKey];
+    estimatedOneRM = maxes[exerciseKey];
   } else {
     return 0;
   }
@@ -44,11 +44,11 @@ export const calculateHypertrophyWeight = (exercise: string, percentage: number,
 };
 
 // Calculate warmup sets for strength exercises
-export const calculateWarmupSets = (_exercise: string, workingWeight: number, state: AppState): WarmupSet[] => {
+export const calculateWarmupSets = (_exercise: string, workingWeight: number, { weightUnit }: { weightUnit: string }): WarmupSet[] => {
   if (!workingWeight || workingWeight <= 0) return [];
   
-  const barbellWeight = state.weightUnit === 'kg' ? 20 : 45;
-  const plateIncrement = state.weightUnit === 'kg' ? 2.5 : 5;
+  const barbellWeight = weightUnit === 'kg' ? 20 : 45;
+  const plateIncrement = weightUnit === 'kg' ? 2.5 : 5;
   const roundToPlate = (weight: number) => Math.max(Math.round(weight / plateIncrement) * plateIncrement, barbellWeight);
   
   const warmupSets = [
