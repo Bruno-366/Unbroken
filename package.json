@@ -1,38 +1,35 @@
 {
   "name": "unbroken",
   "version": "0.1.0",
-  "description": "A React application deployed on Cloudflare Pages",
+  "description": "A Svelte application deployed on Cloudflare Pages",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext ts,tsx --fix",
-    "type-check": "tsc --noEmit"
+    "lint": "eslint . --ext ts,js,svelte --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,js,svelte --fix",
+    "type-check": "svelte-check --tsconfig tsconfig.json"
   },
   "dependencies": {
-    "lucide-react": "^0.539.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "lucide-svelte": "^0.446.0"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tailwindcss/postcss": "^4.1.12",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
-    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.21",
     "canvas": "^3.1.2",
     "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.6",
+    "eslint-plugin-svelte": "^2.44.1",
     "postcss": "^8.5.6",
     "sharp": "^0.34.3",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.2.2",
-    "vite": "^7.1.2",
+    "vite": "^6.0.0",
     "vite-plugin-pwa": "^1.0.2"
   },
   "engines": {
