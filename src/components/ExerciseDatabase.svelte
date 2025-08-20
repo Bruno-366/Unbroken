@@ -4,23 +4,28 @@
   import { blockTemplates } from '../blockTemplates'
   import { exerciseStore, preferencesStore, trainingPlanStore } from '../stores'
   
-  // Access stores directly
-  let maxes = $state($exerciseStore.maxes)
-  let tenRMs = $state($exerciseStore.tenRMs)
+  // Access stores directly using $derived for reactive values
+  const exerciseState = $derived($exerciseStore)
+  const maxes = $derived(exerciseState.maxes)
+  const tenRMs = $derived(exerciseState.tenRMs)
   const weightUnit = $derived($preferencesStore.weightUnit)
   const customPlan = $derived($trainingPlanStore.customPlan)
   const currentBlockName = $derived(customPlan[0]?.name || 'No active block')
   
-  // Subscribe to store changes to update local state
-  $effect(() => {
-    maxes = $exerciseStore.maxes
-    tenRMs = $exerciseStore.tenRMs
-  })
+  // Update functions for direct store updates
+  const updateMax = (exerciseKey: string, value: number) => {
+    exerciseStore.update(state => ({
+      ...state,
+      maxes: { ...state.maxes, [exerciseKey]: value }
+    }))
+  }
   
-  // Update store when local state changes
-  $effect(() => {
-    exerciseStore.set({ maxes, tenRMs })
-  })
+  const updateTenRM = (exerciseKey: string, value: number) => {
+    exerciseStore.update(state => ({
+      ...state,
+      tenRMs: { ...state.tenRMs, [exerciseKey]: value }
+    }))
+  }
 
   // Extract function outside reactive context - better performance
   const getCurrentBlockExercises = () => {
@@ -82,7 +87,12 @@
               <input
                 id="max-{exerciseKey}"
                 type="number"
-                bind:value={maxes[exerciseKey]}
+                value={maxes[exerciseKey] || ''}
+                oninput={(e) => {
+                  const target = e.target as HTMLInputElement
+                  const value = parseFloat(target.value) || 0
+                  updateMax(exerciseKey, value)
+                }}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
                 placeholder="1RM"
                 step={weightUnit === 'kg' ? '2.5' : '5'}
@@ -111,7 +121,12 @@
               <input
                 id="tenrm-{exerciseKey}"
                 type="number"
-                bind:value={tenRMs[exerciseKey]}
+                value={tenRMs[exerciseKey] || ''}
+                oninput={(e) => {
+                  const target = e.target as HTMLInputElement
+                  const value = parseFloat(target.value) || 0
+                  updateTenRM(exerciseKey, value)
+                }}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 placeholder="10RM"
                 step="1"
