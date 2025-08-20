@@ -1,31 +1,21 @@
 <script lang="ts">
+  import { Clock } from 'lucide-svelte'
   import { showRestCompleteNotification } from '../utils'
   import { uiStore } from '../stores'
   
-  // Access rest timer directly from store
-  let restTimer = $state($uiStore.restTimer)
+  // Access rest timer directly from store without local state
+  const restTimer = $derived($uiStore.restTimer)
   
-  // Subscribe to store changes to update local state
-  $effect(() => {
-    restTimer = $uiStore.restTimer
-  })
-  
-  // Update store when local state changes
+  // Update store function
   const updateRestTimer = (updates: Partial<typeof restTimer>) => {
-    const newTimer = { ...restTimer, ...updates }
-    restTimer = newTimer
-    uiStore.update(state => ({ ...state, restTimer: newTimer }))
-  }
-  
-  let intervalId: number | null = null
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    uiStore.update(state => ({
+      ...state,
+      restTimer: { ...state.restTimer, ...updates }
+    }))
   }
 
-  const handleSkipRest = () => {
+  // Stop rest timer function
+  const stopRestTimer = () => {
     updateRestTimer({
       isActive: false,
       timeLeft: 0,
@@ -36,90 +26,92 @@
     })
   }
 
-  const handleExtendRest = () => {
-    const extensionTime = restTimer.workoutType === 'strength' ? 120 : 60 // 2 min for strength, 1 min for hypertrophy
-    const now = Date.now()
-    
-    updateRestTimer({
-      totalTime: restTimer.totalTime + extensionTime,
-      timeLeft: restTimer.timeLeft + extensionTime,
-      startTime: now - (restTimer.totalTime - restTimer.timeLeft),
-      phase: 'extended'
-    })
+  // Extend rest timer function - matching original React implementation
+  const extendRestTimer = () => {
+    if (restTimer.workoutType === 'strength' && restTimer.phase === 'initial') {
+      const extendedTime = 120 // Additional 2 minutes to reach 5 minutes total
+      const now = Date.now()
+      updateRestTimer({
+        timeLeft: extendedTime,
+        totalTime: extendedTime,
+        phase: 'extended',
+        startTime: now
+      })
+    }
   }
 
-  // Derived progress percentage - more idiomatic than function
+  // Derived progress percentage
   const progressPercent = $derived(() => {
     if (restTimer.totalTime === 0) return 0
     return ((restTimer.totalTime - restTimer.timeLeft) / restTimer.totalTime) * 100
   })
 
-  // Start timer interval when timer becomes active
+  // Timer interval effect - timestamp-based to prevent background throttling
+  // IMPORTANT: Rest timer won't show until user accepts or rejects notification permissions
   $effect(() => {
-    if (restTimer.isActive && !intervalId) {
-      intervalId = setInterval(() => {
+    let interval: number | undefined
+    
+    if (restTimer.isActive && restTimer.timeLeft > 0) {
+      interval = setInterval(() => {
         const now = Date.now()
-        const elapsed = Math.floor((now - restTimer.startTime) / 1000)
-        const newTimeLeft = Math.max(0, restTimer.totalTime - elapsed)
+        const elapsedSeconds = Math.floor((now - restTimer.startTime) / 1000)
+        const newTimeLeft = Math.max(0, restTimer.totalTime - elapsedSeconds)
         
-        if (newTimeLeft === 0 && restTimer.phase === 'initial') {
-          // Timer completed - show notification and update phase
-          showRestCompleteNotification()
-          updateRestTimer({ 
-            phase: 'extended',
-            timeLeft: 0
-          })
-        } else if (newTimeLeft > 0) {
-          updateRestTimer({ timeLeft: newTimeLeft })
-        }
-      }, 1000)
-    } else if (!restTimer.isActive && intervalId) {
-      // Clean up interval when timer stops
-      clearInterval(intervalId)
-      intervalId = null
+        updateRestTimer({ timeLeft: newTimeLeft })
+      }, 100) // Check more frequently for smoother updates
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
     }
   })
 
-  // Cleanup interval on component destroy
+  // Separate effect to handle notification when timer reaches 0
   $effect(() => {
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
+    if (restTimer.isActive && restTimer.timeLeft === 0) {
+      showRestCompleteNotification()
     }
   })
 </script>
 
 {#if restTimer.isActive}
-  <div class="bg-orange-100 border border-orange-300 rounded-lg p-4 mt-4">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-semibold text-orange-800">Rest Timer</h3>
-      <div class="text-lg font-bold text-orange-800">
-        {formatTime(restTimer.timeLeft)}
+  <div class="mb-4 p-4 bg-white rounded-lg border-2 border-orange-200">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <Clock class="w-5 h-5 text-orange-600" />
+        <span class="text-sm font-semibold text-gray-700">
+          {restTimer.phase === 'extended' ? 'Extended Rest' : 'Rest Time'}
+        </span>
+      </div>
+      <div class="text-lg font-bold text-gray-900">
+        {Math.floor(restTimer.timeLeft / 60)}:{(restTimer.timeLeft % 60).toString().padStart(2, '0')}
       </div>
     </div>
     
-    <div class="bg-orange-200 h-2 rounded-full overflow-hidden mb-3">
-      <div 
-        class="bg-orange-500 h-full transition-all duration-1000" 
-        style="width: {progressPercent}%"
-      ></div>
+    <div class="mb-3">
+      <div class="bg-gray-200 h-3 rounded-full overflow-hidden">
+        <div 
+          class="h-full transition-all duration-300 {restTimer.phase === 'extended' ? 'bg-red-500' : 'bg-orange-500'}"
+          style="width: {progressPercent()}%"
+        ></div>
+      </div>
     </div>
     
     <div class="flex gap-2">
       <button
-        onclick={handleSkipRest}
-        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition-colors"
+        onclick={stopRestTimer}
+        class="flex-1 {restTimer.timeLeft === 0 
+          ? 'bg-green-500 hover:bg-green-600' 
+          : 'bg-gray-500 hover:bg-gray-600'} text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
       >
-        {restTimer.phase === 'extended' ? 'Complete Rest' : 'Skip Rest'}
+        {restTimer.timeLeft === 0 ? 'Complete Rest' : 'Skip Rest'}
       </button>
-      
-      {#if restTimer.phase !== 'extended'}
+      {#if restTimer.workoutType === 'strength' && restTimer.phase !== 'extended' && restTimer.timeLeft === 0}
         <button
-          onclick={handleExtendRest}
-          class="flex-1 bg-orange-200 hover:bg-orange-300 text-orange-800 font-medium py-2 px-3 rounded-lg text-sm transition-colors"
+          onclick={extendRestTimer}
+          class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
         >
-          Extend to {restTimer.workoutType === 'strength' ? '5' : '2.5'} min
+          Extend to 5 min
         </button>
       {/if}
     </div>

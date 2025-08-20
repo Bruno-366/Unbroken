@@ -1,6 +1,7 @@
 <script lang="ts">
   import { CheckCircle } from 'lucide-svelte'
   import { workoutStore, exerciseStore, preferencesStore, uiStore } from '../stores'
+  import RestTimer from './RestTimer.svelte'
   import type { 
     Workout, 
     StrengthWorkout, 
@@ -42,8 +43,8 @@
     // Start rest timer when completing a working set (not warm-up sets)
     if (isBeingCompleted && !key.includes('warmup')) {
       if (workout && (workout.type === 'strength' || workout.type === 'hypertrophy')) {
-        // Request notification permission if not already granted
-        await requestNotificationPermission()
+        // Request notification permission without blocking (don't await)
+        requestNotificationPermission()
         
         const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
         const now = Date.now()
@@ -84,6 +85,7 @@
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
   <div class="space-y-4">
+    <RestTimer />
     {#each (strengthWorkout().exercises || []) as exercise, exerciseIndex}
       {@const setSchemes = (strengthWorkout().sets || '').split(',')}
       {@const exerciseSetSchemes = getExerciseData(exerciseIndex, 0).shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes}

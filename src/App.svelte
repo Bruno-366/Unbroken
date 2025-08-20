@@ -16,7 +16,6 @@
   import History from './components/History.svelte'
   import TrainingPlan from './components/TrainingPlan.svelte'
   import ExerciseDatabase from './components/ExerciseDatabase.svelte'
-  import RestTimer from './components/RestTimer.svelte'
   import ResetProgress from './components/ResetProgress.svelte'
 
   // Access stores directly
@@ -197,7 +196,6 @@
                 workout={getCurrentWorkout}
                 onCompleteWorkout={completeWorkout}
               />
-              <RestTimer />
             {:else if renderWorkout() === 'cardio' && getCurrentWorkout}
               <CardioWorkouts 
                 workout={getCurrentWorkout}
