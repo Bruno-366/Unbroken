@@ -140,7 +140,7 @@
               
               <div class="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 transition-all">
                 <div class="flex items-center gap-3">
-                  <span class="text-sm font-medium text-gray-600 w-12">Set {setIndex + 1}</span>
+                  <span class="text-sm font-semibold text-gray-700 w-12">Set {setIndex + 1}</span>
                   <span class="text-sm text-gray-800">{reps} reps</span>
                 </div>
                 <div class="flex items-center gap-3">
