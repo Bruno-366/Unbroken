@@ -105,6 +105,18 @@ const loadFromStorage = async <T>(storeName: string): Promise<T | null> => {
   }
 }
 
+// Loading state management
+export const isStoreInitialized = writable<boolean>(false)
+let storesLoadedCount = 0
+const totalStores = 4 // workoutStore, trainingPlanStore, exerciseStore, preferencesStore
+
+const checkIfAllStoresLoaded = () => {
+  storesLoadedCount++
+  if (storesLoadedCount >= totalStores) {
+    isStoreInitialized.set(true)
+  }
+}
+
 // Create stores with persistence
 const createPersistedStore = <T>(
   storeName: string,
@@ -121,6 +133,7 @@ const createPersistedStore = <T>(
       set(data)
     }
     isInitialized = true
+    checkIfAllStoresLoaded()
   })
   
   return {
