@@ -59,8 +59,11 @@ export const saveStateToStorage = async (state: AppState): Promise<void> => {
       completedSets: state.completedSets,
     };
     
+    // Deep clone to remove any Svelte reactivity proxies
+    const cleanState = JSON.parse(JSON.stringify(persistedState));
+    
     await new Promise<void>((resolve, reject) => {
-      const request = store.put(persistedState, 'state');
+      const request = store.put(cleanState, 'state');
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });

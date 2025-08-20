@@ -5,9 +5,10 @@
     customPlan: TrainingBlock[]
     currentWeek: number
     currentDay: number
+    onUpdate?: () => void
   }
 
-  let { customPlan = $bindable(), currentWeek, currentDay }: TrainingPlanProps = $props()
+  let { customPlan = $bindable(), currentWeek, currentDay, onUpdate }: TrainingPlanProps = $props()
 
   // Available blocks configuration - static data, doesn't need to be reactive
   const AVAILABLE_BLOCKS = {
@@ -34,6 +35,7 @@
           weeks: blockConfig.weeks, 
           type: blockType 
         }]
+        onUpdate?.()
         break
       }
       case 'remove':
@@ -43,6 +45,7 @@
         }
         if (index !== undefined) {
           customPlan = customPlan.filter((_, i) => i !== index)
+          onUpdate?.()
         }
         break
       case 'reorder':
@@ -56,6 +59,7 @@
           const insertIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex
           newPlan.splice(insertIndex, 0, draggedBlock)
           customPlan = newPlan
+          onUpdate?.()
         }
         break
     }

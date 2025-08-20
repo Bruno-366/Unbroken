@@ -55,9 +55,24 @@
     // Only save if state has been loaded to prevent overwriting persisted data
     if (!isStateLoaded) return
 
-    // Create a clean state object for persistence (exclude transient UI state)
+    state = newState
+    saveState()
+  }
+
+  // Save state to storage when changes are made
+  const saveState = () => {
+    if (!isStateLoaded) return
+
     const stateToSave = {
-      ...newState,
+      activeTab: state.activeTab,
+      currentWeek: state.currentWeek,
+      currentDay: state.currentDay,
+      completedWorkouts: state.completedWorkouts,
+      customPlan: state.customPlan,
+      maxes: state.maxes,
+      tenRMs: state.tenRMs,
+      weightUnit: state.weightUnit,
+      completedSets: state.completedSets,
       // Don't persist transient UI state
       showResetConfirm: false,
       restTimer: {
@@ -70,12 +85,9 @@
       }
     } as AppState
 
-    // Save to IndexedDB asynchronously (don't wait for it)
     saveStateToStorage(stateToSave).catch(error => {
       console.warn('Failed to save state to IndexedDB:', error)
     })
-
-    state = newState
   }
 
   // Load state from IndexedDB on mount
@@ -107,28 +119,25 @@
     }
   })
 
-  // Watch for changes to bound properties and save them
+  // Effect to save state when it changes (for bound values in child components)
   $effect(() => {
     if (!isStateLoaded) return
-
-    // Save changes to bound properties automatically
-    const stateToSave = {
-      ...state,
-      // Don't persist transient UI state
-      showResetConfirm: false,
-      restTimer: {
-        isActive: false,
-        timeLeft: 0,
-        totalTime: 0,
-        workoutType: null as "strength" | "hypertrophy" | null,
-        phase: 'initial' as "initial" | "extended",
-        startTime: 0
-      }
-    } as AppState
-
-    saveStateToStorage(stateToSave).catch(error => {
-      console.warn('Failed to save state to IndexedDB:', error)
-    })
+    
+    // Access all state properties to track them for child component bindings
+    // Use void operator to explicitly ignore the return value
+    void {
+      activeTab: state.activeTab,
+      currentWeek: state.currentWeek,
+      currentDay: state.currentDay,
+      completedWorkouts: state.completedWorkouts,
+      customPlan: state.customPlan,
+      maxes: state.maxes,
+      tenRMs: state.tenRMs,
+      weightUnit: state.weightUnit,
+      completedSets: state.completedSets
+    }
+    
+    saveState()
   })
 
   // Convert function to derived - more idiomatic for reactive values
@@ -310,6 +319,7 @@
             bind:customPlan={state.customPlan}
             currentWeek={state.currentWeek}
             currentDay={state.currentDay}
+            onUpdate={saveState}
           />
 
           <ExerciseDatabase 
@@ -318,6 +328,7 @@
             weightUnit={state.weightUnit}
             customPlan={state.customPlan}
             currentBlockName={currentBlockInfo.name}
+            onUpdate={saveState}
           />
 
           <div class="mb-6">
@@ -326,6 +337,7 @@
             <select
               id="weight-unit-select"
               bind:value={state.weightUnit}
+              onchange={saveState}
               class="w-full p-3 border-2 border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer hover:border-gray-400"
             >
               <option value="kg">Kilograms (kg)</option>

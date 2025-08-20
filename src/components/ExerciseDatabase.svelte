@@ -10,9 +10,10 @@
     weightUnit: string
     customPlan: TrainingBlock[]
     currentBlockName: string
+    onUpdate?: () => void
   }
 
-  let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, customPlan, currentBlockName }: ExerciseDatabaseProps = $props()
+  let { maxes = $bindable(), tenRMs = $bindable(), weightUnit, customPlan, currentBlockName, onUpdate }: ExerciseDatabaseProps = $props()
 
   // Extract function outside reactive context - better performance
   const getCurrentBlockExercises = () => {
@@ -75,6 +76,7 @@
                 id="max-{exerciseKey}"
                 type="number"
                 bind:value={maxes[exerciseKey]}
+                onchange={onUpdate}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
                 placeholder="1RM"
                 step={weightUnit === 'kg' ? '2.5' : '5'}
@@ -104,6 +106,7 @@
                 id="tenrm-{exerciseKey}"
                 type="number"
                 bind:value={tenRMs[exerciseKey]}
+                onchange={onUpdate}
                 class="w-24 p-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 placeholder="10RM"
                 step="1"
