@@ -67,6 +67,14 @@ export interface AppState {
     phase: 'initial' | 'extended';
     startTime: number;
   };
+  lissTimer: {
+    isActive: boolean;
+    isPaused: boolean;
+    timeLeft: number;
+    totalTime: number;
+    startTime: number;
+    pausedTime: number;
+  };
 }
 
 export interface WarmupSet {

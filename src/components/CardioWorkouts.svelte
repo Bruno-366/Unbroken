@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Workout, CardioWorkout } from '../types'
+  import LiSSTimer from './LiSSTimer.svelte'
 
   interface CardioWorkoutsProps {
     workout: Workout
@@ -43,6 +44,12 @@
         {/if}
       {/if}
     </div>
+    
+    {#if workout.type === 'liss' && typeof cardioWorkout().duration === 'number'}
+      <!-- Include LiSS Timer for liss workouts with numeric duration -->
+      <LiSSTimer duration={cardioWorkout().duration as number} />
+    {/if}
+    
     <button 
       onclick={onCompleteWorkout} 
       class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors mt-4"
