@@ -148,20 +148,20 @@
       start: {
         disabled: isStartDisabled,
         class: isStartDisabled 
-          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
-          : 'flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+          ? 'flex-1 bg-green-500 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-40 cursor-not-allowed'
+          : 'flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-100'
       },
       pause: {
         disabled: isPauseDisabled,
         class: isPauseDisabled
-          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
-          : 'flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+          ? 'flex-1 bg-yellow-500 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-40 cursor-not-allowed'
+          : 'flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-100'
       },
       stop: {
         disabled: isStopDisabled,
         class: isStopDisabled
-          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
-          : 'flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+          ? 'flex-1 bg-red-500 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-40 cursor-not-allowed'
+          : 'flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 opacity-100'
       }
     }
   })
@@ -189,7 +189,7 @@
           disabled={buttonStates().start.disabled}
           class={buttonStates().start.class}
         >
-          <Play class="w-4 h-4" stroke-width="3" />
+          <Play class="w-5 h-5" stroke="none" fill="currentColor" />
           Start
         </button>
         <button 
@@ -197,7 +197,7 @@
           disabled={buttonStates().pause.disabled}
           class={buttonStates().pause.class}
         >
-          <Pause class="w-4 h-4" stroke-width="3" />
+          <Pause class="w-5 h-5" stroke="none" fill="currentColor" />
           Pause
         </button>
         <button 
@@ -205,7 +205,7 @@
           disabled={buttonStates().stop.disabled}
           class={buttonStates().stop.class}
         >
-          <Square class="w-4 h-4" stroke-width="3" />
+          <Square class="w-5 h-5" stroke="none" fill="currentColor" />
           Stop
         </button>
       </div>
