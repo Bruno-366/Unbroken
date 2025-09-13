@@ -1,7 +1,7 @@
 <script lang="ts">
-  import TrainingPlan from '../../components/TrainingPlan.svelte'
-  import ExerciseDatabase from '../../components/ExerciseDatabase.svelte'
-  import ResetProgress from '../../components/ResetProgress.svelte'
+  import TrainingPlan from './TrainingPlan.svelte'
+  import ExerciseDatabase from './ExerciseDatabase.svelte'
+  import ResetProgress from './ResetProgress.svelte'
   import { preferencesStore } from '../../stores'
   
   let weightUnit = $state($preferencesStore.weightUnit)

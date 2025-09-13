@@ -1,5 +1,5 @@
 <script lang="ts">
-  import History from '../../components/History.svelte'
+  import History from './History.svelte'
 </script>
 
 <History />

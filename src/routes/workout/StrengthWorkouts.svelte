@@ -1,18 +1,18 @@
 <script lang="ts">
   import { CheckCircle } from 'lucide-svelte'
-  import { workoutStore, exerciseStore, preferencesStore, uiStore } from '../stores'
+  import { workoutStore, exerciseStore, preferencesStore, uiStore } from '../../stores'
   import RestTimer from './RestTimer.svelte'
   import type { 
     Workout, 
     StrengthWorkout, 
     HypertrophyWorkout
-  } from '../types'
+  } from '../../types'
   import { 
     calculateWeight, 
     calculateHypertrophyWeight, 
     calculateWarmupSets,
     requestNotificationPermission
-  } from '../utils'
+  } from '../../utils'
 
   interface StrengthWorkoutsProps {
     workout: Workout

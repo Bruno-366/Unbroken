@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Clock } from 'lucide-svelte'
-  import { workoutStore } from '../stores'
+  import { workoutStore } from '../../stores'
   import type { 
     CompletedWorkout, 
     CardioWorkout, 
     StrengthWorkout, 
     HypertrophyWorkout 
-  } from '../types'
+  } from '../../types'
   
   // Access completed workouts directly from store
   const completedWorkouts = $derived($workoutStore.completedWorkouts)

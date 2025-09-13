@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Workout, RestWorkout } from '../types'
+  import type { Workout, RestWorkout } from '../../types'
 
   interface RestWorkoutsProps {
     workout: Workout
