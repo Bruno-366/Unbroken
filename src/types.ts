@@ -21,7 +21,9 @@ export interface HypertrophyWorkout extends BaseWorkout {
 export interface CardioWorkout extends BaseWorkout {
   type: 'liss' | 'hiit';
   activity: string;
-  duration: number | string;
+  duration?: number; // seconds for HIIT, minutes for LISS
+  distance?: number; // meters for HIIT, kilometers for LISS
+  rounds?: number;
 }
 
 export interface RestWorkout extends BaseWorkout {
