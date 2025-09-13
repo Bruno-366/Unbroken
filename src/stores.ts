@@ -14,6 +14,14 @@ interface UIState {
     phase: 'initial' | 'extended'
     startTime: number
   }
+  lissTimer: {
+    isActive: boolean
+    isPaused: boolean
+    timeLeft: number
+    totalTime: number
+    startTime: number
+    pausedTime: number
+  }
 }
 
 interface WorkoutState {
@@ -167,6 +175,14 @@ const defaultUIState: UIState = {
     workoutType: null,
     phase: 'initial',
     startTime: 0
+  },
+  lissTimer: {
+    isActive: false,
+    isPaused: false,
+    timeLeft: 0,
+    totalTime: 0,
+    startTime: 0,
+    pausedTime: 0
   }
 }
 
