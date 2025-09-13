@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit'
-import { blockTemplates } from '../../../../blockTemplates'
+import { blockTemplates } from '$lib/blockTemplates'
 import { trainingPlanStore } from '$lib/stores'
 import { get } from 'svelte/store'
 

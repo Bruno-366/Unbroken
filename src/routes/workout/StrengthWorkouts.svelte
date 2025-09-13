@@ -12,7 +12,7 @@
     calculateHypertrophyWeight, 
     calculateWarmupSets,
     requestNotificationPermission
-  } from '../../utils'
+  } from '$lib/utils'
 
   interface StrengthWorkoutsProps {
     workout: Workout

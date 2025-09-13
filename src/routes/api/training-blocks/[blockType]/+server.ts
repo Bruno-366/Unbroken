@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit'
-import { blockTemplates } from '../../../../blockTemplates'
+import { blockTemplates } from '$lib/blockTemplates'
 import type { RequestHandler } from './$types'
 
 export const GET: RequestHandler = async ({ params }) => {

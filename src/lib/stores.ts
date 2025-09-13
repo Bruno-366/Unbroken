@@ -1,6 +1,6 @@
 // Svelte stores for centralized state management with persistence
 import { writable } from 'svelte/store'
-import type { CompletedWorkout, TrainingBlock } from '$lib/types'
+import type { CompletedWorkout, CustomPlanBlock } from '$lib/types'
 
 // Store interfaces
 interface UIState {
@@ -32,7 +32,7 @@ interface WorkoutState {
 }
 
 interface TrainingPlanState {
-  customPlan: TrainingBlock[]
+  customPlan: CustomPlanBlock[]
 }
 
 interface ExerciseState {

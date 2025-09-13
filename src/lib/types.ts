@@ -32,14 +32,22 @@ export interface RestWorkout extends BaseWorkout {
 
 export type Workout = StrengthWorkout | HypertrophyWorkout | CardioWorkout | RestWorkout;
 
+export interface Week {
+  days: Workout[];
+}
+
+export interface BlockTemplate {
+  weeks: Week[];
+}
+
 export interface CustomPlanBlock {
   name: string;
   weeks: number;
   type: string;
 }
 
-// Alias for consistency
-export type TrainingBlock = CustomPlanBlock;
+// Type for the training block templates (the data structure in blockTemplates.ts)
+export type TrainingBlock = BlockTemplate;
 
 export interface CompletedWorkout {
   date: string;
