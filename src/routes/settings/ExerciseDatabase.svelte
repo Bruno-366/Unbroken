@@ -2,7 +2,7 @@
   import { Activity } from 'lucide-svelte'
   import { getExerciseKey } from '../../utils'
   import { blockTemplates } from '../../blockTemplates'
-  import { exerciseStore, preferencesStore, trainingPlanStore } from '../../stores'
+  import { exerciseStore, preferencesStore, trainingPlanStore } from '$lib/stores'
   
   // Access stores directly using $derived for reactive values
   const exerciseState = $derived($exerciseStore)

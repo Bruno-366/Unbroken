@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Workout, CardioWorkout } from '../../types'
+  import type { Workout, CardioWorkout } from '$lib/types'
   import { Play, Pause, Square } from 'lucide-svelte'
   import { showRestCompleteNotification } from '../../utils'
-  import { uiStore } from '../../stores'
+  import { uiStore } from '$lib/stores'
 
   interface CardioWorkoutsProps {
     workout: Workout

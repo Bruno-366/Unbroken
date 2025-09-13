@@ -3,7 +3,7 @@
   import { 
     workoutStore, 
     trainingPlanStore
-  } from '../stores'
+  } from '$lib/stores'
   
   // Access stores directly
   const currentWeek = $derived($workoutStore.currentWeek)

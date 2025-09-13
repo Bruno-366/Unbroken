@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { trainingPlanStore, workoutStore } from '../../stores'
+  import { trainingPlanStore, workoutStore } from '$lib/stores'
   
   // Access stores directly
   let customPlan = $state($trainingPlanStore.customPlan)

@@ -4,9 +4,9 @@ import {
   workoutStore, 
   trainingPlanStore,
   uiStore
-} from '../../../../stores'
+} from '$lib/stores'
 import { get } from 'svelte/store'
-import type { CompletedWorkout, Workout } from '../../../../types'
+import type { CompletedWorkout, Workout } from '$lib/types'
 
 export async function POST() {
   try {

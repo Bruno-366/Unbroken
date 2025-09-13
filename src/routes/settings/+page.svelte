@@ -2,7 +2,7 @@
   import TrainingPlan from './TrainingPlan.svelte'
   import ExerciseDatabase from './ExerciseDatabase.svelte'
   import ResetProgress from './ResetProgress.svelte'
-  import { preferencesStore } from '../../stores'
+  import { preferencesStore } from '$lib/stores'
   
   let weightUnit = $state($preferencesStore.weightUnit)
   

@@ -3,9 +3,9 @@ import { blockTemplates } from '../../../../blockTemplates'
 import { 
   workoutStore, 
   trainingPlanStore
-} from '../../../../stores'
+} from '$lib/stores'
 import { get } from 'svelte/store'
-import type { Workout } from '../../../../types'
+import type { Workout } from '$lib/types'
 
 export async function GET() {
   try {

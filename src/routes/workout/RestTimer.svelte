@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Clock } from 'lucide-svelte'
   import { showRestCompleteNotification } from '../../utils'
-  import { uiStore } from '../../stores'
+  import { uiStore } from '$lib/stores'
   
   // Access rest timer directly from store without local state
   const restTimer = $derived($uiStore.restTimer)

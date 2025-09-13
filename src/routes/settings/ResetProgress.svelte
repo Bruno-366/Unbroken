@@ -6,7 +6,7 @@
     trainingPlanStore, 
     exerciseStore, 
     preferencesStore 
-  } from '../../stores'
+  } from '$lib/stores'
   
   // Access UI state directly from store
   const showResetConfirm = $derived($uiStore.showResetConfirm)

@@ -1,6 +1,6 @@
 // Svelte stores for centralized state management with persistence
 import { writable } from 'svelte/store'
-import type { CompletedWorkout, TrainingBlock } from './types'
+import type { CompletedWorkout, TrainingBlock } from '$lib/types'
 
 // Store interfaces
 interface UIState {

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit'
 import { blockTemplates } from '../../../../blockTemplates'
-import { trainingPlanStore } from '../../../../stores'
+import { trainingPlanStore } from '$lib/stores'
 import { get } from 'svelte/store'
 
 export async function GET() {

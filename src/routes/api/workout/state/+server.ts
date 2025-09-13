@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit'
 import { 
   workoutStore, 
   trainingPlanStore
-} from '../../../../stores'
+} from '$lib/stores'
 import { get } from 'svelte/store'
 
 export async function GET() {
