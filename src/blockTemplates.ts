@@ -174,7 +174,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x6", intensity: 75 },
           { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 65 },
-          { type: "hiit", activity: "Reset-20", duration: "20 sec", rounds: 5 },
+          { type: "hiit", activity: "Reset-20", duration: 20, rounds: 5 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x6", intensity: 75 },
           { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 65 },
           { type: "rest" },
@@ -185,7 +185,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x5", intensity: 80 },
           { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 70 },
-          { type: "hiit", activity: "Reset-20", duration: "15 sec", rounds: 4 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x5", intensity: 80 },
           { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 70 },
           { type: "rest" },
@@ -196,7 +196,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x3", intensity: 85 },
           { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 75 },
-          { type: "hiit", activity: "Reset-20", duration: "15 sec", rounds: 4 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x3", intensity: 85 },
           { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 75 },
           { type: "rest" },
@@ -211,7 +211,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x6,3x6,1x6", intensity: 75 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x12,4x12,4x12", intensity: 65 },
-          { type: "hiit", activity: "Reset-20", duration: "20 sec", rounds: 5 },
+          { type: "hiit", activity: "Reset-20", duration: 20, rounds: 5 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x6,3x6,1x6", intensity: 75 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x12,4x12,4x12", intensity: 65 },
           { type: "rest" },
@@ -222,7 +222,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x5,3x5,1x5", intensity: 80 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x10,4x10,4x10", intensity: 70 },
-          { type: "hiit", activity: "Reset-20", duration: "15 sec", rounds: 4 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x5,3x5,1x5", intensity: 80 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x10,4x10,4x10", intensity: 70 },
           { type: "rest" },
@@ -233,7 +233,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x3,3x3,1x3", intensity: 85 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x8,4x8,4x8", intensity: 75 },
-          { type: "hiit", activity: "Reset-20", duration: "15 sec", rounds: 4 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
           { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x3,3x3,1x3", intensity: 85 },
           { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x8,4x8,4x8", intensity: 75 },
           { type: "rest" },
@@ -248,7 +248,7 @@ export const blockTemplates = {
         days: [
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 50 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 50 },
-          { type: "hiit", activity: "Hill Sprints", duration: "", rounds: 3 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 3 },
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 55 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 55 },
           { type: "rest" },
@@ -259,7 +259,7 @@ export const blockTemplates = {
         days: [
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 60 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 60 },
-          { type: "hiit", activity: "Hill Sprints", duration: "", rounds: 5 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 5 },
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 65 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 65 },
           { type: "rest" },
@@ -270,7 +270,7 @@ export const blockTemplates = {
         days: [
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 70 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 70 },
-          { type: "hiit", activity: "Hill Sprints", duration: "", rounds: 7 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 7 },
           { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 75 },
           { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 75 },
           { type: "rest" },
@@ -285,10 +285,10 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 70 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 70 },
-          { type: "hiit", activity: "Tempo Run", duration: "5 km" },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 70 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 70 },
-          { type: "hiit", activity: "GC 9", duration: "100 m", rounds: 10 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
@@ -296,10 +296,10 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 80 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 80 },
-          { type: "hiit", activity: "600m Resets", duration: "600 m", rounds: 6 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 80 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 80 },
-          { type: "hiit", activity: "GC 9", duration: "100 m", rounds: 10 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
@@ -307,7 +307,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 90 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x3", intensity: 90 },
-          { type: "hiit", activity: "Tempo Run", duration: "5 km" },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 90 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x3,5x3", intensity: 90 },
           { type: "rest" },
@@ -318,10 +318,10 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 75 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 75 },
-          { type: "hiit", activity: "600m Resets", duration: "600 m", rounds: 6 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 75 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 75 },
-          { type: "hiit", activity: "GC 9", duration: "100 m", rounds: 10 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
@@ -329,10 +329,10 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 85 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x3", intensity: 85 },
-          { type: "hiit", activity: "Tempo Run", duration: "5 km" },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 85 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x3,5x3", intensity: 85 },
-          { type: "hiit", activity: "GC 9", duration: "100 m", rounds: 10 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
@@ -340,7 +340,7 @@ export const blockTemplates = {
         days: [
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x2", intensity: 95 },
           { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x2", intensity: 95 },
-          { type: "hiit", activity: "600m Resets", duration: "600 m", rounds: 6 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
           { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x2", intensity: 95 },
           { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x2,5x2", intensity: 95 },
           { type: "rest" },

@@ -45,7 +45,9 @@
 
   // Start LiSS timer function
   const startLissTimer = () => {
-    const duration = cardioWorkout().duration as number
+    const duration = cardioWorkout().duration
+    if (duration === undefined) return
+    
     const durationInSeconds = duration * 60
     const now = Date.now()
     
@@ -120,7 +122,7 @@
 
   // Derived timer display values
   const displayDuration = $derived(() => {
-    if (workout.type === 'liss' && typeof cardioWorkout().duration === 'number') {
+    if (workout.type === 'liss' && cardioWorkout().duration !== undefined) {
       if (lissTimer.isActive || lissTimer.isPaused || lissTimer.timeLeft > 0) {
         // Show countdown timer
         const minutes = Math.floor(lissTimer.timeLeft / 60)
@@ -135,7 +137,7 @@
   })
 
   const showTimerControls = $derived(() => {
-    return workout.type === 'liss' && typeof cardioWorkout().duration === 'number'
+    return workout.type === 'liss' && cardioWorkout().duration !== undefined
   })
 
   // Derived button states for conditional styling
@@ -173,13 +175,27 @@
       <h3 class="text-2xl font-bold mb-2">
         {cardioWorkout().activity}
       </h3>
-      {#if cardioWorkout().duration}
+      {#if cardioWorkout().duration !== undefined}
         <div class="text-4xl font-bold">{displayDuration()}</div>
-        {#if typeof cardioWorkout().duration === 'number'}
-          <div class="text-sm opacity-90 mt-1">minutes</div>
-        {/if}
+        <div class="text-sm opacity-90 mt-1">
+          {#if workout.type === 'liss'}
+            minutes
+          {:else}
+            seconds
+          {/if}
+        </div>
       {/if}
-      {#if cardioWorkout().rounds}
+      {#if cardioWorkout().distance !== undefined}
+        <div class="text-4xl font-bold">{cardioWorkout().distance}</div>
+        <div class="text-sm opacity-90 mt-1">
+          {#if workout.type === 'liss'}
+            km
+          {:else}
+            m
+          {/if}
+        </div>
+      {/if}
+      {#if cardioWorkout().rounds !== undefined}
         <div class="text-2xl font-semibold mt-2">
           {cardioWorkout().rounds} rounds
         </div>
