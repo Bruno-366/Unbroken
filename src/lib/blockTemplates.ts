@@ -98,34 +98,34 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Barbell Row", "Overhead Press"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Trap Bar Deadlift"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Weighted Dips"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x8", intensity: 60 },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x8", intensity: 60 },
+          { type: "liss", activity: "LISS run", duration: 20 },
+          { type: "strength", exercises: ["Deadlift"], sets: "5x8", intensity: 60 },
+          { type: "liss", activity: "Ruck", duration: 60 },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Barbell Row", "Overhead Press"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Trap Bar Deadlift"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Weighted Dips"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x6", intensity: 70 },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x6", intensity: 70 },
+          { type: "liss", activity: "LISS run", duration: 20 },
+          { type: "strength", exercises: ["Deadlift"], sets: "5x5", intensity: 70 },
+          { type: "liss", activity: "Ruck", duration: 60 },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Barbell Row", "Overhead Press"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Trap Bar Deadlift"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Weighted Dips"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Front Squat", "Weighted Pull-up"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 80 },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 80 },
+          { type: "liss", activity: "LISS run", duration: 20 },
+          { type: "strength", exercises: ["Deadlift"], sets: "10x3", intensity: 80 },
+          { type: "liss", activity: "Ruck", duration: 60 },
           { type: "rest" }
         ]
       }
@@ -135,34 +135,34 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "3x5", intensity: 75 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
+          { type: "liss", activity: "LISS run", duration: 30 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8,4x8,4x12,4x12,4x12", intensity: "70,70,55,55,55" },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "3x3", intensity: 85 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
+          { type: "liss", activity: "LISS run", duration: 30 },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x6,4x6,4x10,4x10,4x10", intensity: "75,75,60,60,60" },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "5x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
+          { type: "liss", activity: "Walk", duration: 60 },
+          { type: "strength", exercises: ["Overhead Press", "Deadlift", "KB Halos", "KB Rotational Swings", "KB Side Bends"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
+          { type: "liss", activity: "LISS run", duration: 30 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Calf Raises", "Adduction Machine", "Abduction Machine"], sets: "4x3,4x3,4x8,4x8,4x8", intensity: "80,80,65,65,65" },
+          { type: "rest" },
           { type: "rest" }
         ]
       }
@@ -172,34 +172,34 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "5x3", intensity: 80 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "5x3", intensity: 80 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "5x3", intensity: 80 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "4x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x6", intensity: 75 },
+          { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 65 },
+          { type: "hiit", activity: "Reset-20", duration: 20, rounds: 5 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x6", intensity: 75 },
+          { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 65 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "5x2", intensity: 87.5 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "5x2", intensity: 87.5 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "5x2", intensity: 87.5 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "4x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x5", intensity: 80 },
+          { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 70 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x5", intensity: 80 },
+          { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 70 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Bench Press", "Squat", "Weighted Pull-up"], sets: "6x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Dips"], sets: "6x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "4x8-12" },
-          { type: "strength", exercises: ["Bench Press", "Front Squat", "Barbell Row"], sets: "6x1", intensity: 95 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "4x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x3", intensity: 85 },
+          { type: "hypertrophy", exercises: ["DB Chest Flys", "DB Reverse Flys", "DB Lateral Raises", "DB Pullovers", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 75 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Power Clean"], sets: "3x3", intensity: 85 },
+          { type: "hypertrophy", exercises: ["KB Bulgarian Split Squat", "KB Cossack Squat", "KB Hack Squat", "Calf Raise", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 75 },
+          { type: "rest" },
           { type: "rest" }
         ]
       }
@@ -209,34 +209,34 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Weighted Pull-up"], sets: "Work up to daily max then 85% 3x3", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Overhead Press", "Weighted Dips"], sets: "Work up to daily max then 85% 3x3", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "Work up to daily max then 85% 3x3", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x6,3x6,1x6", intensity: 75 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x12,4x12,4x12", intensity: 65 },
+          { type: "hiit", activity: "Reset-20", duration: 20, rounds: 5 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x6,3x6,1x6", intensity: 75 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x12,4x12,4x12", intensity: 65 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Weighted Pull-up"], sets: "Work up to daily max then 90% 2x2", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Overhead Press", "Weighted Dips"], sets: "Work up to daily max then 90% 2x2", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "Work up to daily max then 90% 2x2", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x5,3x5,1x5", intensity: 80 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x10,4x10,4x10", intensity: 70 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x5,3x5,1x5", intensity: 80 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x10,4x10,4x10", intensity: 70 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Weighted Pull-up"], sets: "Work up to daily max then 95% 1x1", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Incline Dumbbell Press", "Romanian Deadlift", "Barbell Row"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Overhead Press", "Weighted Dips"], sets: "Work up to daily max then 95% 1x1", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Dumbbell Shoulder Press", "Bulgarian Split Squat", "Lat Pulldown"], sets: "3x8-12" },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "Work up to daily max then 95% 1x1", intensity: 100 },
-          { type: "hypertrophy", exercises: ["Close Grip Bench Press", "Walking Lunges", "Face Pulls"], sets: "3x8-12" },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x3,3x3,1x3", intensity: 85 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x8,4x8,4x8", intensity: 75 },
+          { type: "hiit", activity: "Reset-20", duration: 15, rounds: 4 },
+          { type: "strength", exercises: ["Bench Press", "Squat", "Deadlift"], sets: "3x3,3x3,1x3", intensity: 85 },
+          { type: "hypertrophy", exercises: ["Bench Press", "Squat", "Romanian Deadlift"], sets: "4x8,4x8,4x8", intensity: 75 },
+          { type: "rest" },
           { type: "rest" }
         ]
       }
@@ -246,34 +246,34 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "hypertrophy", exercises: ["Bench Press", "Incline Dumbbell Press", "Weighted Dips", "Close Grip Bench Press", "Tricep Dips"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Squat", "Romanian Deadlift", "Bulgarian Split Squat", "Walking Lunges", "Calf Raises"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Weighted Pull-up", "Barbell Row", "Lat Pulldown", "Face Pulls", "Barbell Curl"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Overhead Press", "Dumbbell Shoulder Press", "Lateral Raises", "Rear Delt Flies", "Shrugs"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Deadlift", "Good Mornings", "Glute Ham Raises", "Back Extensions", "Plank"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Full Body Circuit", "Farmer's Walk", "Battle Ropes", "Burpees", "Mountain Climbers"], sets: "3x8-12" },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 50 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 50 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 3 },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x12", intensity: 55 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x12", intensity: 55 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "hypertrophy", exercises: ["Incline Barbell Press", "Dumbbell Flyes", "Cable Crossovers", "Diamond Push-ups", "Overhead Tricep Extension"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Front Squat", "Goblet Squat", "Step-ups", "Leg Curls", "Calf Raises"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["T-Bar Row", "Cable Row", "Reverse Flyes", "Hammer Curls", "Cable Curls"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Arnold Press", "Front Raises", "Cable Lateral Raises", "Upright Rows", "Face Pulls"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Sumo Deadlift", "Hip Thrusts", "Single Leg RDL", "Reverse Hypers", "Side Plank"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["HIIT Circuit", "Jump Squats", "Push-up to T", "High Knees", "Plank Jacks"], sets: "3x30s" },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 60 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 60 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 5 },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x10", intensity: 65 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x10", intensity: 65 },
+          { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "hypertrophy", exercises: ["Dumbbell Press", "Cable Flyes", "Dips", "Skull Crushers", "Cable Tricep Pushdowns"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Hack Squat", "Leg Press", "Leg Extensions", "Leg Curls", "Standing Calf Raises"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Wide Grip Pull-ups", "Bent Over Row", "Cable Rows", "Preacher Curls", "Cable Hammer Curls"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Seated Dumbbell Press", "Cable Lateral Raises", "Bent Over Lateral Raises", "Cable Shrugs", "Barbell Shrugs"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Trap Bar Deadlift", "Stiff Leg Deadlift", "Cable Pull Throughs", "Good Mornings", "Russian Twists"], sets: "4x8-12" },
-          { type: "hypertrophy", exercises: ["Metabolic Circuit", "Kettlebell Swings", "Box Jumps", "Rowing Machine", "Bike Sprints"], sets: "3x45s" },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 70 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 70 },
+          { type: "hiit", activity: "Hill Sprints", rounds: 7 },
+          { type: "hypertrophy", exercises: ["DB Shoulder Press", "1-Arm DB Bench Press", "Weighted Dips", "Weighted Pull-Ups", "1-Arm DB Rows", "DB Upright Rows", "DB Bicep Curls", "DB Skull Crushers"], sets: "4x8", intensity: 75 },
+          { type: "hypertrophy", exercises: ["Leg Extensions", "Lying Leg Curls", "Leg Press", "Calf Raises", "Back Extensions", "Hanging Leg Raises", "Adduction Machine", "Abduction Machine"], sets: "4x8", intensity: 75 },
+          { type: "rest" },
           { type: "rest" }
         ]
       }
@@ -283,99 +283,66 @@ export const blockTemplates = {
     weeks: [
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 65 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 65 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 65 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 65 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 65 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 70 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 70 },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 70 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 70 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
+          { type: "rest" }
+        ]
+      },
+      {
+        days: [
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 80 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 80 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 80 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 80 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
+          { type: "rest" }
+        ]
+      },
+      {
+        days: [
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 90 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x3", intensity: 90 },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 90 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x3,5x3", intensity: 90 },
           { type: "rest" },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 70 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 70 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 70 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 70 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 70 },
-          { type: "rest" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 75 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x5", intensity: 75 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x5", intensity: 75 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x5,5x5", intensity: 75 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 75 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 75 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 75 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x5", intensity: 75 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x5", intensity: 75 },
-          { type: "rest" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 85 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x3", intensity: 85 },
+          { type: "hiit", activity: "Tempo Run", distance: 5000 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x3", intensity: 85 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x3,5x3", intensity: 85 },
+          { type: "hiit", activity: "GC 9", distance: 100, rounds: 10 },
           { type: "rest" }
         ]
       },
       {
         days: [
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "rest" },
-          { type: "rest" }
-        ]
-      },
-      {
-        days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 80 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 80 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 80 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 80 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 80 },
-          { type: "rest" },
-          { type: "rest" }
-        ]
-      },
-      {
-        days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 85 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 85 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 85 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 85 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 85 },
-          { type: "rest" },
-          { type: "rest" }
-        ]
-      },
-      {
-        days: [
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 90 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 90 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 90 },
-          { type: "strength", exercises: ["Overhead Press", "Deadlift", "Weighted Chin-up"], sets: "3x3", intensity: 90 },
-          { type: "strength", exercises: ["Squat", "Bench Press", "Barbell Row"], sets: "3x3", intensity: 90 },
-          { type: "rest" },
-          { type: "rest" }
-        ]
-      },
-      {
-        days: [
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "deload" },
-          { type: "rest" },
-          { type: "rest" }
-        ]
-      },
-      {
-        days: [
-          { type: "strength", exercises: ["Squat"], sets: "1x1", intensity: 100 },
-          { type: "strength", exercises: ["Bench Press"], sets: "1x1", intensity: 100 },
-          { type: "strength", exercises: ["Deadlift"], sets: "1x1", intensity: 100 },
-          { type: "rest" },
-          { type: "rest" },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x2", intensity: 95 },
+          { type: "strength", exercises: ["Weighted Pull-up", "Overhead Press"], sets: "5x2", intensity: 95 },
+          { type: "hiit", activity: "600m Resets", distance: 600, rounds: 6 },
+          { type: "strength", exercises: ["Bench Press", "Squat"], sets: "5x2", intensity: 95 },
+          { type: "strength", exercises: ["Deadlift", "Overhead Press"], sets: "3x2,5x2", intensity: 95 },
           { type: "rest" },
           { type: "rest" }
         ]

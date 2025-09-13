@@ -13,6 +13,7 @@
     "type-check": "npx svelte-kit sync && svelte-check --tsconfig tsconfig.json"
   },
   "dependencies": {
+    "@sveltejs/adapter-cloudflare": "^7.2.3",
     "@sveltejs/adapter-static": "^3.0.9",
     "@sveltejs/kit": "^2.39.1",
     "lucide-svelte": "^0.446.0"
