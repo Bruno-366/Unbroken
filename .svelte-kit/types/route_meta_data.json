@@ -1,0 +1,17 @@
+{
+	"/": [],
+	"/api/workout/complete": [
+		"src/routes/api/workout/complete/+server.ts"
+	],
+	"/api/workout/current": [
+		"src/routes/api/workout/current/+server.ts"
+	],
+	"/api/workout/state": [
+		"src/routes/api/workout/state/+server.ts"
+	],
+	"/history": [],
+	"/settings": [],
+	"/workout": [
+		"src/routes/workout/+page.ts"
+	]
+}

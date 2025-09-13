@@ -4,7 +4,7 @@
   "description": "A Svelte application deployed on Cloudflare Pages",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,js,svelte --report-unused-disable-directives --max-warnings 0",
@@ -12,6 +12,8 @@
     "type-check": "svelte-check --tsconfig tsconfig.json"
   },
   "dependencies": {
+    "@sveltejs/adapter-static": "^3.0.9",
+    "@sveltejs/kit": "^2.39.1",
     "lucide-svelte": "^0.446.0"
   },
   "devDependencies": {
