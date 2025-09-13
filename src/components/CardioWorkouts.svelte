@@ -137,6 +137,34 @@
   const showTimerControls = $derived(() => {
     return workout.type === 'liss' && typeof cardioWorkout().duration === 'number'
   })
+
+  // Derived button states for conditional styling
+  const buttonStates = $derived(() => {
+    const isStartDisabled = lissTimer.isActive
+    const isPauseDisabled = !lissTimer.isActive
+    const isStopDisabled = !lissTimer.isActive && !lissTimer.isPaused
+    
+    return {
+      start: {
+        disabled: isStartDisabled,
+        class: isStartDisabled 
+          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
+          : 'flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+      },
+      pause: {
+        disabled: isPauseDisabled,
+        class: isPauseDisabled
+          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
+          : 'flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+      },
+      stop: {
+        disabled: isStopDisabled,
+        class: isStopDisabled
+          ? 'flex-1 bg-gray-400 text-gray-600 font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-not-allowed'
+          : 'flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2'
+      }
+    }
+  })
 </script>
 
 {#if workout.type === 'liss' || workout.type === 'hiit'}
@@ -157,24 +185,27 @@
       <!-- Timer control buttons -->
       <div class="flex gap-2 mt-4">
         <button 
-          onclick={startLissTimer} 
-          class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          onclick={buttonStates().start.disabled ? undefined : startLissTimer} 
+          disabled={buttonStates().start.disabled}
+          class={buttonStates().start.class}
         >
-          <Play class="w-4 h-4" />
+          <Play class="w-4 h-4" stroke-width="3" />
           Start
         </button>
         <button 
-          onclick={pauseLissTimer} 
-          class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          onclick={buttonStates().pause.disabled ? undefined : pauseLissTimer} 
+          disabled={buttonStates().pause.disabled}
+          class={buttonStates().pause.class}
         >
-          <Pause class="w-4 h-4" />
+          <Pause class="w-4 h-4" stroke-width="3" />
           Pause
         </button>
         <button 
-          onclick={stopLissTimer} 
-          class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          onclick={buttonStates().stop.disabled ? undefined : stopLissTimer} 
+          disabled={buttonStates().stop.disabled}
+          class={buttonStates().stop.class}
         >
-          <Square class="w-4 h-4" />
+          <Square class="w-4 h-4" stroke-width="3" />
           Stop
         </button>
       </div>
