@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import type { Workout } from '../../types'
   import CardioWorkouts from '../../components/CardioWorkouts.svelte'
   import StrengthWorkouts from '../../components/StrengthWorkouts.svelte'
   import RestWorkouts from '../../components/RestWorkouts.svelte'

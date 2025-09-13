@@ -1,10 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
-  import { 
-    uiStore, 
-    isStoreInitialized
-  } from '../stores'
+  import { isStoreInitialized } from '../stores'
   
   // Import global styles
   import '../app.css'

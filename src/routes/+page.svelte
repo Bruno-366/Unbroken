@@ -7,7 +7,6 @@
   
   // Access stores directly
   const currentWeek = $derived($workoutStore.currentWeek)
-  const currentDay = $derived($workoutStore.currentDay)
   const customPlan = $derived($trainingPlanStore.customPlan)
   
   // Derived values
