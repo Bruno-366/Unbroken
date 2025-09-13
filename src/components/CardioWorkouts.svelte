@@ -179,6 +179,11 @@
           <div class="text-sm opacity-90 mt-1">minutes</div>
         {/if}
       {/if}
+      {#if cardioWorkout().rounds}
+        <div class="text-2xl font-semibold mt-2">
+          {cardioWorkout().rounds} rounds
+        </div>
+      {/if}
     </div>
     
     {#if showTimerControls()}

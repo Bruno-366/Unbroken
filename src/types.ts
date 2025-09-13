@@ -22,6 +22,7 @@ export interface CardioWorkout extends BaseWorkout {
   type: 'liss' | 'hiit';
   activity: string;
   duration: number | string;
+  rounds?: number;
 }
 
 export interface RestWorkout extends BaseWorkout {
