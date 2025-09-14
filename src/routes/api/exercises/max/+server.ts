@@ -1,31 +1,29 @@
 import { json } from '@sveltejs/kit'
-import { exerciseStore } from '$lib/stores'
-import { get } from 'svelte/store'
 
-export async function GET() {
+export async function GET({ url }) {
   try {
-    const exerciseState = get(exerciseStore)
-    return json(exerciseState.maxes)
+    // Get maxes from query parameter
+    const maxesParam = url.searchParams.get('maxes')
+    const maxes = maxesParam ? JSON.parse(maxesParam) : {}
+    
+    return json(maxes)
   } catch (error) {
-    console.error('Error fetching exercise maxes:', error)
-    return json({ error: 'Failed to fetch exercise maxes' }, { status: 500 })
+    console.error('Error processing exercise maxes:', error)
+    return json({ error: 'Failed to process exercise maxes' }, { status: 500 })
   }
 }
 
 export async function POST({ request }) {
   try {
-    const { exerciseKey, value } = await request.json()
+    const { exerciseKey, value, currentMaxes } = await request.json()
     
     if (!exerciseKey || typeof value !== 'number') {
       return json({ error: 'Invalid exercise key or value' }, { status: 400 })
     }
     
-    exerciseStore.update(state => ({
-      ...state,
-      maxes: { ...state.maxes, [exerciseKey]: value }
-    }))
+    const updatedMaxes = { ...currentMaxes, [exerciseKey]: value }
     
-    return json({ success: true })
+    return json({ success: true, maxes: updatedMaxes })
   } catch (error) {
     console.error('Error updating exercise max:', error)
     return json({ error: 'Failed to update exercise max' }, { status: 500 })

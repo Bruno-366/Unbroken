@@ -1,15 +1,18 @@
 import { json } from '@sveltejs/kit'
 import { blockTemplates } from '$lib/blockTemplates'
-import { 
-  workoutStore, 
-  trainingPlanStore
-} from '$lib/stores'
-import { get } from 'svelte/store'
 import type { Workout } from '$lib/types'
 
-export async function GET() {
+export async function GET({ url }) {
   try {
-    const currentWorkout = getCurrentWorkout()
+    const blockType = url.searchParams.get('blockType')
+    const currentWeek = parseInt(url.searchParams.get('currentWeek') || '1')
+    const currentDay = parseInt(url.searchParams.get('currentDay') || '1')
+    
+    if (!blockType) {
+      return json({ error: 'Block type is required' }, { status: 400 })
+    }
+    
+    const currentWorkout = getCurrentWorkout(blockType, currentWeek, currentDay)
     return json(currentWorkout)
   } catch (error) {
     console.error('Error fetching current workout:', error)
@@ -17,17 +20,15 @@ export async function GET() {
   }
 }
 
-function getCurrentWorkout(): Workout | null {
-  const workoutState = get(workoutStore)
-  const trainingState = get(trainingPlanStore)
-  
-  const block = trainingState.customPlan[0]
-  if (!block) return null
-  
-  const blockTemplate = blockTemplates[block.type as keyof typeof blockTemplates]
+function getCurrentWorkout(blockType: string, currentWeek: number, currentDay: number): Workout | null {
+  const blockTemplate = blockTemplates[blockType as keyof typeof blockTemplates]
   if (!blockTemplate) return null
   
-  const weekIndex = Math.min(workoutState.currentWeek - 1, blockTemplate.weeks.length - 1)
-  const dayIndex = workoutState.currentDay - 1
+  const weekIndex = Math.min(currentWeek - 1, blockTemplate.weeks.length - 1)
+  const dayIndex = currentDay - 1
+  
+  if (weekIndex < 0 || dayIndex < 0 || dayIndex >= 7) return null
+  if (!blockTemplate.weeks[weekIndex] || !blockTemplate.weeks[weekIndex].days[dayIndex]) return null
+  
   return blockTemplate.weeks[weekIndex].days[dayIndex] as Workout
 }

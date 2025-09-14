@@ -1,18 +1,15 @@
 import { json } from '@sveltejs/kit'
 import { blockTemplates } from '$lib/blockTemplates'
-import { trainingPlanStore } from '$lib/stores'
-import { get } from 'svelte/store'
 
-export async function GET() {
+export async function GET({ url }) {
   try {
-    const trainingState = get(trainingPlanStore)
-    const currentBlock = trainingState.customPlan[0]
+    const blockType = url.searchParams.get('blockType')
     
-    if (!currentBlock) {
+    if (!blockType) {
       return json({ strengthExercises: [], hypertrophyExercises: [] })
     }
     
-    const blockTemplate = blockTemplates[currentBlock.type as keyof typeof blockTemplates]
+    const blockTemplate = blockTemplates[blockType as keyof typeof blockTemplates]
     if (!blockTemplate) {
       return json({ strengthExercises: [], hypertrophyExercises: [] })
     }

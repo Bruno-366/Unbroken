@@ -29,14 +29,73 @@
   })
 
   const handleCompleteWorkout = async () => {
-    await fetch('/api/workout/complete', {
+    // Import stores dynamically to ensure they're available
+    const { workoutStore, trainingPlanStore, uiStore } = await import('$lib/stores')
+    const { get } = await import('svelte/store')
+    
+    const workoutState = get(workoutStore)
+    const trainingState = get(trainingPlanStore)
+    const currentBlock = trainingState.customPlan[0]
+    
+    if (!currentBlock) return
+    
+    const response = await fetch('/api/workout/complete', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({})
+      body: JSON.stringify({
+        currentWeek: workoutState.currentWeek,
+        currentDay: workoutState.currentDay,
+        blockType: currentBlock.type,
+        blockName: currentBlock.name
+      })
     })
-    goto('/')
+    
+    const result = await response.json()
+    
+    if (result.success) {
+      // Update local stores with the new state
+      workoutStore.update(state => ({
+        ...state,
+        completedWorkouts: [...state.completedWorkouts, result.workout],
+        completedSets: {},
+        currentDay: result.newDay,
+        currentWeek: result.newWeek
+      }))
+      
+      // Move to next block if needed
+      if (result.moveToNextBlock) {
+        trainingPlanStore.update(state => ({
+          ...state,
+          customPlan: state.customPlan.slice(1)
+        }))
+      }
+      
+      // Reset UI state
+      uiStore.update(state => ({
+        ...state,
+        activeTab: 'overview',
+        restTimer: {
+          isActive: false,
+          timeLeft: 0,
+          totalTime: 0,
+          workoutType: null,
+          phase: 'initial',
+          startTime: 0
+        },
+        lissTimer: {
+          isActive: false,
+          isPaused: false,
+          timeLeft: 0,
+          totalTime: 0,
+          startTime: 0,
+          pausedTime: 0
+        }
+      }))
+      
+      goto('/')
+    }
   }
 </script>
 

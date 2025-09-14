@@ -1,26 +1,23 @@
 import { json } from '@sveltejs/kit'
-import { 
-  workoutStore, 
-  trainingPlanStore
-} from '$lib/stores'
-import { get } from 'svelte/store'
 
-export async function GET() {
+export async function GET({ url }) {
   try {
-    const workoutState = get(workoutStore)
-    const trainingState = get(trainingPlanStore)
-    
-    const currentBlockInfo = trainingState.customPlan[0] || { name: 'No active block', weeks: 0 }
+    // Extract client state from query parameters
+    const currentWeek = parseInt(url.searchParams.get('currentWeek') || '1')
+    const currentDay = parseInt(url.searchParams.get('currentDay') || '1')
+    const blockName = url.searchParams.get('blockName') || 'No active block'
+    const completedWorkouts = JSON.parse(url.searchParams.get('completedWorkouts') || '[]')
+    const completedSets = JSON.parse(url.searchParams.get('completedSets') || '{}')
     
     return json({
-      currentWeek: workoutState.currentWeek,
-      currentDay: workoutState.currentDay,
-      currentBlockInfo,
-      completedWorkouts: workoutState.completedWorkouts,
-      completedSets: workoutState.completedSets
+      currentWeek,
+      currentDay,
+      currentBlockInfo: { name: blockName, weeks: 0 },
+      completedWorkouts,
+      completedSets
     })
   } catch (error) {
-    console.error('Error fetching workout state:', error)
-    return json({ error: 'Failed to fetch workout state' }, { status: 500 })
+    console.error('Error processing workout state:', error)
+    return json({ error: 'Failed to process workout state' }, { status: 500 })
   }
 }
