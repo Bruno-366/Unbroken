@@ -171,7 +171,7 @@ const defaultUIState: UIState = {
 export const uiStore = writable<UIState>(defaultUIState)
 
 // Workout Store (persisted)
-const defaultWorkoutState: WorkoutState = {
+export const defaultWorkoutState: WorkoutState = {
   currentWeek: 1,
   currentDay: 1,
   completedWorkouts: [],
@@ -181,7 +181,7 @@ const defaultWorkoutState: WorkoutState = {
 export const workoutStore = createPersistedStore('workoutState', defaultWorkoutState)
 
 // Training Plan Store (persisted)  
-const defaultTrainingPlanState: TrainingPlanState = {
+export const defaultTrainingPlanState: TrainingPlanState = {
   customPlan: [
     { name: "Get Ready", weeks: 1, type: "getready" },
     { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
@@ -200,7 +200,7 @@ const defaultTrainingPlanState: TrainingPlanState = {
 export const trainingPlanStore = createPersistedStore('trainingPlanState', defaultTrainingPlanState)
 
 // Exercise Store (persisted)
-const defaultExerciseState: ExerciseState = {
+export const defaultExerciseState: ExerciseState = {
   maxes: { 
     benchpress: 100, 
     squat: 120, 
@@ -218,7 +218,7 @@ const defaultExerciseState: ExerciseState = {
 export const exerciseStore = createPersistedStore('exerciseState', defaultExerciseState)
 
 // Preferences Store (persisted)
-const defaultPreferencesState: PreferencesState = {
+export const defaultPreferencesState: PreferencesState = {
   weightUnit: 'kg'
 }
 

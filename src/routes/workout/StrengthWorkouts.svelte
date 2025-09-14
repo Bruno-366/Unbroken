@@ -27,30 +27,9 @@
   const tenRMs = $derived($exerciseStore.tenRMs)
   const weightUnit = $derived($preferencesStore.weightUnit)
 
-  // Local rest timer state using runes
-  let restTimer = $state({
-    isActive: false,
-    timeLeft: 0,
-    totalTime: 0,
-    workoutType: null as 'strength' | 'hypertrophy' | null,
-    phase: 'initial' as 'initial' | 'extended',
-    startTime: 0
-  })
-
-  // Rest timer update function
-  const updateRestTimer = (updates: Partial<typeof restTimer>) => {
-    Object.assign(restTimer, updates)
-  }
-
-  // Stop rest timer function
-  const stopRestTimer = () => {
-    restTimer.isActive = false
-    restTimer.timeLeft = 0
-    restTimer.totalTime = 0
-    restTimer.workoutType = null
-    restTimer.phase = 'initial'
-    restTimer.startTime = 0
-  }
+  // Local state for showing rest timer
+  let showRest = $state(false)
+  let restTimerRef = $state<{ start: () => void } | undefined>(undefined)
 
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
@@ -71,18 +50,19 @@
         // Request notification permission without blocking (don't await)
         requestNotificationPermission()
         
-        const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
-        const now = Date.now()
-        
-        // Update local rest timer state
-        restTimer.isActive = true
-        restTimer.timeLeft = initialTime
-        restTimer.totalTime = initialTime
-        restTimer.workoutType = workout.type as 'strength' | 'hypertrophy'
-        restTimer.phase = 'initial'
-        restTimer.startTime = now
+        // Show rest timer and start it
+        showRest = true
+        // Wait for the component to render before calling start
+        await new Promise(resolve => setTimeout(resolve, 0))
+        if (restTimerRef) {
+          restTimerRef.start()
+        }
       }
     }
+  }
+
+  const onRestComplete = () => {
+    showRest = false
   }
 
   // Derive strength workout with proper typing - more idiomatic than casting everywhere
@@ -105,16 +85,13 @@
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
   <div class="space-y-4">
-    <RestTimer 
-      isActive={restTimer.isActive}
-      timeLeft={restTimer.timeLeft}
-      totalTime={restTimer.totalTime}
-      workoutType={restTimer.workoutType}
-      phase={restTimer.phase}
-      startTime={restTimer.startTime}
-      onUpdate={updateRestTimer}
-      onStop={stopRestTimer}
-    />
+    {#if showRest}
+      <RestTimer 
+        workoutType={workout.type}
+        onStop={onRestComplete}
+        bind:this={restTimerRef}
+      />
+    {/if}
     {#each (strengthWorkout().exercises || []) as exercise, exerciseIndex}
       {@const setSchemes = (strengthWorkout().sets || '').split(',')}
       {@const exerciseSetSchemes = getExerciseData(exerciseIndex, 0).shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes}
