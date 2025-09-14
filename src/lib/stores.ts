@@ -22,6 +22,17 @@ interface UIState {
     startTime: number
     pausedTime: number
   }
+  hiitTimer: {
+    isActive: boolean
+    isPaused: boolean
+    timeLeft: number
+    totalTime: number
+    startTime: number
+    pausedTime: number
+    currentRound: number
+    totalRounds: number
+    roundCompleted: boolean
+  }
 }
 
 interface WorkoutState {
@@ -199,6 +210,17 @@ const defaultUIState: UIState = {
     totalTime: 0,
     startTime: 0,
     pausedTime: 0
+  },
+  hiitTimer: {
+    isActive: false,
+    isPaused: false,
+    timeLeft: 0,
+    totalTime: 0,
+    startTime: 0,
+    pausedTime: 0,
+    currentRound: 0,
+    totalRounds: 0,
+    roundCompleted: false
   }
 }
 

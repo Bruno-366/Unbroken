@@ -85,6 +85,17 @@ export interface AppState {
     startTime: number;
     pausedTime: number;
   };
+  hiitTimer: {
+    isActive: boolean;
+    isPaused: boolean;
+    timeLeft: number;
+    totalTime: number;
+    startTime: number;
+    pausedTime: number;
+    currentRound: number;
+    totalRounds: number;
+    roundCompleted: boolean;
+  };
 }
 
 export interface WarmupSet {

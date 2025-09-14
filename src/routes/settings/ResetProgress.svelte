@@ -43,6 +43,17 @@
           totalTime: 0,
           startTime: 0,
           pausedTime: 0
+        },
+        hiitTimer: {
+          isActive: false,
+          isPaused: false,
+          timeLeft: 0,
+          totalTime: 0,
+          startTime: 0,
+          pausedTime: 0,
+          currentRound: 0,
+          totalRounds: 0,
+          roundCompleted: false
         }
       })
       
