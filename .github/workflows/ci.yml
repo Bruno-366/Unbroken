@@ -32,7 +32,7 @@ jobs:
       run: npx svelte-kit sync
       
     - name: Run ESLint
-      run: npm run lint
+      run: ./node_modules/.bin/eslint . --ext ts,js,svelte --report-unused-disable-directives --max-warnings 0
       
     - name: Run TypeScript type checking
       run: npm run type-check
