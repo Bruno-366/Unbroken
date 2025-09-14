@@ -1,9 +1,9 @@
 {
   "name": "unbroken",
-  "main": ".svelte-kit/output/server/index.js",
+  "main": ".svelte-kit/cloudflare/_worker.js",
   "compatibility_date": "2025-08-15",
   "assets": {
-    "directory": ".svelte-kit/output/client",
+    "directory": ".svelte-kit/cloudflare",
     "binding": "ASSETS"
   }
 }
