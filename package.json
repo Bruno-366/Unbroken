@@ -25,7 +25,6 @@
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
     "autoprefixer": "^10.4.21",
-    "canvas": "^3.1.2",
     "eslint": "^9.15.0",
     "eslint-plugin-svelte": "^2.45.0",
     "globals": "^15.13.0",
