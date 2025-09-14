@@ -2,7 +2,7 @@
 
 # Unbroken
 
-**Tactical Barbell Tracker** - A modern Svelte 5 application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript and Vite, ready for deployment on Cloudflare Pages.
+**Tactical Barbell Tracker** - A modern SvelteKit application for tracking strength training, cardio workouts, and training blocks following the Tactical Barbell methodology. Built with TypeScript, featuring a comprehensive REST API and server-side rendering, ready for deployment on Cloudflare Pages.
 
 ## 📋 Features
 
@@ -44,20 +44,24 @@
 
 ## 📝 Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run dev` - Start SvelteKit development server with hot module replacement
+- `npm run build` - Build for production (includes SSR bundle generation)
 - `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint
+- `npm run sync` - Sync SvelteKit generated files 
+- `npm run lint` - Run ESLint with Svelte support
 - `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run type-check` - Run Svelte type checking
+- `npm run type-check` - Run SvelteKit sync and Svelte type checking
 
 ## 🏗️ Tech Stack
 
+- **SvelteKit** - Full-stack web framework with server-side rendering and API routes
 - **Svelte 5** - Modern reactive framework with runes for state management
 - **TypeScript** - Type safety and enhanced developer experience
 - **Vite** - Build tool and dev server with hot module replacement
 - **Tailwind CSS** - Utility-first CSS framework for responsive design
-- **ESLint** - Code linting and quality enforcement
+- **ESLint v9** - Code linting with flat config structure
+- **Cloudflare Adapter** - Deployment as Cloudflare Workers with assets binding
+- **REST API** - Comprehensive API endpoints for workout management
 - **Tactical Barbell Methodology** - Structured training approach for strength and conditioning
 
 ## 🌐 Deployment on Cloudflare Pages
@@ -71,9 +75,9 @@
    - Select the `Bruno-366/Unbroken` repository
 
 2. **Configure Build Settings:**
-   - **Framework preset**: `None` (or `Vite` if available)
+   - **Framework preset**: `SvelteKit` (or `None` if SvelteKit is not available)
    - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
+   - **Build output directory**: `.svelte-kit/output/client`
    - **Root directory**: `/` (leave empty)
    - **Node.js version**: `18` or higher
 
@@ -93,9 +97,9 @@
    npm run build
    ```
 
-2. Upload the `dist` folder contents to Cloudflare Pages using:
+2. Upload the `.svelte-kit/output/client` folder contents to Cloudflare Pages using:
    - Cloudflare Pages dashboard (drag and drop)
-   - Wrangler CLI: `npx wrangler pages deploy dist`
+   - Wrangler CLI: `npx wrangler pages deploy .svelte-kit/output/client`
 
 ### Custom Domain
 
@@ -107,53 +111,64 @@
 
 ```
 Unbroken/
-├── public/                      # Static assets
-├── src/                         # Source code
-│   ├── components/              # Svelte components (refactored from monolithic App.svelte)
-│   │   ├── CardioWorkouts.svelte   # LISS and HIIT workout rendering
-│   │   ├── StrengthWorkouts.svelte # Strength/hypertrophy workouts with warm-up sets
-│   │   ├── RestWorkouts.svelte     # Rest and deload workout rendering
-│   │   ├── History.svelte          # Workout history display
-│   │   ├── TrainingPlan.svelte     # Training blocks drag & drop management
-│   │   ├── ExerciseDatabase.svelte # 1RM and 10RM exercise input management
-│   │   ├── RestTimer.svelte        # Rest timer with visual feedback
-│   │   └── ResetProgress.svelte    # Reset confirmation modal
-│   ├── App.svelte                  # Main App component with reactive state management
-│   ├── types.ts                 # Centralized TypeScript interfaces and types
-│   ├── utils.ts                 # Shared utility functions (weight calculations, notifications)
-│   ├── blockTemplates.ts        # Training block templates and configurations
-│   ├── main.ts                  # Entry point
-│   └── app.css                  # Global styles with Tailwind CSS
-├── .github/                     # GitHub Actions workflows
-├── dist/                        # Build output (generated)
-├── index.html                   # HTML template
-├── package.json                 # Dependencies and scripts
-├── tsconfig.json                # TypeScript configuration
-├── vite.config.ts               # Vite configuration
-├── wrangler.jsonc               # Cloudflare Pages configuration
-├── tailwind.config.js           # Tailwind CSS configuration
-├── postcss.config.js            # PostCSS configuration
-├── svelte.config.js             # Svelte configuration
-└── .eslintrc.cjs                # ESLint configuration
+├── static/                       # Static assets (icons, favicons)
+├── src/                          # Source code
+│   ├── routes/                   # SvelteKit file-based routing
+│   │   ├── +layout.svelte           # Main layout with navigation
+│   │   ├── +layout.ts               # Layout data loading
+│   │   ├── +page.svelte             # Overview page (home)
+│   │   ├── api/                     # REST API endpoints
+│   │   │   ├── exercises/               # Exercise management endpoints
+│   │   │   ├── training-blocks/         # Training block endpoints
+│   │   │   ├── training-plan/           # Training plan endpoints
+│   │   │   ├── workout/                 # Workout state and completion endpoints
+│   │   │   └── history/                 # Workout history endpoints
+│   │   ├── workout/                 # Workout page
+│   │   │   ├── +page.svelte             # Strength/cardio workout interface
+│   │   │   └── +page.ts                 # Workout page data loading
+│   │   ├── history/                 # History page
+│   │   │   └── +page.svelte             # Workout history display
+│   │   └── settings/                # Settings page
+│   │       └── +page.svelte             # Exercise database and training plan management
+│   ├── lib/                      # Shared library code (SvelteKit convention)
+│   │   ├── blockTemplates.ts        # Training block templates and configurations
+│   │   ├── stores.ts                # Client-side reactive stores
+│   │   ├── types.ts                 # Centralized TypeScript interfaces
+│   │   └── utils.ts                 # Shared utility functions (weight calculations, notifications)
+│   ├── app.html                  # HTML template with PWA meta tags
+│   ├── app.d.ts                  # SvelteKit app type definitions
+│   └── app.css                   # Global styles with Tailwind CSS
+├── .github/                      # GitHub Actions workflows
+├── .svelte-kit/                  # SvelteKit generated files (git ignored)
+├── eslint.config.js              # ESLint v9 flat configuration
+├── package.json                  # Dependencies and scripts
+├── tsconfig.json                 # TypeScript configuration
+├── vite.config.ts                # Vite configuration with SvelteKit
+├── wrangler.jsonc                # Cloudflare Pages configuration
+├── tailwind.config.js            # Tailwind CSS configuration
+├── postcss.config.js             # PostCSS configuration
+└── svelte.config.js              # Svelte and SvelteKit configuration
 ```
 
 ### Component Architecture
 
-The application has been built with Svelte 5's modern reactive architecture using runes for state management:
+The application has been built with SvelteKit's full-stack architecture and Svelte 5's modern reactive patterns:
 
-- **Reactive State Management**: Svelte 5 runes ($state, $derived, $effect) provide automatic reactivity
-- **Component Composition**: Each component handles a specific aspect of functionality
-- **Type Safety**: Comprehensive TypeScript interfaces ensure code reliability
-- **Reusability**: Components are designed to be easily testable and modifiable
-- **Maintainability**: Svelte's compile-time optimizations and clean syntax improve maintainability
+- **SvelteKit Framework**: File-based routing with dedicated pages for each section
+- **REST API**: Comprehensive server-side API endpoints for all data operations
+- **Server-Side Rendering**: Optimized initial page loads with SSR capabilities
+- **Reactive State Management**: Svelte 5 runes ($state, $derived, $effect) with client-side stores
+- **Type Safety**: Comprehensive TypeScript interfaces shared between client and server
+- **Modular Architecture**: Clear separation between routes, API endpoints, and shared utilities
+- **Progressive Enhancement**: Works with and without JavaScript enabled
 
 ## 🚨 CI/CD
 
 The repository includes GitHub Actions workflow that runs on every push and pull request:
 
-- **Linting**: ESLint checks for code quality (Svelte components included)
-- **Type Checking**: Svelte type checking validates components and TypeScript
-- **Build**: Ensures the project builds successfully
+- **Linting**: ESLint v9 checks for code quality (Svelte components and TypeScript)
+- **Type Checking**: SvelteKit sync and Svelte type checking validates components and TypeScript
+- **Build**: Ensures the project builds successfully with SSR bundle generation
 - **Artifact Upload**: Stores build output for review
 
 ## 🛠️ Customization
@@ -168,38 +183,44 @@ The repository includes GitHub Actions workflow that runs on every push and pull
 
 ### Additional Dependencies
 ```bash
-# Example: Add a UI library (compatible with Tailwind and Svelte)
+# Example: Add a UI library (compatible with Tailwind and SvelteKit)
 npm install @floating-ui/dom
 
-# Example: Add routing (for multi-page functionality)
-npm install svelte-spa-router
+# Example: Add form handling and validation for SvelteKit
+npm install @sveltejs/enhanced:$form
 
-# Example: Add form handling and validation
-npm install felte @felte/validator-zod zod
+# Example: Add database integration
+npm install drizzle-orm @libsql/client
 
-# Example: Add state management (if needed for larger scale)
-npm install svelte/store
+# Example: Add authentication
+npm install @auth/sveltekit
 
 # Example: Add date/time utilities
 npm install date-fns
+
+# Example: Add additional SvelteKit adapters
+npm install @sveltejs/adapter-vercel @sveltejs/adapter-netlify
 ```
 
 ### Tailwind CSS Customization
 - Modify `tailwind.config.js` to extend the theme, add custom colors, or configure plugins
 - Add custom utilities or components in `src/app.css`
 - Use Tailwind IntelliSense extension in VS Code for better development experience
-- Svelte components work seamlessly with Tailwind's utility classes
+- SvelteKit pages and components work seamlessly with Tailwind's utility classes
 
 ### Environment Variables
 Create `.env` files for different environments:
-- `.env.local` - Local development
+- `.env` - Environment variables for all environments
+- `.env.local` - Local development (git ignored)
 - `.env.production` - Production builds
 
 ## 📚 Resources
 
-- [Vite Documentation](https://vitejs.dev/)
+- [SvelteKit Documentation](https://kit.svelte.dev/)
 - [Svelte 5 Documentation](https://svelte.dev/)
+- [Vite Documentation](https://vitejs.dev/)
 - [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
 - [TypeScript Documentation](https://www.typescriptlang.org/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/)
 - [Tactical Barbell Official](https://www.tacticalbarbell.com/) - Learn about the training methodology
