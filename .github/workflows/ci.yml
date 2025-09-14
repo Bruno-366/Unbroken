@@ -12,9 +12,6 @@ jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest
     
-    env:
-      NODE_ENV: production
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -26,9 +23,7 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: |
-        npm cache clean --force
-        npm install --include=dev
+      run: npm ci
       
     - name: Generate SvelteKit files
       run: npx svelte-kit sync
@@ -41,10 +36,3 @@ jobs:
       
     - name: Build project
       run: npm run build
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-files
-        path: .svelte-kit/output/
-        retention-days: 7
