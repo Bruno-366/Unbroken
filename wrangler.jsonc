@@ -1,7 +1,4 @@
 {
   "name": "unbroken",
-  "compatibility_date": "2025-08-15",
-  "assets": {
-    "directory": "./dist"
-  }
+  "compatibility_date": "2025-08-15"
 }
