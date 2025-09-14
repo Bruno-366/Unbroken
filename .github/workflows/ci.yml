@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm cache clean --force
-        npm install
+        npm install --include=dev
       
     - name: Generate SvelteKit files
       run: npx svelte-kit sync
