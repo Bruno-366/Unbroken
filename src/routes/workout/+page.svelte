@@ -30,7 +30,7 @@
 
   const handleCompleteWorkout = async () => {
     // Import stores dynamically to ensure they're available
-    const { workoutStore, trainingPlanStore, uiStore } = await import('$lib/stores')
+    const { workoutStore, trainingPlanStore } = await import('$lib/stores')
     const { get } = await import('svelte/store')
     
     const workoutState = get(workoutStore)
@@ -71,12 +71,6 @@
           customPlan: state.customPlan.slice(1)
         }))
       }
-      
-      // Reset UI state (only activeTab now since timers are component-level)
-      uiStore.update(state => ({
-        ...state,
-        activeTab: 'overview'
-      }))
       
       goto('/')
     }

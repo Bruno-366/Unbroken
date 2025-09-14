@@ -3,10 +3,6 @@ import { writable } from 'svelte/store'
 import type { CompletedWorkout, CustomPlanBlock } from '$lib/types'
 
 // Store interfaces
-interface UIState {
-  activeTab: string
-}
-
 interface WorkoutState {
   currentWeek: number
   currentDay: number
@@ -162,13 +158,6 @@ const createPersistedStore = <T>(
     }
   }
 }
-
-// UI Store (not persisted - transient state)
-const defaultUIState: UIState = {
-  activeTab: 'overview'
-}
-
-export const uiStore = writable<UIState>(defaultUIState)
 
 // Workout Store (persisted)
 export const defaultWorkoutState: WorkoutState = {
