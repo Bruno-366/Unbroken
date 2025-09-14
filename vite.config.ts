@@ -1,17 +1,10 @@
+import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    svelte({
-      compilerOptions: {
-        experimental: {
-          async: true
-        }
-      }
-    }),
+    sveltekit(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
@@ -50,10 +43,5 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       }
     })
-  ],
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-  },
-  base: '/',
+  ]
 })

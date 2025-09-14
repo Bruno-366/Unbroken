@@ -1,6 +1,6 @@
 // Shared utility functions for the Unbroken Tactical Barbell Tracker
 
-import type { WarmupSet } from './types';
+import type { WarmupSet } from '$lib/types';
 
 // Helper function to generate exercise key from name
 export const getExerciseKey = (exerciseName: string): string => {

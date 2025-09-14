@@ -1,6 +1,6 @@
 // Svelte stores for centralized state management with persistence
 import { writable } from 'svelte/store'
-import type { CompletedWorkout, TrainingBlock } from './types'
+import type { CompletedWorkout, CustomPlanBlock } from '$lib/types'
 
 // Store interfaces
 interface UIState {
@@ -32,7 +32,7 @@ interface WorkoutState {
 }
 
 interface TrainingPlanState {
-  customPlan: TrainingBlock[]
+  customPlan: CustomPlanBlock[]
 }
 
 interface ExerciseState {
@@ -50,6 +50,12 @@ const DB_VERSION = 1
 
 const openDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
+    // Check if we're in a browser environment
+    if (typeof indexedDB === 'undefined') {
+      reject(new Error('IndexedDB not available (likely server-side rendering)'))
+      return
+    }
+    
     const request = indexedDB.open(DB_NAME, DB_VERSION)
     
     request.onerror = () => reject(request.error)
@@ -74,6 +80,11 @@ const openDB = (): Promise<IDBDatabase> => {
 
 const saveToStorage = async (storeName: string, data: unknown): Promise<void> => {
   try {
+    // Skip saving during SSR
+    if (typeof indexedDB === 'undefined') {
+      return
+    }
+    
     const db = await openDB()
     const transaction = db.transaction([storeName], 'readwrite')
     const store = transaction.objectStore(storeName)
@@ -95,6 +106,11 @@ const saveToStorage = async (storeName: string, data: unknown): Promise<void> =>
 
 const loadFromStorage = async <T>(storeName: string): Promise<T | null> => {
   try {
+    // Return null during SSR
+    if (typeof indexedDB === 'undefined') {
+      return null
+    }
+    
     const db = await openDB()
     const transaction = db.transaction([storeName], 'readonly')
     const store = transaction.objectStore(storeName)
@@ -244,6 +260,11 @@ export const preferencesStore = createPersistedStore('preferencesState', default
 // Clear all stored data
 export const clearAllStorage = async (): Promise<void> => {
   try {
+    // Skip during SSR
+    if (typeof indexedDB === 'undefined') {
+      return
+    }
+    
     const db = await openDB()
     const storeNames = ['workoutState', 'trainingPlanState', 'exerciseState', 'preferencesState']
     
