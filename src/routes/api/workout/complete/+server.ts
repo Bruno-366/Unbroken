@@ -34,7 +34,11 @@ export async function POST({ request }) {
     const blockTemplate = blockTemplates[blockType as keyof typeof blockTemplates]
     const maxWeeks = blockTemplate?.weeks?.length || 8
     
-    if (newDay > 7) {
+    // Check if the next day exists in the current week
+    const currentWeekTemplate = blockTemplate?.weeks?.[currentWeek - 1]
+    const maxDaysInCurrentWeek = currentWeekTemplate?.days?.length || 7
+    
+    if (newDay > maxDaysInCurrentWeek) {
       newDay = 1
       newWeek++
       if (newWeek > maxWeeks) {
