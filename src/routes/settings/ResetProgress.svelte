@@ -1,22 +1,21 @@
 <script lang="ts">
   import { 
     clearAllStorage, 
-    uiStore, 
     workoutStore, 
     trainingPlanStore, 
     exerciseStore, 
     preferencesStore 
   } from '$lib/stores'
   
-  // Access UI state directly from store
-  const showResetConfirm = $derived($uiStore.showResetConfirm)
+  // Local component state for reset confirmation dialog
+  let showResetConfirm = $state(false)
   
   const onShowReset = () => {
-    uiStore.update(state => ({ ...state, showResetConfirm: true }))
+    showResetConfirm = true
   }
   
   const onCancelReset = () => {
-    uiStore.update(state => ({ ...state, showResetConfirm: false }))
+    showResetConfirm = false
   }
 
   // Reset functionality - reset all stores to defaults
@@ -24,20 +23,7 @@
     try {
       await clearAllStorage()
       
-      // Reset all stores to their default values
-      uiStore.set({
-        activeTab: 'overview',
-        showResetConfirm: false,
-        restTimer: {
-          isActive: false,
-          timeLeft: 0,
-          totalTime: 0,
-          workoutType: null,
-          phase: 'initial',
-          startTime: 0
-        }
-      })
-      
+      // Reset all stores to their default values - use the existing defaults from stores.ts
       workoutStore.set({
         currentWeek: 1,
         currentDay: 1,
@@ -73,6 +59,9 @@
       preferencesStore.set({
         weightUnit: 'kg'
       })
+
+      // Close the dialog
+      showResetConfirm = false
     } catch (error) {
       console.error('Failed to reset app:', error)
     }

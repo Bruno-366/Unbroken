@@ -72,37 +72,10 @@
         }))
       }
       
-      // Reset UI state
+      // Reset UI state (only activeTab now since timers are component-level)
       uiStore.update(state => ({
         ...state,
-        activeTab: 'overview',
-        restTimer: {
-          isActive: false,
-          timeLeft: 0,
-          totalTime: 0,
-          workoutType: null,
-          phase: 'initial',
-          startTime: 0
-        },
-        lissTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0
-        },
-        hiitTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0,
-          currentRound: 0,
-          totalRounds: 0,
-          roundCompleted: false
-        }
+        activeTab: 'overview'
       }))
       
       goto('/')

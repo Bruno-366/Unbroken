@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CheckCircle } from 'lucide-svelte'
-  import { workoutStore, exerciseStore, preferencesStore, uiStore } from '$lib/stores'
+  import { workoutStore, exerciseStore, preferencesStore } from '$lib/stores'
   import RestTimer from './RestTimer.svelte'
   import type { 
     Workout, 
@@ -27,6 +27,31 @@
   const tenRMs = $derived($exerciseStore.tenRMs)
   const weightUnit = $derived($preferencesStore.weightUnit)
 
+  // Local rest timer state using runes
+  let restTimer = $state({
+    isActive: false,
+    timeLeft: 0,
+    totalTime: 0,
+    workoutType: null as 'strength' | 'hypertrophy' | null,
+    phase: 'initial' as 'initial' | 'extended',
+    startTime: 0
+  })
+
+  // Rest timer update function
+  const updateRestTimer = (updates: Partial<typeof restTimer>) => {
+    Object.assign(restTimer, updates)
+  }
+
+  // Stop rest timer function
+  const stopRestTimer = () => {
+    restTimer.isActive = false
+    restTimer.timeLeft = 0
+    restTimer.totalTime = 0
+    restTimer.workoutType = null
+    restTimer.phase = 'initial'
+    restTimer.startTime = 0
+  }
+
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
     const isBeingCompleted = !completedSets[key]
@@ -49,18 +74,13 @@
         const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
         const now = Date.now()
         
-        // Update rest timer state in store
-        uiStore.update(state => ({
-          ...state,
-          restTimer: {
-            isActive: true,
-            timeLeft: initialTime,
-            totalTime: initialTime,
-            workoutType: workout.type as 'strength' | 'hypertrophy',
-            phase: 'initial',
-            startTime: now
-          }
-        }))
+        // Update local rest timer state
+        restTimer.isActive = true
+        restTimer.timeLeft = initialTime
+        restTimer.totalTime = initialTime
+        restTimer.workoutType = workout.type as 'strength' | 'hypertrophy'
+        restTimer.phase = 'initial'
+        restTimer.startTime = now
       }
     }
   }
@@ -85,7 +105,16 @@
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
   <div class="space-y-4">
-    <RestTimer />
+    <RestTimer 
+      isActive={restTimer.isActive}
+      timeLeft={restTimer.timeLeft}
+      totalTime={restTimer.totalTime}
+      workoutType={restTimer.workoutType}
+      phase={restTimer.phase}
+      startTime={restTimer.startTime}
+      onUpdate={updateRestTimer}
+      onStop={stopRestTimer}
+    />
     {#each (strengthWorkout().exercises || []) as exercise, exerciseIndex}
       {@const setSchemes = (strengthWorkout().sets || '').split(',')}
       {@const exerciseSetSchemes = getExerciseData(exerciseIndex, 0).shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes}

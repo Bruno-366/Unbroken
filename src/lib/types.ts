@@ -58,27 +58,6 @@ export interface CompletedWorkout {
   details: Workout;
 }
 
-export interface AppState {
-  activeTab: string;
-  currentWeek: number;
-  currentDay: number;
-  completedWorkouts: CompletedWorkout[];
-  customPlan: CustomPlanBlock[];
-  maxes: Record<string, number>;
-  tenRMs: Record<string, number>;
-  weightUnit: string;
-  completedSets: Record<string, boolean>;
-  showResetConfirm: boolean;
-  restTimer: {
-    isActive: boolean;
-    timeLeft: number;
-    totalTime: number;
-    workoutType: 'strength' | 'hypertrophy' | null;
-    phase: 'initial' | 'extended';
-    startTime: number;
-  };
-}
-
 export interface WarmupSet {
   weight: number;
   reps: number;

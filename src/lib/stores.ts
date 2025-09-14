@@ -5,15 +5,6 @@ import type { CompletedWorkout, CustomPlanBlock } from '$lib/types'
 // Store interfaces
 interface UIState {
   activeTab: string
-  showResetConfirm: boolean
-  restTimer: {
-    isActive: boolean
-    timeLeft: number
-    totalTime: number
-    workoutType: 'strength' | 'hypertrophy' | null
-    phase: 'initial' | 'extended'
-    startTime: number
-  }
 }
 
 interface WorkoutState {
@@ -174,16 +165,7 @@ const createPersistedStore = <T>(
 
 // UI Store (not persisted - transient state)
 const defaultUIState: UIState = {
-  activeTab: 'overview',
-  showResetConfirm: false,
-  restTimer: {
-    isActive: false,
-    timeLeft: 0,
-    totalTime: 0,
-    workoutType: null,
-    phase: 'initial',
-    startTime: 0
-  }
+  activeTab: 'overview'
 }
 
 export const uiStore = writable<UIState>(defaultUIState)
