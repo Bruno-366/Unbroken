@@ -14,25 +14,6 @@ interface UIState {
     phase: 'initial' | 'extended'
     startTime: number
   }
-  lissTimer: {
-    isActive: boolean
-    isPaused: boolean
-    timeLeft: number
-    totalTime: number
-    startTime: number
-    pausedTime: number
-  }
-  hiitTimer: {
-    isActive: boolean
-    isPaused: boolean
-    timeLeft: number
-    totalTime: number
-    startTime: number
-    pausedTime: number
-    currentRound: number
-    totalRounds: number
-    roundCompleted: boolean
-  }
 }
 
 interface WorkoutState {
@@ -202,25 +183,6 @@ const defaultUIState: UIState = {
     workoutType: null,
     phase: 'initial',
     startTime: 0
-  },
-  lissTimer: {
-    isActive: false,
-    isPaused: false,
-    timeLeft: 0,
-    totalTime: 0,
-    startTime: 0,
-    pausedTime: 0
-  },
-  hiitTimer: {
-    isActive: false,
-    isPaused: false,
-    timeLeft: 0,
-    totalTime: 0,
-    startTime: 0,
-    pausedTime: 0,
-    currentRound: 0,
-    totalRounds: 0,
-    roundCompleted: false
   }
 }
 
@@ -239,6 +201,7 @@ export const workoutStore = createPersistedStore('workoutState', defaultWorkoutS
 // Training Plan Store (persisted)  
 const defaultTrainingPlanState: TrainingPlanState = {
   customPlan: [
+    { name: "Get Ready", weeks: 1, type: "getready" },
     { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
     { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
     { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },

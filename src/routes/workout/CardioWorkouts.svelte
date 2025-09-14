@@ -2,7 +2,6 @@
   import type { Workout, CardioWorkout } from '$lib/types'
   import { Play, Pause, Square, SkipForward, CheckCircle } from 'lucide-svelte'
   import { showRestCompleteNotification } from '$lib/utils'
-  import { uiStore } from '$lib/stores'
 
   interface CardioWorkoutsProps {
     workout: Workout
@@ -32,26 +31,27 @@
     return CARDIO_WORKOUT_CONFIGS[type as keyof typeof CARDIO_WORKOUT_CONFIGS]
   })
 
-  // LiSS Timer functionality
-  const lissTimer = $derived($uiStore.lissTimer)
-  
-  // HIIT Timer functionality
-  const hiitTimer = $derived($uiStore.hiitTimer)
-  
-  // Update store functions
-  const updateLissTimer = (updates: Partial<typeof lissTimer>) => {
-    uiStore.update(state => ({
-      ...state,
-      lissTimer: { ...state.lissTimer, ...updates }
-    }))
-  }
+  // Local timer state - using runes for reactive state management
+  let lissTimer = $state({
+    isActive: false,
+    isPaused: false,
+    timeLeft: 0,
+    totalTime: 0,
+    startTime: 0,
+    pausedTime: 0
+  })
 
-  const updateHiitTimer = (updates: Partial<typeof hiitTimer>) => {
-    uiStore.update(state => ({
-      ...state,
-      hiitTimer: { ...state.hiitTimer, ...updates }
-    }))
-  }
+  let hiitTimer = $state({
+    isActive: false,
+    isPaused: false,
+    timeLeft: 0,
+    totalTime: 0,
+    startTime: 0,
+    pausedTime: 0,
+    currentRound: 0,
+    totalRounds: 0,
+    roundCompleted: false
+  })
 
   // Start LiSS timer function
   const startLissTimer = () => {
@@ -63,43 +63,35 @@
     
     if (lissTimer.isPaused) {
       // Resume from pause
-      updateLissTimer({
-        isActive: true,
-        isPaused: false,
-        startTime: now - (lissTimer.totalTime - lissTimer.timeLeft) * 1000
-      })
+      lissTimer.isActive = true
+      lissTimer.isPaused = false
+      lissTimer.startTime = now - (lissTimer.totalTime - lissTimer.timeLeft) * 1000
     } else {
       // Start fresh
-      updateLissTimer({
-        isActive: true,
-        isPaused: false,
-        timeLeft: durationInSeconds,
-        totalTime: durationInSeconds,
-        startTime: now,
-        pausedTime: 0
-      })
+      lissTimer.isActive = true
+      lissTimer.isPaused = false
+      lissTimer.timeLeft = durationInSeconds
+      lissTimer.totalTime = durationInSeconds
+      lissTimer.startTime = now
+      lissTimer.pausedTime = 0
     }
   }
 
   // Pause LiSS timer function
   const pauseLissTimer = () => {
-    updateLissTimer({
-      isActive: false,
-      isPaused: true,
-      pausedTime: Date.now()
-    })
+    lissTimer.isActive = false
+    lissTimer.isPaused = true
+    lissTimer.pausedTime = Date.now()
   }
 
   // Stop LiSS timer function
   const stopLissTimer = () => {
-    updateLissTimer({
-      isActive: false,
-      isPaused: false,
-      timeLeft: 0,
-      totalTime: 0,
-      startTime: 0,
-      pausedTime: 0
-    })
+    lissTimer.isActive = false
+    lissTimer.isPaused = false
+    lissTimer.timeLeft = 0
+    lissTimer.totalTime = 0
+    lissTimer.startTime = 0
+    lissTimer.pausedTime = 0
   }
 
   // HIIT Timer functions
@@ -115,77 +107,63 @@
     
     if (hiitTimer.isPaused) {
       // Resume from pause
-      updateHiitTimer({
-        isActive: true,
-        isPaused: false,
-        startTime: now - (hiitTimer.totalTime - hiitTimer.timeLeft) * 1000
-      })
+      hiitTimer.isActive = true
+      hiitTimer.isPaused = false
+      hiitTimer.startTime = now - (hiitTimer.totalTime - hiitTimer.timeLeft) * 1000
     } else if (hiitTimer.currentRound === 0) {
       // Start fresh
-      updateHiitTimer({
-        isActive: true,
-        isPaused: false,
-        timeLeft: durationInSeconds,
-        totalTime: durationInSeconds,
-        startTime: now,
-        pausedTime: 0,
-        currentRound: 1,
-        totalRounds: rounds,
-        roundCompleted: false
-      })
+      hiitTimer.isActive = true
+      hiitTimer.isPaused = false
+      hiitTimer.timeLeft = durationInSeconds
+      hiitTimer.totalTime = durationInSeconds
+      hiitTimer.startTime = now
+      hiitTimer.pausedTime = 0
+      hiitTimer.currentRound = 1
+      hiitTimer.totalRounds = rounds
+      hiitTimer.roundCompleted = false
     } else {
       // Continue to next round
-      updateHiitTimer({
-        isActive: true,
-        isPaused: false,
-        timeLeft: durationInSeconds,
-        totalTime: durationInSeconds,
-        startTime: now,
-        pausedTime: 0,
-        roundCompleted: false
-      })
+      hiitTimer.isActive = true
+      hiitTimer.isPaused = false
+      hiitTimer.timeLeft = durationInSeconds
+      hiitTimer.totalTime = durationInSeconds
+      hiitTimer.startTime = now
+      hiitTimer.pausedTime = 0
+      hiitTimer.roundCompleted = false
     }
   }
 
   const pauseHiitTimer = () => {
-    updateHiitTimer({
-      isActive: false,
-      isPaused: true,
-      pausedTime: Date.now()
-    })
+    hiitTimer.isActive = false
+    hiitTimer.isPaused = true
+    hiitTimer.pausedTime = Date.now()
   }
 
   const stopHiitTimer = () => {
-    updateHiitTimer({
-      isActive: false,
-      isPaused: false,
-      timeLeft: 0,
-      totalTime: 0,
-      startTime: 0,
-      pausedTime: 0,
-      currentRound: 0,
-      totalRounds: 0,
-      roundCompleted: false
-    })
+    hiitTimer.isActive = false
+    hiitTimer.isPaused = false
+    hiitTimer.timeLeft = 0
+    hiitTimer.totalTime = 0
+    hiitTimer.startTime = 0
+    hiitTimer.pausedTime = 0
+    hiitTimer.currentRound = 0
+    hiitTimer.totalRounds = 0
+    hiitTimer.roundCompleted = false
   }
 
   const completeCurrentRound = () => {
     if (hiitTimer.currentRound < hiitTimer.totalRounds) {
-      updateHiitTimer({
-        isActive: false,
-        isPaused: false,
-        currentRound: hiitTimer.currentRound + 1,
-        roundCompleted: true,
-        timeLeft: 0
-      })
+      hiitTimer.isActive = false
+      hiitTimer.isPaused = false
+      hiitTimer.currentRound = hiitTimer.currentRound + 1
+      hiitTimer.roundCompleted = true
+      hiitTimer.timeLeft = 0
     } else {
       // All rounds completed
-      updateHiitTimer({
-        isActive: false,
-        isPaused: false,
-        roundCompleted: true,
-        timeLeft: 0
-      })
+      hiitTimer.isActive = false
+      hiitTimer.isPaused = false
+      hiitTimer.roundCompleted = true
+      hiitTimer.timeLeft = 0
     }
   }
 
@@ -199,7 +177,7 @@
         const elapsedSeconds = Math.floor((now - lissTimer.startTime) / 1000)
         const newTimeLeft = Math.max(0, lissTimer.totalTime - elapsedSeconds)
         
-        updateLissTimer({ timeLeft: newTimeLeft })
+        lissTimer.timeLeft = newTimeLeft
       }, 100) // Check more frequently for smoother updates
     }
 
@@ -213,7 +191,8 @@
     if (lissTimer.isActive && lissTimer.timeLeft === 0) {
       showRestCompleteNotification()
       // Auto-pause when complete
-      updateLissTimer({ isActive: false, isPaused: false })
+      lissTimer.isActive = false
+      lissTimer.isPaused = false
     }
   })
 
@@ -227,7 +206,7 @@
         const elapsedSeconds = Math.floor((now - hiitTimer.startTime) / 1000)
         const newTimeLeft = Math.max(0, hiitTimer.totalTime - elapsedSeconds)
         
-        updateHiitTimer({ timeLeft: newTimeLeft })
+        hiitTimer.timeLeft = newTimeLeft
       }, 100) // Check more frequently for smoother updates
     }
 

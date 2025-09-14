@@ -2,6 +2,15 @@
 // Contains workout configuration templates for different training blocks
 
 export const blockTemplates = {
+  getready: {
+    weeks: [
+      {
+        days: [
+          { type: "rest" }
+        ]
+      }
+    ]
+  },
   endurance1: {
     weeks: [
       {

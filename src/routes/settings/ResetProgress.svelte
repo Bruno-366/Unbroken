@@ -35,25 +35,6 @@
           workoutType: null,
           phase: 'initial',
           startTime: 0
-        },
-        lissTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0
-        },
-        hiitTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0,
-          currentRound: 0,
-          totalRounds: 0,
-          roundCompleted: false
         }
       })
       
@@ -66,6 +47,7 @@
       
       trainingPlanStore.set({
         customPlan: [
+          { name: "Get Ready", weeks: 1, type: "getready" },
           { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
           { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
           { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
