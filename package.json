@@ -19,12 +19,12 @@
     "lucide-svelte": "^0.446.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tailwindcss/postcss": "^4.1.12",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
     "autoprefixer": "^10.4.21",
-    "canvas": "^3.1.2",
     "eslint": "^9.15.0",
     "eslint-plugin-svelte": "^2.45.0",
     "globals": "^15.13.0",
@@ -39,6 +39,6 @@
     "vite-plugin-pwa": "^1.0.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
