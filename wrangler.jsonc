@@ -1,4 +1,9 @@
 {
   "name": "unbroken",
-  "compatibility_date": "2025-08-15"
+  "main": ".svelte-kit/output/server/index.js",
+  "compatibility_date": "2025-08-15",
+  "assets": {
+    "directory": ".svelte-kit/output/client",
+    "binding": "ASSETS"
+  }
 }
