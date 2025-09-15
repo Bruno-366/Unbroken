@@ -249,7 +249,7 @@
   </button>
 </div>
 
-<style>
+<style lang="postcss">
   @reference "tailwindcss";
   
   .btn-start,
