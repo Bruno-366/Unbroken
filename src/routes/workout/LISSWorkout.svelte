@@ -192,47 +192,31 @@
 </div>
 
 <style>
+  @reference "tailwindcss";
+  
   .btn-start,
   .btn-pause,
   .btn-stop {
-    flex: 1;
-    font-weight: 600;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: white;
+    @apply flex-1 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-white;
   }
 
   .btn-start {
-    background-color: #22c55e; /* green-500 */
-  }
-
-  .btn-start:not(.disabled):hover {
-    background-color: #16a34a; /* green-600 */
+    @apply bg-green-500 hover:bg-green-600;
   }
 
   .btn-pause {
-    background-color: #eab308; /* yellow-500 */
-  }
-
-  .btn-pause:not(.disabled):hover {
-    background-color: #ca8a04; /* yellow-600 */
+    @apply bg-yellow-500 hover:bg-yellow-600;
   }
 
   .btn-stop {
-    background-color: #ef4444; /* red-500 */
-  }
-
-  .btn-stop:not(.disabled):hover {
-    background-color: #dc2626; /* red-600 */
+    @apply bg-red-500 hover:bg-red-600;
   }
 
   .disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+    @apply opacity-40 cursor-not-allowed;
+  }
+  
+  .disabled:hover {
+    @apply bg-current;
   }
 </style>
