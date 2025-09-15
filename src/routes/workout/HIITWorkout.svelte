@@ -143,12 +143,8 @@
       : `${workoutData().rounds} rounds`
   })
 
-  // Button states for conditional styling
+  // Button states for conditional logic only (no styling)
   const buttonStates = $derived(() => {
-    const baseClass = 'font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2'
-    const enabled = 'opacity-100'
-    const disabled = 'opacity-40 cursor-not-allowed'
-    
     if (isRoundsOnly()) {
       const startDisabled = workoutComplete()
       const completeDisabled = hiitTimer.currentRound === 0 || workoutComplete()
@@ -157,16 +153,13 @@
         start: {
           disabled: startDisabled,
           text: hiitTimer.currentRound === 0 ? 'Start Round 1' : 
-                workoutComplete() ? 'Workout Complete' : `Start Round ${hiitTimer.currentRound}`,
-          class: `flex-1 bg-green-500 text-white ${baseClass} ${startDisabled ? disabled : `hover:bg-green-600 ${enabled}`}`
+                workoutComplete() ? 'Workout Complete' : `Start Round ${hiitTimer.currentRound}`
         },
         complete: {
-          disabled: completeDisabled,
-          class: `flex-1 bg-blue-500 text-white ${baseClass} ${completeDisabled ? disabled : `hover:bg-blue-600 ${enabled}`}`
+          disabled: completeDisabled
         },
         stop: {
-          disabled: hiitTimer.currentRound === 0,
-          class: `flex-1 bg-red-500 text-white ${baseClass} ${hiitTimer.currentRound === 0 ? disabled : `hover:bg-red-600 ${enabled}`}`
+          disabled: hiitTimer.currentRound === 0
         }
       }
     }
@@ -181,20 +174,16 @@
       start: {
         disabled: startDisabled,
         text: hiitTimer.currentRound === 0 ? 'Start Round 1' : 
-              hiitTimer.roundCompleted ? `Start Round ${hiitTimer.currentRound}` : 'Resume Round',
-        class: `flex-1 bg-green-500 text-white ${baseClass} ${startDisabled ? disabled : `hover:bg-green-600 ${enabled}`}`
+              hiitTimer.roundCompleted ? `Start Round ${hiitTimer.currentRound}` : 'Resume Round'
       },
       pause: {
-        disabled: pauseDisabled,
-        class: `flex-1 bg-yellow-500 text-white ${baseClass} ${pauseDisabled ? disabled : `hover:bg-yellow-600 ${enabled}`}`
+        disabled: pauseDisabled
       },
       stop: {
-        disabled: stopDisabled,
-        class: `flex-1 bg-red-500 text-white ${baseClass} ${stopDisabled ? disabled : `hover:bg-red-600 ${enabled}`}`
+        disabled: stopDisabled
       },
       nextRound: {
-        disabled: nextDisabled,
-        class: `w-full bg-blue-500 text-white ${baseClass} ${nextDisabled ? disabled : `hover:bg-blue-600 ${enabled}`}`
+        disabled: nextDisabled
       }
     }
   })
@@ -232,17 +221,29 @@
     {#if isRoundsOnly()}
       <!-- Rounds-only HIIT controls -->
       <div class="flex gap-2 mt-4">
-        <button onclick={states.start?.disabled ? undefined : startTimer} disabled={states.start?.disabled} class={states.start?.class}>
+        <button 
+          onclick={states.start?.disabled ? undefined : startTimer} 
+          disabled={states.start?.disabled} 
+          class="btn-start {states.start?.disabled ? 'disabled' : ''}"
+        >
           <Play class="w-5 h-5" stroke="none" fill="currentColor" />
           {states.start?.text}
         </button>
         {#if hiitTimer.currentRound > 0 && !workoutComplete() && states.complete}
-          <button onclick={states.complete?.disabled ? undefined : markRoundComplete} disabled={states.complete?.disabled} class={states.complete?.class}>
+          <button 
+            onclick={states.complete?.disabled ? undefined : markRoundComplete} 
+            disabled={states.complete?.disabled} 
+            class="btn-complete {states.complete?.disabled ? 'disabled' : ''}"
+          >
             <CheckCircle class="w-5 h-5" stroke="none" fill="currentColor" />
             Complete Round {hiitTimer.currentRound}
           </button>
         {/if}
-        <button onclick={states.stop?.disabled ? undefined : stopTimer} disabled={states.stop?.disabled} class={states.stop?.class}>
+        <button 
+          onclick={states.stop?.disabled ? undefined : stopTimer} 
+          disabled={states.stop?.disabled} 
+          class="btn-stop {states.stop?.disabled ? 'disabled' : ''}"
+        >
           <Square class="w-5 h-5" stroke="none" fill="currentColor" />
           Reset
         </button>
@@ -250,17 +251,29 @@
     {:else}
       <!-- Timed HIIT controls -->
       <div class="flex gap-2 mt-4">
-        <button onclick={states.start?.disabled ? undefined : startTimer} disabled={states.start?.disabled} class={states.start?.class}>
+        <button 
+          onclick={states.start?.disabled ? undefined : startTimer} 
+          disabled={states.start?.disabled} 
+          class="btn-start {states.start?.disabled ? 'disabled' : ''}"
+        >
           <Play class="w-5 h-5" stroke="none" fill="currentColor" />
           {states.start?.text}
         </button>
         {#if states.pause}
-          <button onclick={states.pause?.disabled ? undefined : pauseTimer} disabled={states.pause?.disabled} class={states.pause?.class}>
+          <button 
+            onclick={states.pause?.disabled ? undefined : pauseTimer} 
+            disabled={states.pause?.disabled} 
+            class="btn-pause {states.pause?.disabled ? 'disabled' : ''}"
+          >
             <Pause class="w-5 h-5" stroke="none" fill="currentColor" />
             Pause
           </button>
         {/if}
-        <button onclick={states.stop?.disabled ? undefined : stopTimer} disabled={states.stop?.disabled} class={states.stop?.class}>
+        <button 
+          onclick={states.stop?.disabled ? undefined : stopTimer} 
+          disabled={states.stop?.disabled} 
+          class="btn-stop {states.stop?.disabled ? 'disabled' : ''}"
+        >
           <Square class="w-5 h-5" stroke="none" fill="currentColor" />
           Reset
         </button>
@@ -268,7 +281,11 @@
       
       {#if hiitTimer.roundCompleted && !workoutComplete() && states.nextRound}
         <div class="mt-4">
-          <button onclick={states.nextRound?.disabled ? undefined : startTimer} disabled={states.nextRound?.disabled} class={states.nextRound?.class}>
+          <button 
+            onclick={states.nextRound?.disabled ? undefined : startTimer} 
+            disabled={states.nextRound?.disabled} 
+            class="btn-next-round {states.nextRound?.disabled ? 'disabled' : ''}"
+          >
             <SkipForward class="w-5 h-5" stroke="none" fill="currentColor" />
             Start Round {hiitTimer.currentRound}
           </button>
@@ -284,3 +301,72 @@
     Complete HIIT Cardio
   </button>
 </div>
+
+<style>
+  .btn-start,
+  .btn-pause,
+  .btn-stop,
+  .btn-complete,
+  .btn-next-round {
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: white;
+    opacity: 1;
+  }
+
+  .btn-start {
+    flex: 1;
+    background-color: rgb(34 197 94);
+  }
+
+  .btn-start:not(.disabled):hover {
+    background-color: rgb(22 163 74);
+  }
+
+  .btn-pause {
+    flex: 1;
+    background-color: rgb(234 179 8);
+  }
+
+  .btn-pause:not(.disabled):hover {
+    background-color: rgb(202 138 4);
+  }
+
+  .btn-stop {
+    flex: 1;
+    background-color: rgb(239 68 68);
+  }
+
+  .btn-stop:not(.disabled):hover {
+    background-color: rgb(220 38 38);
+  }
+
+  .btn-complete {
+    flex: 1;
+    background-color: rgb(59 130 246);
+  }
+
+  .btn-complete:not(.disabled):hover {
+    background-color: rgb(37 99 235);
+  }
+
+  .btn-next-round {
+    width: 100%;
+    background-color: rgb(59 130 246);
+  }
+
+  .btn-next-round:not(.disabled):hover {
+    background-color: rgb(37 99 235);
+  }
+
+  .disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+</style>

@@ -111,28 +111,21 @@
     return cardioWorkout().duration !== undefined
   })
 
-  // Button states for conditional styling
+  // Button states for conditional logic only (no styling)
   const buttonStates = $derived(() => {
-    const baseButtonClass = 'font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2'
-    const enabledClass = 'opacity-100'
-    const disabledClass = 'opacity-40 cursor-not-allowed'
-    
     const isStartDisabled = lissTimer.isActive
     const isPauseDisabled = !lissTimer.isActive
     const isStopDisabled = !lissTimer.isActive && !lissTimer.isPaused
     
     return {
       start: {
-        disabled: isStartDisabled,
-        class: `flex-1 bg-green-500 text-white ${baseButtonClass} ${isStartDisabled ? disabledClass : `hover:bg-green-600 ${enabledClass}`}`
+        disabled: isStartDisabled
       },
       pause: {
-        disabled: isPauseDisabled,
-        class: `flex-1 bg-yellow-500 text-white ${baseButtonClass} ${isPauseDisabled ? disabledClass : `hover:bg-yellow-600 ${enabledClass}`}`
+        disabled: isPauseDisabled
       },
       stop: {
-        disabled: isStopDisabled,
-        class: `flex-1 bg-red-500 text-white ${baseButtonClass} ${isStopDisabled ? disabledClass : `hover:bg-red-600 ${enabledClass}`}`
+        disabled: isStopDisabled
       }
     }
   })
@@ -166,7 +159,7 @@
       <button 
         onclick={buttonStates().start?.disabled ? undefined : startTimer} 
         disabled={buttonStates().start?.disabled}
-        class={buttonStates().start?.class}
+        class="btn-start {buttonStates().start?.disabled ? 'disabled' : ''}"
       >
         <Play class="w-5 h-5" stroke="none" fill="currentColor" />
         Start
@@ -174,7 +167,7 @@
       <button 
         onclick={buttonStates().pause?.disabled ? undefined : pauseTimer} 
         disabled={buttonStates().pause?.disabled}
-        class={buttonStates().pause?.class}
+        class="btn-pause {buttonStates().pause?.disabled ? 'disabled' : ''}"
       >
         <Pause class="w-5 h-5" stroke="none" fill="currentColor" />
         Pause
@@ -182,7 +175,7 @@
       <button 
         onclick={buttonStates().stop?.disabled ? undefined : stopTimer} 
         disabled={buttonStates().stop?.disabled}
-        class={buttonStates().stop?.class}
+        class="btn-stop {buttonStates().stop?.disabled ? 'disabled' : ''}"
       >
         <Square class="w-5 h-5" stroke="none" fill="currentColor" />
         Stop
@@ -197,3 +190,50 @@
     Complete LISS Cardio
   </button>
 </div>
+
+<style>
+  .btn-start,
+  .btn-pause,
+  .btn-stop {
+    flex: 1;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: white;
+    opacity: 1;
+  }
+
+  .btn-start {
+    background-color: rgb(34 197 94);
+  }
+
+  .btn-start:not(.disabled):hover {
+    background-color: rgb(22 163 74);
+  }
+
+  .btn-pause {
+    background-color: rgb(234 179 8);
+  }
+
+  .btn-pause:not(.disabled):hover {
+    background-color: rgb(202 138 4);
+  }
+
+  .btn-stop {
+    background-color: rgb(239 68 68);
+  }
+
+  .btn-stop:not(.disabled):hover {
+    background-color: rgb(220 38 38);
+  }
+
+  .disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+</style>

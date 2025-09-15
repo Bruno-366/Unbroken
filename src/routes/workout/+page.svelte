@@ -1,6 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import CardioWorkouts from './CardioWorkouts.svelte'
+  import type { CardioWorkout } from '$lib/types'
+  import LISSWorkout from './LISSWorkout.svelte'
+  import HIITWorkout from './HIITWorkout.svelte'
   import StrengthWorkouts from './StrengthWorkouts.svelte'
   import RestWorkouts from './RestWorkouts.svelte'
 
@@ -89,10 +91,17 @@
       onCompleteWorkout={handleCompleteWorkout}
     />
   {:else if renderWorkout() === 'cardio' && getCurrentWorkout}
-    <CardioWorkouts 
-      workout={getCurrentWorkout}
-      onCompleteWorkout={handleCompleteWorkout}
-    />
+    {#if (getCurrentWorkout as CardioWorkout).type === 'liss'}
+      <LISSWorkout 
+        workout={getCurrentWorkout}
+        onCompleteWorkout={handleCompleteWorkout}
+      />
+    {:else if (getCurrentWorkout as CardioWorkout).type === 'hiit'}
+      <HIITWorkout 
+        workout={getCurrentWorkout}
+        onCompleteWorkout={handleCompleteWorkout}
+      />
+    {/if}
   {:else if renderWorkout() === 'rest' && getCurrentWorkout}
     <RestWorkouts 
       workout={getCurrentWorkout}
