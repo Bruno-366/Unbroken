@@ -1,43 +1,55 @@
 <script lang="ts">
   import { Clock } from 'lucide-svelte'
   import { showRestCompleteNotification } from '$lib/utils'
-  import { uiStore } from '$lib/stores'
-  
-  // Access rest timer directly from store without local state
-  const restTimer = $derived($uiStore.restTimer)
-  
-  // Update store function
-  const updateRestTimer = (updates: Partial<typeof restTimer>) => {
-    uiStore.update(state => ({
-      ...state,
-      restTimer: { ...state.restTimer, ...updates }
-    }))
+
+  interface RestTimerProps {
+    workoutType: 'strength' | 'hypertrophy'
+    onStop: () => void
   }
 
-  // Stop rest timer function
-  const stopRestTimer = () => {
-    updateRestTimer({
-      isActive: false,
-      timeLeft: 0,
-      totalTime: 0,
-      workoutType: null,
-      phase: 'initial',
-      startTime: 0
-    })
+  let { workoutType, onStop }: RestTimerProps = $props()
+
+  // Local rest timer state using runes - managed internally
+  let restTimer = $state({
+    isActive: false,
+    timeLeft: 0,
+    totalTime: 0,
+    phase: 'initial' as 'initial' | 'extended',
+    startTime: 0
+  })
+
+  // Start the rest timer
+  export const start = () => {
+    const initialTime = workoutType === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
+    const now = Date.now()
+    
+    restTimer.isActive = true
+    restTimer.timeLeft = initialTime
+    restTimer.totalTime = initialTime
+    restTimer.phase = 'initial'
+    restTimer.startTime = now
   }
 
   // Extend rest timer function - matching original React implementation
   const extendRestTimer = () => {
-    if (restTimer.workoutType === 'strength' && restTimer.phase === 'initial') {
+    if (workoutType === 'strength' && restTimer.phase === 'initial') {
       const extendedTime = 120 // Additional 2 minutes to reach 5 minutes total
       const now = Date.now()
-      updateRestTimer({
-        timeLeft: extendedTime,
-        totalTime: extendedTime,
-        phase: 'extended',
-        startTime: now
-      })
+      restTimer.timeLeft = extendedTime
+      restTimer.totalTime = extendedTime
+      restTimer.phase = 'extended'
+      restTimer.startTime = now
     }
+  }
+
+  // Stop rest timer function
+  const stopRestTimer = () => {
+    restTimer.isActive = false
+    restTimer.timeLeft = 0
+    restTimer.totalTime = 0
+    restTimer.phase = 'initial'
+    restTimer.startTime = 0
+    onStop()
   }
 
   // Derived progress percentage
@@ -47,7 +59,6 @@
   })
 
   // Timer interval effect - timestamp-based to prevent background throttling
-  // IMPORTANT: Rest timer won't show until user accepts or rejects notification permissions
   $effect(() => {
     let interval: number | undefined
     
@@ -57,7 +68,7 @@
         const elapsedSeconds = Math.floor((now - restTimer.startTime) / 1000)
         const newTimeLeft = Math.max(0, restTimer.totalTime - elapsedSeconds)
         
-        updateRestTimer({ timeLeft: newTimeLeft })
+        restTimer.timeLeft = newTimeLeft
       }, 100) // Check more frequently for smoother updates
     }
 
@@ -106,7 +117,7 @@
       >
         {restTimer.timeLeft === 0 ? 'Complete Rest' : 'Skip Rest'}
       </button>
-      {#if restTimer.workoutType === 'strength' && restTimer.phase !== 'extended' && restTimer.timeLeft === 0}
+      {#if workoutType === 'strength' && restTimer.phase !== 'extended' && restTimer.timeLeft === 0}
         <button
           onclick={extendRestTimer}
           class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"

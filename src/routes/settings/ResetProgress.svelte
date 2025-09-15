@@ -1,22 +1,25 @@
 <script lang="ts">
   import { 
     clearAllStorage, 
-    uiStore, 
     workoutStore, 
     trainingPlanStore, 
     exerciseStore, 
-    preferencesStore 
+    preferencesStore,
+    defaultWorkoutState,
+    defaultTrainingPlanState,
+    defaultExerciseState,
+    defaultPreferencesState
   } from '$lib/stores'
   
-  // Access UI state directly from store
-  const showResetConfirm = $derived($uiStore.showResetConfirm)
+  // Local component state for reset confirmation dialog
+  let showResetConfirm = $state(false)
   
   const onShowReset = () => {
-    uiStore.update(state => ({ ...state, showResetConfirm: true }))
+    showResetConfirm = true
   }
   
   const onCancelReset = () => {
-    uiStore.update(state => ({ ...state, showResetConfirm: false }))
+    showResetConfirm = false
   }
 
   // Reset functionality - reset all stores to defaults
@@ -24,62 +27,14 @@
     try {
       await clearAllStorage()
       
-      // Reset all stores to their default values
-      uiStore.set({
-        activeTab: 'overview',
-        showResetConfirm: false,
-        restTimer: {
-          isActive: false,
-          timeLeft: 0,
-          totalTime: 0,
-          workoutType: null,
-          phase: 'initial',
-          startTime: 0
-        },
-        lissTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0
-        }
-      })
-      
-      workoutStore.set({
-        currentWeek: 1,
-        currentDay: 1,
-        completedWorkouts: [],
-        completedSets: {}
-      })
-      
-      trainingPlanStore.set({
-        customPlan: [
-          { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
-          { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
-          { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
-          { name: "Powerbuilding Block 3", weeks: 3, type: "powerbuilding3" },
-          { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-          { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-          { name: "Bodybuilding Block", weeks: 3, type: "bodybuilding" },
-          { name: "Powerbuilding Block 3 - Bulgarian", weeks: 3, type: "powerbuilding3bulgarian" },
-          { name: "Strength Block", weeks: 6, type: "strength" },
-          { name: "Endurance Block 1", weeks: 8, type: "endurance1" }
-        ]
-      })
-      
-      exerciseStore.set({
-        maxes: { 
-          benchpress: 100, squat: 120, deadlift: 140, trapbardeadlift: 130, 
-          overheadpress: 60, frontsquat: 90, weightedpullup: 20, powerclean: 80, 
-          romaniandeadlift: 120 
-        },
-        tenRMs: {}
-      })
-      
-      preferencesStore.set({
-        weightUnit: 'kg'
-      })
+      // Reset all stores to their default values - use the imported defaults from stores.ts
+      workoutStore.set(defaultWorkoutState)
+      trainingPlanStore.set(defaultTrainingPlanState)
+      exerciseStore.set(defaultExerciseState)
+      preferencesStore.set(defaultPreferencesState)
+
+      // Close the dialog
+      showResetConfirm = false
     } catch (error) {
       console.error('Failed to reset app:', error)
     }

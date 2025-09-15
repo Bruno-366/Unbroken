@@ -3,27 +3,6 @@ import { writable } from 'svelte/store'
 import type { CompletedWorkout, CustomPlanBlock } from '$lib/types'
 
 // Store interfaces
-interface UIState {
-  activeTab: string
-  showResetConfirm: boolean
-  restTimer: {
-    isActive: boolean
-    timeLeft: number
-    totalTime: number
-    workoutType: 'strength' | 'hypertrophy' | null
-    phase: 'initial' | 'extended'
-    startTime: number
-  }
-  lissTimer: {
-    isActive: boolean
-    isPaused: boolean
-    timeLeft: number
-    totalTime: number
-    startTime: number
-    pausedTime: number
-  }
-}
-
 interface WorkoutState {
   currentWeek: number
   currentDay: number
@@ -180,32 +159,8 @@ const createPersistedStore = <T>(
   }
 }
 
-// UI Store (not persisted - transient state)
-const defaultUIState: UIState = {
-  activeTab: 'overview',
-  showResetConfirm: false,
-  restTimer: {
-    isActive: false,
-    timeLeft: 0,
-    totalTime: 0,
-    workoutType: null,
-    phase: 'initial',
-    startTime: 0
-  },
-  lissTimer: {
-    isActive: false,
-    isPaused: false,
-    timeLeft: 0,
-    totalTime: 0,
-    startTime: 0,
-    pausedTime: 0
-  }
-}
-
-export const uiStore = writable<UIState>(defaultUIState)
-
 // Workout Store (persisted)
-const defaultWorkoutState: WorkoutState = {
+export const defaultWorkoutState: WorkoutState = {
   currentWeek: 1,
   currentDay: 1,
   completedWorkouts: [],
@@ -215,8 +170,9 @@ const defaultWorkoutState: WorkoutState = {
 export const workoutStore = createPersistedStore('workoutState', defaultWorkoutState)
 
 // Training Plan Store (persisted)  
-const defaultTrainingPlanState: TrainingPlanState = {
+export const defaultTrainingPlanState: TrainingPlanState = {
   customPlan: [
+    { name: "Get Ready", weeks: 1, type: "getready" },
     { name: "Endurance Block 1", weeks: 8, type: "endurance1" },
     { name: "Powerbuilding Block 1", weeks: 3, type: "powerbuilding1" },
     { name: "Powerbuilding Block 2", weeks: 3, type: "powerbuilding2" },
@@ -233,7 +189,7 @@ const defaultTrainingPlanState: TrainingPlanState = {
 export const trainingPlanStore = createPersistedStore('trainingPlanState', defaultTrainingPlanState)
 
 // Exercise Store (persisted)
-const defaultExerciseState: ExerciseState = {
+export const defaultExerciseState: ExerciseState = {
   maxes: { 
     benchpress: 100, 
     squat: 120, 
@@ -251,7 +207,7 @@ const defaultExerciseState: ExerciseState = {
 export const exerciseStore = createPersistedStore('exerciseState', defaultExerciseState)
 
 // Preferences Store (persisted)
-const defaultPreferencesState: PreferencesState = {
+export const defaultPreferencesState: PreferencesState = {
   weightUnit: 'kg'
 }
 

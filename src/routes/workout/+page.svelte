@@ -1,6 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import CardioWorkouts from './CardioWorkouts.svelte'
+  import type { CardioWorkout } from '$lib/types'
+  import LISSWorkout from './LISSWorkout.svelte'
+  import HIITWorkout from './HIITWorkout.svelte'
   import StrengthWorkouts from './StrengthWorkouts.svelte'
   import RestWorkouts from './RestWorkouts.svelte'
 
@@ -30,7 +32,7 @@
 
   const handleCompleteWorkout = async () => {
     // Import stores dynamically to ensure they're available
-    const { workoutStore, trainingPlanStore, uiStore } = await import('$lib/stores')
+    const { workoutStore, trainingPlanStore } = await import('$lib/stores')
     const { get } = await import('svelte/store')
     
     const workoutState = get(workoutStore)
@@ -72,28 +74,6 @@
         }))
       }
       
-      // Reset UI state
-      uiStore.update(state => ({
-        ...state,
-        activeTab: 'overview',
-        restTimer: {
-          isActive: false,
-          timeLeft: 0,
-          totalTime: 0,
-          workoutType: null,
-          phase: 'initial',
-          startTime: 0
-        },
-        lissTimer: {
-          isActive: false,
-          isPaused: false,
-          timeLeft: 0,
-          totalTime: 0,
-          startTime: 0,
-          pausedTime: 0
-        }
-      }))
-      
       goto('/')
     }
   }
@@ -111,10 +91,17 @@
       onCompleteWorkout={handleCompleteWorkout}
     />
   {:else if renderWorkout() === 'cardio' && getCurrentWorkout}
-    <CardioWorkouts 
-      workout={getCurrentWorkout}
-      onCompleteWorkout={handleCompleteWorkout}
-    />
+    {#if (getCurrentWorkout as CardioWorkout).type === 'liss'}
+      <LISSWorkout 
+        workout={getCurrentWorkout}
+        onCompleteWorkout={handleCompleteWorkout}
+      />
+    {:else if (getCurrentWorkout as CardioWorkout).type === 'hiit'}
+      <HIITWorkout 
+        workout={getCurrentWorkout}
+        onCompleteWorkout={handleCompleteWorkout}
+      />
+    {/if}
   {:else if renderWorkout() === 'rest' && getCurrentWorkout}
     <RestWorkouts 
       workout={getCurrentWorkout}

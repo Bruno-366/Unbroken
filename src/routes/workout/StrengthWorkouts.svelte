@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CheckCircle } from 'lucide-svelte'
-  import { workoutStore, exerciseStore, preferencesStore, uiStore } from '$lib/stores'
+  import { workoutStore, exerciseStore, preferencesStore } from '$lib/stores'
   import RestTimer from './RestTimer.svelte'
   import type { 
     Workout, 
@@ -27,6 +27,10 @@
   const tenRMs = $derived($exerciseStore.tenRMs)
   const weightUnit = $derived($preferencesStore.weightUnit)
 
+  // Local state for showing rest timer
+  let showRest = $state(false)
+  let restTimerRef = $state<{ start: () => void } | undefined>(undefined)
+
   const toggleSet = async (exerciseAndSchemeIndex: string, setIndex: number) => {
     const key = `${exerciseAndSchemeIndex}-${setIndex}`
     const isBeingCompleted = !completedSets[key]
@@ -46,23 +50,19 @@
         // Request notification permission without blocking (don't await)
         requestNotificationPermission()
         
-        const initialTime = workout.type === 'strength' ? 180 : 90 // 3 min for strength, 1.5 min for hypertrophy
-        const now = Date.now()
-        
-        // Update rest timer state in store
-        uiStore.update(state => ({
-          ...state,
-          restTimer: {
-            isActive: true,
-            timeLeft: initialTime,
-            totalTime: initialTime,
-            workoutType: workout.type as 'strength' | 'hypertrophy',
-            phase: 'initial',
-            startTime: now
-          }
-        }))
+        // Show rest timer and start it
+        showRest = true
+        // Wait for the component to render before calling start
+        await new Promise(resolve => setTimeout(resolve, 0))
+        if (restTimerRef) {
+          restTimerRef.start()
+        }
       }
     }
+  }
+
+  const onRestComplete = () => {
+    showRest = false
   }
 
   // Derive strength workout with proper typing - more idiomatic than casting everywhere
@@ -85,7 +85,13 @@
 
 {#if workout.type === 'strength' || workout.type === 'hypertrophy'}
   <div class="space-y-4">
-    <RestTimer />
+    {#if showRest}
+      <RestTimer 
+        workoutType={workout.type}
+        onStop={onRestComplete}
+        bind:this={restTimerRef}
+      />
+    {/if}
     {#each (strengthWorkout().exercises || []) as exercise, exerciseIndex}
       {@const setSchemes = (strengthWorkout().sets || '').split(',')}
       {@const exerciseSetSchemes = getExerciseData(exerciseIndex, 0).shouldMapByIndex ? [setSchemes[exerciseIndex]] : setSchemes}
