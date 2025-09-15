@@ -184,7 +184,7 @@
     
     {#if workoutData().distance !== undefined}
       <div class="text-4xl font-bold">{workoutData().distance}</div>
-      <div class="text-sm opacity-90 mt-1">m</div>
+      <div class="text-sm opacity-90 mt-1">meters</div>
     {/if}
     
     {#if hasRounds()}
@@ -192,7 +192,7 @@
     {/if}
     
     {#if workoutComplete()}
-      <div class="text-green-300 text-lg font-semibold mt-2 flex items-center justify-center gap-2">
+      <div class="text-white text-lg font-semibold mt-2 flex items-center justify-center gap-2">
         <CheckCircle class="w-6 h-6" />
         All Rounds Complete!
       </div>
@@ -275,6 +275,6 @@
   }
   
   .disabled:hover {
-    @apply bg-current;
+    @apply opacity-40;
   }
 </style>

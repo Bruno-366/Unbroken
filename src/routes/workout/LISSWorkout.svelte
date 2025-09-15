@@ -217,6 +217,6 @@
   }
   
   .disabled:hover {
-    @apply bg-current;
+    @apply opacity-40;
   }
 </style>
