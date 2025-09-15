@@ -205,31 +205,30 @@
     justify-content: center;
     gap: 0.5rem;
     color: white;
-    opacity: 1;
   }
 
   .btn-start {
-    background-color: rgb(34 197 94);
+    background-color: #22c55e; /* green-500 */
   }
 
   .btn-start:not(.disabled):hover {
-    background-color: rgb(22 163 74);
+    background-color: #16a34a; /* green-600 */
   }
 
   .btn-pause {
-    background-color: rgb(234 179 8);
+    background-color: #eab308; /* yellow-500 */
   }
 
   .btn-pause:not(.disabled):hover {
-    background-color: rgb(202 138 4);
+    background-color: #ca8a04; /* yellow-600 */
   }
 
   .btn-stop {
-    background-color: rgb(239 68 68);
+    background-color: #ef4444; /* red-500 */
   }
 
   .btn-stop:not(.disabled):hover {
-    background-color: rgb(220 38 38);
+    background-color: #dc2626; /* red-600 */
   }
 
   .disabled {

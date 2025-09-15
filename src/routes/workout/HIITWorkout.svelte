@@ -31,21 +31,9 @@
     const { duration, rounds } = workoutData()
     if (!rounds) return
     
-    // Rounds-only workouts (Hill Sprints)
-    if (!duration) {
-      if (hiitTimer.currentRound === 0) {
-        Object.assign(hiitTimer, {
-          isActive: false, isPaused: false, timeLeft: 0, totalTime: 0,
-          startTime: 0, pausedTime: 0, currentRound: 1, totalRounds: rounds, roundCompleted: true
-        })
-      } else if (hiitTimer.currentRound < hiitTimer.totalRounds) {
-        hiitTimer.currentRound++
-        hiitTimer.roundCompleted = true
-      }
-      return
-    }
+    // Use -1 duration for rounds-only workouts (Hill Sprints)
+    const effectiveDuration = duration ?? -1
     
-    // Timed workouts
     const now = Date.now()
     if (hiitTimer.isPaused) {
       hiitTimer.isActive = true
@@ -53,13 +41,19 @@
       hiitTimer.startTime = now - (hiitTimer.totalTime - hiitTimer.timeLeft) * 1000
     } else if (hiitTimer.currentRound === 0) {
       Object.assign(hiitTimer, {
-        isActive: true, isPaused: false, timeLeft: duration, totalTime: duration,
-        startTime: now, pausedTime: 0, currentRound: 1, totalRounds: rounds, roundCompleted: false
+        isActive: effectiveDuration > 0, isPaused: false, 
+        timeLeft: effectiveDuration > 0 ? effectiveDuration : 0, 
+        totalTime: effectiveDuration > 0 ? effectiveDuration : 0,
+        startTime: now, pausedTime: 0, currentRound: 1, totalRounds: rounds, 
+        roundCompleted: effectiveDuration === -1
       })
     } else {
       Object.assign(hiitTimer, {
-        isActive: true, isPaused: false, timeLeft: duration, totalTime: duration,
-        startTime: now, pausedTime: 0, roundCompleted: false
+        isActive: effectiveDuration > 0, isPaused: false, 
+        timeLeft: effectiveDuration > 0 ? effectiveDuration : 0, 
+        totalTime: effectiveDuration > 0 ? effectiveDuration : 0,
+        startTime: now, pausedTime: 0, 
+        roundCompleted: effectiveDuration === -1
       })
     }
   }
@@ -79,19 +73,21 @@
 
   const completeCurrentRound = () => {
     if (hiitTimer.currentRound < hiitTimer.totalRounds) {
-      Object.assign(hiitTimer, {
-        isActive: false, isPaused: false, currentRound: hiitTimer.currentRound + 1,
-        roundCompleted: true, timeLeft: 0
-      })
+      // For rounds-only workouts, directly advance to next round
+      if (workoutData().duration === undefined) {
+        hiitTimer.currentRound++
+        hiitTimer.roundCompleted = true
+      } else {
+        Object.assign(hiitTimer, {
+          isActive: false, isPaused: false, currentRound: hiitTimer.currentRound + 1,
+          roundCompleted: true, timeLeft: 0
+        })
+      }
     } else {
       Object.assign(hiitTimer, {
         isActive: false, isPaused: false, roundCompleted: true, timeLeft: 0
       })
     }
-  }
-
-  const markRoundComplete = () => {
-    if (isRoundsOnly()) completeCurrentRound()
   }
 
   // Timer interval effect - timestamp-based to prevent background throttling
@@ -124,10 +120,12 @@
   // Derived display values
   const workoutData = $derived(() => cardioWorkout())
   const hasRounds = $derived(() => workoutData().rounds !== undefined)
-  const isRoundsOnly = $derived(() => workoutData().duration === undefined && hasRounds())
   const workoutComplete = $derived(() => hiitTimer.totalRounds > 0 && hiitTimer.currentRound > hiitTimer.totalRounds)
   
   const displayTime = $derived(() => {
+    // Don't show time for rounds-only workouts
+    if (workoutData().duration === undefined) return undefined
+    
     if (hiitTimer.isActive || hiitTimer.isPaused || hiitTimer.timeLeft > 0) {
       const minutes = Math.floor(hiitTimer.timeLeft / 60)
       const seconds = hiitTimer.timeLeft % 60
@@ -145,28 +143,8 @@
 
   // Button states for conditional logic only (no styling)
   const buttonStates = $derived(() => {
-    if (isRoundsOnly()) {
-      const startDisabled = workoutComplete()
-      const completeDisabled = hiitTimer.currentRound === 0 || workoutComplete()
-      
-      return {
-        start: {
-          disabled: startDisabled,
-          text: hiitTimer.currentRound === 0 ? 'Start Round 1' : 
-                workoutComplete() ? 'Workout Complete' : `Start Round ${hiitTimer.currentRound}`
-        },
-        complete: {
-          disabled: completeDisabled
-        },
-        stop: {
-          disabled: hiitTimer.currentRound === 0
-        }
-      }
-    }
-    
-    // Timed workouts
     const startDisabled = hiitTimer.isActive
-    const pauseDisabled = !hiitTimer.isActive
+    const pauseDisabled = !hiitTimer.isActive || workoutData().duration === undefined
     const stopDisabled = !hiitTimer.isActive && !hiitTimer.isPaused && hiitTimer.currentRound === 0
     const nextDisabled = hiitTimer.isActive || hiitTimer.currentRound === 0 || workoutComplete()
     
@@ -193,7 +171,7 @@
   <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-lg text-center">
     <h3 class="text-2xl font-bold mb-2">{workoutData().activity}</h3>
     
-    {#if workoutData().duration !== undefined}
+    {#if displayTime() !== undefined}
       <div class="text-4xl font-bold">{displayTime()}</div>
       <div class="text-sm opacity-90 mt-1">seconds</div>
     {/if}
@@ -218,79 +196,47 @@
   {#if hasRounds()}
     {@const states = buttonStates()}
     
-    {#if isRoundsOnly()}
-      <!-- Rounds-only HIIT controls -->
-      <div class="flex gap-2 mt-4">
+    <!-- Unified HIIT controls for all workout types -->
+    <div class="flex gap-2 mt-4">
+      <button 
+        onclick={states.start?.disabled ? undefined : startTimer} 
+        disabled={states.start?.disabled} 
+        class="btn-start {states.start?.disabled ? 'disabled' : ''}"
+      >
+        <Play class="w-5 h-5" stroke="none" fill="currentColor" />
+        {states.start?.text}
+      </button>
+      {#if workoutData().duration !== undefined && states.pause}
         <button 
-          onclick={states.start?.disabled ? undefined : startTimer} 
-          disabled={states.start?.disabled} 
-          class="btn-start {states.start?.disabled ? 'disabled' : ''}"
+          onclick={states.pause?.disabled ? undefined : pauseTimer} 
+          disabled={states.pause?.disabled} 
+          class="btn-pause {states.pause?.disabled ? 'disabled' : ''}"
         >
-          <Play class="w-5 h-5" stroke="none" fill="currentColor" />
-          {states.start?.text}
+          <Pause class="w-5 h-5" stroke="none" fill="currentColor" />
+          Pause
         </button>
-        {#if hiitTimer.currentRound > 0 && !workoutComplete() && states.complete}
-          <button 
-            onclick={states.complete?.disabled ? undefined : markRoundComplete} 
-            disabled={states.complete?.disabled} 
-            class="btn-complete {states.complete?.disabled ? 'disabled' : ''}"
-          >
-            <CheckCircle class="w-5 h-5" stroke="none" fill="currentColor" />
-            Complete Round {hiitTimer.currentRound}
-          </button>
-        {/if}
-        <button 
-          onclick={states.stop?.disabled ? undefined : stopTimer} 
-          disabled={states.stop?.disabled} 
-          class="btn-stop {states.stop?.disabled ? 'disabled' : ''}"
-        >
-          <Square class="w-5 h-5" stroke="none" fill="currentColor" />
-          Reset
-        </button>
-      </div>
-    {:else}
-      <!-- Timed HIIT controls -->
-      <div class="flex gap-2 mt-4">
-        <button 
-          onclick={states.start?.disabled ? undefined : startTimer} 
-          disabled={states.start?.disabled} 
-          class="btn-start {states.start?.disabled ? 'disabled' : ''}"
-        >
-          <Play class="w-5 h-5" stroke="none" fill="currentColor" />
-          {states.start?.text}
-        </button>
-        {#if states.pause}
-          <button 
-            onclick={states.pause?.disabled ? undefined : pauseTimer} 
-            disabled={states.pause?.disabled} 
-            class="btn-pause {states.pause?.disabled ? 'disabled' : ''}"
-          >
-            <Pause class="w-5 h-5" stroke="none" fill="currentColor" />
-            Pause
-          </button>
-        {/if}
-        <button 
-          onclick={states.stop?.disabled ? undefined : stopTimer} 
-          disabled={states.stop?.disabled} 
-          class="btn-stop {states.stop?.disabled ? 'disabled' : ''}"
-        >
-          <Square class="w-5 h-5" stroke="none" fill="currentColor" />
-          Reset
-        </button>
-      </div>
-      
-      {#if hiitTimer.roundCompleted && !workoutComplete() && states.nextRound}
-        <div class="mt-4">
-          <button 
-            onclick={states.nextRound?.disabled ? undefined : startTimer} 
-            disabled={states.nextRound?.disabled} 
-            class="btn-next-round {states.nextRound?.disabled ? 'disabled' : ''}"
-          >
-            <SkipForward class="w-5 h-5" stroke="none" fill="currentColor" />
-            Start Round {hiitTimer.currentRound}
-          </button>
-        </div>
       {/if}
+      <button 
+        onclick={states.stop?.disabled ? undefined : stopTimer} 
+        disabled={states.stop?.disabled} 
+        class="btn-stop {states.stop?.disabled ? 'disabled' : ''}"
+      >
+        <Square class="w-5 h-5" stroke="none" fill="currentColor" />
+        Reset
+      </button>
+    </div>
+    
+    {#if hiitTimer.roundCompleted && !workoutComplete() && states.nextRound && workoutData().duration !== undefined}
+      <div class="mt-4">
+        <button 
+          onclick={states.nextRound?.disabled ? undefined : startTimer} 
+          disabled={states.nextRound?.disabled} 
+          class="btn-next-round {states.nextRound?.disabled ? 'disabled' : ''}"
+        >
+          <SkipForward class="w-5 h-5" stroke="none" fill="currentColor" />
+          Start Round {hiitTimer.currentRound}
+        </button>
+      </div>
     {/if}
   {/if}
   
@@ -306,7 +252,6 @@
   .btn-start,
   .btn-pause,
   .btn-stop,
-  .btn-complete,
   .btn-next-round {
     font-weight: 600;
     padding: 0.75rem;
@@ -317,52 +262,42 @@
     justify-content: center;
     gap: 0.5rem;
     color: white;
-    opacity: 1;
   }
 
   .btn-start {
     flex: 1;
-    background-color: rgb(34 197 94);
+    background-color: #22c55e; /* green-500 */
   }
 
   .btn-start:not(.disabled):hover {
-    background-color: rgb(22 163 74);
+    background-color: #16a34a; /* green-600 */
   }
 
   .btn-pause {
     flex: 1;
-    background-color: rgb(234 179 8);
+    background-color: #eab308; /* yellow-500 */
   }
 
   .btn-pause:not(.disabled):hover {
-    background-color: rgb(202 138 4);
+    background-color: #ca8a04; /* yellow-600 */
   }
 
   .btn-stop {
     flex: 1;
-    background-color: rgb(239 68 68);
+    background-color: #ef4444; /* red-500 */
   }
 
   .btn-stop:not(.disabled):hover {
-    background-color: rgb(220 38 38);
-  }
-
-  .btn-complete {
-    flex: 1;
-    background-color: rgb(59 130 246);
-  }
-
-  .btn-complete:not(.disabled):hover {
-    background-color: rgb(37 99 235);
+    background-color: #dc2626; /* red-600 */
   }
 
   .btn-next-round {
     width: 100%;
-    background-color: rgb(59 130 246);
+    background-color: #3b82f6; /* blue-500 */
   }
 
   .btn-next-round:not(.disabled):hover {
-    background-color: rgb(37 99 235);
+    background-color: #2563eb; /* blue-600 */
   }
 
   .disabled {
