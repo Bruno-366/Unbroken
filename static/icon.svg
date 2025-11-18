@@ -3,19 +3,12 @@
   <circle cx="256" cy="256" r="240" fill="#1f2937" stroke="#374151" stroke-width="32"/>
   
   <!-- Weight plate design -->
-  <!-- Outer rim -->
   <circle cx="256" cy="256" r="180" fill="#4b5563" stroke="#6b7280" stroke-width="8"/>
-  
-  <!-- Main plate surface -->
   <circle cx="256" cy="256" r="165" fill="#374151"/>
-  
-  <!-- Inner detail ring -->
   <circle cx="256" cy="256" r="120" fill="none" stroke="#6b7280" stroke-width="4"/>
-  
-  <!-- Center hole -->
   <circle cx="256" cy="256" r="45" fill="#1f2937" stroke="#4b5563" stroke-width="6"/>
   
-  <!-- Weight markings (radial lines for authentic look) -->
+  <!-- Weight markings -->
   <g stroke="#6b7280" stroke-width="3" opacity="0.7">
     <line x1="256" y1="110" x2="256" y2="130"/>
     <line x1="326" y1="140" x2="316" y2="150"/>
@@ -33,14 +26,12 @@
   
   <!-- Circular text "UNBROKEN" -->
   <defs>
-    <!-- Path for text. pathLength normalized to 360 so we can use textLength="360" -->
-    <path id="circle-text" d="M 256,256 m -140,0 a 140,140 0 1,1 280,0 a 140,140 0 1,1 -280,0" pathLength="360"/>
-
+    <!-- Adjusted path for 90-degree clockwise rotation -->
+    <path id="circle-text" d="M 256,256 m 0,-140 a 140,140 0 1,1 0,280 a 140,140 0 1,1 0,-280" pathLength="360"/>
   </defs>
   
   <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb" text-anchor="middle" dominant-baseline="middle">
-    <!-- textLength matches pathLength and lengthAdjust="spacing" forces even spacing of the 8 glyphs -->
-    <textPath href="#circle-text" startOffset="44%" textLength="800" lengthAdjust="spacing">
+    <textPath href="#circle-text" startOffset="43.77%" textLength="800" lengthAdjust="spacing">
       UNBROKEN
     </textPath>
   </text>
