@@ -27,12 +27,19 @@
   <!-- Circular text "UNBROKEN" -->
   <defs>
     <!-- Adjusted path for 90-degree clockwise rotation -->
-    <path id="circle-text" d="M 256,256 m 0,-140 a 140,140 0 1,1 0,280 a 140,140 0 1,1 0,-280" pathLength="360"/>
+    <path id="circle-text" d="M 256,256 m 0,-140 a 140,140 0 1,1 0,280 a 140,140 0 1,1 0,-280"/>
   </defs>
   
-  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb" text-anchor="middle" dominant-baseline="middle">
-    <textPath href="#circle-text" startOffset="43.77%" textLength="800" lengthAdjust="spacing">
-      UNBROKEN
+  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb" dominant-baseline="middle">
+    <textPath href="#circle-text">
+      <tspan dy="0" dx="-15">U</tspan>
+      <tspan dy="0" dx="65">N</tspan>
+      <tspan dy="0" dx="70">B</tspan>
+      <tspan dy="0" dx="65">R</tspan>
+      <tspan dy="0" dx="70">O</tspan>
+      <tspan dy="0" dx="70">K</tspan>
+      <tspan dy="0" dx="70">E</tspan>
+      <tspan dy="0" dx="70">N</tspan>
     </textPath>
   </text>
 </svg>
