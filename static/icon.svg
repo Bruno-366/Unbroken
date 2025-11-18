@@ -33,11 +33,11 @@
   
   <!-- Circular text "UNBROKEN" -->
   <defs>
-    <path id="circle-text" d="M 256,256 m -140,0 a 140,140 0 1,1 280,0 a 140,140 0 1,1 -280,0"/>
+    <path id="circle-text" d="M 256,256 m -140,0 a 140,140 0 1,1 280,0 a 140,140 0 1,1 -280,0" pathLength="360"/>
   </defs>
   
-  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb" letter-spacing="8">
-    <textPath href="#circle-text" startOffset="50%" text-anchor="middle">
+  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb">
+    <textPath href="#circle-text" startOffset="50%" text-anchor="middle" textLength="360" lengthAdjust="spacing">
       UNBROKEN
     </textPath>
   </text>
