@@ -33,11 +33,14 @@
   
   <!-- Circular text "UNBROKEN" -->
   <defs>
+    <!-- Path for text. pathLength normalized to 360 so we can use textLength="360" -->
     <path id="circle-text" d="M 256,256 m -140,0 a 140,140 0 1,1 280,0 a 140,140 0 1,1 -280,0" pathLength="360"/>
+
   </defs>
   
-  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb">
-    <textPath href="#circle-text" startOffset="50%" text-anchor="middle" textLength="360" lengthAdjust="spacing">
+  <text font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e5e7eb" text-anchor="middle" dominant-baseline="middle">
+    <!-- textLength matches pathLength and lengthAdjust="spacing" forces even spacing of the 8 glyphs -->
+    <textPath href="#circle-text" startOffset="44%" textLength="800" lengthAdjust="spacing">
       UNBROKEN
     </textPath>
   </text>
